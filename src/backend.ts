@@ -1,4 +1,4 @@
-import { resolve } from "node:path";
+﻿import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { WebResponse, type WebRequestType, type WebResponseType } from "./contracts.js";
 import type { HostConfig } from "./config.js";
@@ -6,30 +6,30 @@ import { resolveProtectedStateDir } from "./state-dir.js";
 
 export class BackendError extends Error {}
 
-type InProcessBridge = {
-  handle(subject: string, raw: WebRequestType): Promise<{ status_code: number; body: unknown }>;
+type InProcessRuntime = {
+  execute(subject: string, raw: WebRequestType): Promise<{ status_code: number; body: unknown }>;
 };
 
-let inProcessBridgePromise: Promise<InProcessBridge> | null = null;
+let inProcessRuntimePromise: Promise<InProcessRuntime> | null = null;
 
-async function getInProcessBridge(): Promise<InProcessBridge> {
-  if (!inProcessBridgePromise) {
-    const bridgeUrl = pathToFileURL(
-      resolve(process.cwd(), "host-integration/node-private-host/bridge.mjs")
-    ).href;
-    inProcessBridgePromise = import(bridgeUrl).then(async mod => {
-      if (typeof mod.createFactoryBridge !== "function") {
-        throw new BackendError("INPROCESS_BRIDGE_FACTORY_MISSING");
+async function getInProcessRuntime(config: HostConfig): Promise<InProcessRuntime> {
+  if (!inProcessRuntimePromise) {
+    const runtimePath = config.combinedRuntimeModule?.trim()
+      || "host-integration/node-private-host/combined-runtime.mjs";
+    const runtimeUrl = pathToFileURL(resolve(process.cwd(), runtimePath)).href;
+    inProcessRuntimePromise = import(runtimeUrl).then(async mod => {
+      if (typeof mod.createCombinedFactoryRuntime !== "function") {
+        throw new BackendError("INPROCESS_COMBINED_RUNTIME_FACTORY_MISSING");
       }
       const state=resolveProtectedStateDir();
-      return mod.createFactoryBridge({
+      return mod.createCombinedFactoryRuntime({
         repoRoot: process.cwd(),
         stateDir: state.path,
         stateMode: state.mode
-      }) as Promise<InProcessBridge>;
+      }) as Promise<InProcessRuntime>;
     });
   }
-  return inProcessBridgePromise;
+  return inProcessRuntimePromise;
 }
 
 export async function callProtectedService(
@@ -41,8 +41,8 @@ export async function callProtectedService(
   let raw: unknown;
 
   if (config.inProcessProtected) {
-    const bridge = await getInProcessBridge();
-    const result = await bridge.handle(subject, request);
+    const runtime = await getInProcessRuntime(config);
+    const result = await runtime.execute(subject, request);
     if (result.status_code !== 200) {
       throw new BackendError(`PROTECTED_INPROCESS_STATUS_${result.status_code}`);
     }

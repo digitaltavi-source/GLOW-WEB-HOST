@@ -3,10 +3,12 @@ export type HostConfig = {
   protectedServiceToken: string | null;
   port: number;
   inProcessProtected?: boolean;
+  combinedRuntimeModule?: string | null;
 };
 
 export function loadConfig(env = process.env): HostConfig {
-  const inProcessProtected = env.GLOW_PROTECTED_INPROCESS === "1";
+  const combinedRuntimeModule = env.GLOW_COMBINED_RUNTIME_MODULE?.trim() || null;
+  const inProcessProtected = env.GLOW_PROTECTED_INPROCESS === "1" || Boolean(combinedRuntimeModule);
   const port = Number(env.PORT ?? 3000);
 
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error("CONFIG_PORT_INVALID");
@@ -16,7 +18,8 @@ export function loadConfig(env = process.env): HostConfig {
       protectedServiceUrl: null,
       protectedServiceToken: null,
       port,
-      inProcessProtected: true
+      inProcessProtected: true,
+      combinedRuntimeModule
     };
   }
 
