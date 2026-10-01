@@ -1,0 +1,68 @@
+{
+  "schema": "GLOW_WEB_PUBLIC_HOST_CONTRACT_EXPORT_V1",
+  "classification": "DECLASSIFIED_INTERFACE_ONLY",
+  "endpoint": "/v1/web-missions",
+  "operations": [
+    "create_web_mission",
+    "get_work",
+    "submit_work",
+    "inspect_blocked_stage",
+    "recover_blocked_stage",
+    "approve_stage",
+    "get_status",
+    "get_delivery"
+  ],
+  "exposure_classes": [
+    "PUBLIC_DECLASSIFIED",
+    "MODEL_SESSION_PRIVATE"
+  ],
+  "statuses": [
+    "accepted",
+    "completed",
+    "blocked",
+    "degraded",
+    "failed"
+  ],
+  "required_headers": [
+    "authorization",
+    "x-glow-subject"
+  ],
+  "request_shape": {
+    "request_id": "string",
+    "operation": "enum",
+    "role": "client|operator|unspecified",
+    "locale": "string",
+    "input": "object"
+  },
+  "response_shape": {
+    "request_id": "string",
+    "status": "enum",
+    "exposure": "enum",
+    "result": "object|null",
+    "public_evidence": "array",
+    "errors": "array"
+  },
+  "public_host_laws": [
+    "PUBLIC_HOST != PROTECTED_FACTORY",
+    "PUBLIC_ADAPTER != SOURCE_OF_TRUTH",
+    "MODEL_SESSION_PRIVATE != PUBLIC_DECLASSIFIED",
+    "BACKEND_UNAVAILABLE -> FAIL_CLOSED_OR_DEGRADED"
+  ],
+  "explicitly_excluded": [
+    "private runtime implementation",
+    "Factory Control state machine internals",
+    "qualification logic",
+    "private artifact hashes",
+    "credentials"
+  ],
+  "http_semantics": {
+    "contract_request": "HTTP 200 + response envelope",
+    "transport_auth_body_error": "HTTP 4xx",
+    "application_failure": "status=failed|blocked|degraded inside HTTP 200 envelope"
+  },
+  "schemas": {
+    "request": "contracts/web-request.schema.json",
+    "response": "contracts/web-response.schema.json"
+  },
+  "publication_rule": "Copy only through the private PUBLICATION_EXPORT_MANIFEST after declassification review."
+}

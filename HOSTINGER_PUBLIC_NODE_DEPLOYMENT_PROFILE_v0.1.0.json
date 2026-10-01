@@ -1,0 +1,39 @@
+{
+  "schema_version": "0.1.0",
+  "profile_id": "GLOW_WEB_HOSTINGER_PUBLIC_MCP",
+  "state": "CANDIDATE_DEV_FALSIFICATION_PASS_NOT_LIVE",
+  "purpose": "Deploy the declassified GLOW Web public experience, workspace, MCP/OAuth gateway and readiness edge on Hostinger Managed Node.js.",
+  "source": {
+    "intended_repository": "digitaltavi-source/GLOW-WEB-HOST",
+    "branch": "main",
+    "private_source_repository": "digitaltavi-source/GLOW-WEB-FACTORY",
+    "export_contract": "PUBLIC_EXPORT_MANIFEST.json"
+  },
+  "runtime": {
+    "node_version": "22.x",
+    "repository_root": ".",
+    "build_command": "npm install --ignore-scripts && npm run build",
+    "start_command": "npm start",
+    "health_path": "/healthz",
+    "readiness_path": "/readyz",
+    "canonical_mcp_path": "/mcp-v2"
+  },
+  "security": {
+    "private_assets_embedded": false,
+    "private_release_hashes_public": false,
+    "model_session_private_is_public_delivery": false,
+    "protected_backend_unavailable": "FAIL_CLOSED"
+  },
+  "claims": {
+    "hostinger_deployed": false,
+    "publicly_reachable": false,
+    "oauth_live": false,
+    "chatgpt_connected": false,
+    "field_verified": false,
+    "public_experience_built": true,
+    "local_runtime_verified": true,
+    "mobile_layout_verified": true,
+    "handoff_capsule_private_leak_check": true
+  },
+  "next_gate": "CREATE_PUBLIC_REPO_EXPORT_EXACT_BYTES_THEN_HOSTINGER_DEPLOY"
+}

@@ -1,0 +1,47 @@
+{
+  "schema": "GLOW_WEB_PUBLIC_EXPORT_MANIFEST_V1",
+  "state": "CANDIDATE_PUBLIC_EXPORT_CONTRACT",
+  "public_source_target": "digitaltavi-source/GLOW-WEB-HOST",
+  "private_source": "digitaltavi-source/GLOW-WEB-FACTORY",
+  "public_allowlist": [
+    "host-export/GLOW-WEB-HOST/package.json",
+    "host-export/GLOW-WEB-HOST/tsconfig.json",
+    "host-export/GLOW-WEB-HOST/.gitignore",
+    "host-export/GLOW-WEB-HOST/.env.example",
+    "host-export/GLOW-WEB-HOST/README.md",
+    "host-export/GLOW-WEB-HOST/PUBLIC_HOST_CONTRACT_EXPORT.json",
+    "host-export/GLOW-WEB-HOST/HOSTINGER_PUBLIC_NODE_DEPLOYMENT_PROFILE_v0.1.0.json",
+    "host-export/GLOW-WEB-HOST/PUBLIC_AI_HOST_INTEGRATION_GUIDE.md",
+    "host-export/GLOW-WEB-HOST/src/**",
+    "host-export/GLOW-WEB-HOST/tests/**",
+    "host-export/GLOW-WEB-HOST/contracts/**",
+    "host-export/GLOW-WEB-HOST/adapters/**",
+    "host-export/GLOW-WEB-HOST/public/**",
+    "host-export/GLOW-WEB-HOST/scripts/**",
+    "host-export/GLOW-WEB-HOST/PUBLIC_EXPERIENCE_CONTRACT.md"
+  ],
+  "explicit_denylist": [
+    "factory/**",
+    "governance/evidence/**",
+    "governance/qualification/**",
+    ".runtime/**",
+    ".glow-node-state/**",
+    "**/*.sqlite",
+    "**/*.sqlite3",
+    "**/.env",
+    "**/*secret*",
+    "**/*token*",
+    "**/MODEL_SESSION_PRIVATE/**"
+  ],
+  "public_rules": [
+    "Only allowlisted files may be exported.",
+    "No secrets or credentials may be committed.",
+    "No MODEL_SESSION_PRIVATE payload may be copied into public source.",
+    "No protected Factory source may be mirrored into the public repository.",
+    "Public host responses must pass whitelist declassification.",
+    "A private runtime may be consumed only as an exact versioned private package/artifact.",
+    "Public export does not change Canon or Factory authority."
+  ],
+  "deployment_composition": "PUBLIC_REPO + EXACT_PRIVATE_PACKAGE -> ONE_HOSTINGER_NODE_PROCESS -> ONE_PUBLIC_LISTENER -> IN_PROCESS_PROTECTED_RUNTIME",
+  "claim_limit": "Export contract only. Does not prove public repo creation, deployment, AI-host compatibility, or field verification."
+}

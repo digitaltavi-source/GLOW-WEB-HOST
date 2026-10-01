@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "glow-web-protected-response-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_id",
+    "status",
+    "exposure",
+    "result",
+    "public_evidence",
+    "errors"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "accepted",
+        "completed",
+        "blocked",
+        "degraded",
+        "failed"
+      ]
+    },
+    "exposure": {
+      "enum": [
+        "PUBLIC_DECLASSIFIED",
+        "MODEL_SESSION_PRIVATE"
+      ]
+    },
+    "result": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "public_evidence": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "message",
+          "retryable"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "retryable": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

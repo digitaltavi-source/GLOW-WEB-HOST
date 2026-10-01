@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "glow-web-protected-request-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "request_id",
+    "operation",
+    "role",
+    "locale",
+    "input"
+  ],
+  "properties": {
+    "request_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "operation": {
+      "enum": [
+        "create_web_mission",
+        "get_work",
+        "submit_work",
+        "inspect_blocked_stage",
+        "recover_blocked_stage",
+        "approve_stage",
+        "get_status",
+        "get_delivery"
+      ]
+    },
+    "role": {
+      "enum": [
+        "client",
+        "operator",
+        "unspecified"
+      ]
+    },
+    "locale": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 32
+    },
+    "input": {
+      "type": "object"
+    }
+  }
+}
