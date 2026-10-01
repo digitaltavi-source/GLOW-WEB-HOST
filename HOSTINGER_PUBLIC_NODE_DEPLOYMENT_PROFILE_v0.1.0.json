@@ -1,8 +1,8 @@
 {
   "schema_version": "0.1.0",
-  "profile_id": "GLOW_WEB_HOSTINGER_COMBINED_ONE_DOMAIN",
+  "profile_id": "GLOW_WEB_HOSTINGER_PUBLIC_MCP",
   "state": "CANDIDATE_DEV_FALSIFICATION_PASS_NOT_LIVE",
-  "purpose": "Deploy the public GLOW Web experience plus an exact private Factory runtime fetched at build-time into one Hostinger Managed Node.js process and one public domain.",
+  "purpose": "Deploy the declassified GLOW Web public experience, workspace, MCP/OAuth gateway and readiness edge on Hostinger Managed Node.js.",
   "source": {
     "intended_repository": "digitaltavi-source/GLOW-WEB-HOST",
     "branch": "main",
@@ -16,18 +16,13 @@
     "start_command": "npm start",
     "health_path": "/healthz",
     "readiness_path": "/readyz",
-    "canonical_mcp_path": "/mcp-v2",
-    "deployment_topology": "ONE_PROCESS_ONE_PUBLIC_LISTENER_PRIVATE_FACTORY_INPROCESS",
-    "private_runtime_staging": ".glow-private-runtime"
+    "canonical_mcp_path": "/mcp-v2"
   },
   "security": {
-    "private_assets_embedded": true,
+    "private_assets_embedded": false,
     "private_release_hashes_public": false,
     "model_session_private_is_public_delivery": false,
-    "protected_backend_unavailable": "FAIL_CLOSED",
-    "private_assets_publicly_committed": false,
-    "private_runtime_fetch": "BUILD_TIME_EXACT_SHA_READ_ONLY_GITHUB_TOKEN",
-    "private_runtime_token_storage": "HOSTINGER_ENV_ONLY"
+    "protected_backend_unavailable": "FAIL_CLOSED"
   },
   "claims": {
     "hostinger_deployed": false,
@@ -38,9 +33,7 @@
     "public_experience_built": true,
     "local_runtime_verified": true,
     "mobile_layout_verified": true,
-    "handoff_capsule_private_leak_check": true,
-    "combined_local_build_verified": true,
-    "inprocess_readiness_local_verified": true
+    "handoff_capsule_private_leak_check": true
   },
-  "next_gate": "PUSH_COMBINED_HOST_SOURCE_THEN_HOSTINGER_FIELD_DEPLOYMENT"
+  "next_gate": "CREATE_PUBLIC_REPO_EXPORT_EXACT_BYTES_THEN_HOSTINGER_DEPLOY"
 }

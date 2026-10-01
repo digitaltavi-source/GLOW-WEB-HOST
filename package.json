@@ -4,12 +4,11 @@
   "private": false,
   "type": "module",
   "scripts": {
-    "build": "npm run prepare:private && tsc -p tsconfig.json && esbuild src/oauth-client.ts --bundle --format=iife --global-name=GlowOAuth --outfile=dist/public/oauth-client.js && npm run copy:public",
+    "build": "tsc -p tsconfig.json && esbuild src/oauth-client.ts --bundle --format=iife --global-name=GlowOAuth --outfile=dist/public/oauth-client.js && npm run copy:public",
     "test": "npm run build && node --test dist/tests/*.test.js",
     "dev": "tsx src/server.ts",
     "start": "node dist/src/server.js",
-    "copy:public": "node scripts/copy-public.mjs",
-    "prepare:private": "node scripts/prepare-private-runtime.mjs"
+    "copy:public": "node scripts/copy-public.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "2.0.0",
@@ -18,8 +17,7 @@
     "express": "^5.2.1",
     "jose": "^6.1.3",
     "zod": "^4.2.0",
-    "@supabase/supabase-js": "^2.57.4",
-    "pyodide": "314.0.7"
+    "@supabase/supabase-js": "^2.57.4"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",

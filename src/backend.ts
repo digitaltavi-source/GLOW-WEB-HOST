@@ -14,12 +14,8 @@ let inProcessBridgePromise: Promise<InProcessBridge> | null = null;
 
 async function getInProcessBridge(): Promise<InProcessBridge> {
   if (!inProcessBridgePromise) {
-    const privateRuntimeRoot=resolve(
-      process.cwd(),
-      process.env.GLOW_PRIVATE_RUNTIME_ROOT?.trim() || ".glow-private-runtime"
-    );
     const bridgeUrl = pathToFileURL(
-      resolve(privateRuntimeRoot, "host-integration/node-private-host/bridge.mjs")
+      resolve(process.cwd(), "host-integration/node-private-host/bridge.mjs")
     ).href;
     inProcessBridgePromise = import(bridgeUrl).then(async mod => {
       if (typeof mod.createFactoryBridge !== "function") {
@@ -27,7 +23,7 @@ async function getInProcessBridge(): Promise<InProcessBridge> {
       }
       const state=resolveProtectedStateDir();
       return mod.createFactoryBridge({
-        repoRoot: privateRuntimeRoot,
+        repoRoot: process.cwd(),
         stateDir: state.path,
         stateMode: state.mode
       }) as Promise<InProcessBridge>;
