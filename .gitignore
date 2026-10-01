@@ -3,3 +3,6 @@ dist/
 .env
 .env.*
 !.env.example
+
+# Build-time private runtime staging (never commit)
+.glow-private-runtime/
