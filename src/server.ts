@@ -547,6 +547,18 @@ app.get("/app",(_req,res) => {
   res.type("html").sendFile(path.join(publicDir,"index.html"));
 });
 
+app.get("/showcase",(_req,res) => {
+  res.type("html").sendFile(path.join(publicDir,"showcase.html"));
+});
+
+app.get("/showcase.css",(_req,res) => {
+  res.type("text/css").sendFile(path.join(publicDir,"showcase.css"));
+});
+
+app.get("/showcase.js",(_req,res) => {
+  res.type("application/javascript").sendFile(path.join(publicDir,"showcase.js"));
+});
+
 app.get("/app.css",(_req,res) => {
   res.type("text/css").sendFile(path.join(publicDir,"app.css"));
 });
