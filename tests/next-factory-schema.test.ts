@@ -40,3 +40,42 @@ test("next-factory schema accepts exact H3 submit contract",()=>{
       payload:{packet_id:"P1",fork_readiness:{status:"PASS"},kit_orders:{kit_a_ref:"A",kit_b_ref:"B",kit_c_ref:"C"}}},...base});
   assert.equal(parsed.action,"submit_phase");
 });
+test("next-factory schema accepts composition result",()=>{
+  const parsed=NextFactoryControlInputSchema.parse({
+    action:"record_composition_result",args:{mission_id:"NM-test",expected_state_version:10,
+      result:{integrated_artifact_sha256:"d".repeat(64),candidate_preview_identity:"preview://1",composition_manifest:{builder:"composer"}}},...base});
+  assert.equal(parsed.action,"record_composition_result");
+});
+
+test("next-factory schema accepts system assurance",()=>{
+  const parsed=NextFactoryControlInputSchema.parse({
+    action:"submit_system_assurance",args:{mission_id:"NM-test",expected_state_version:11,
+      report:{integrated_artifact_sha256:"d".repeat(64),dimensions:{FUNCTIONAL:{status:"PASS",evidence_refs:["e://functional"]}}}},...base});
+  assert.equal(parsed.action,"submit_system_assurance");
+});
+
+test("next-factory schema rejects model as human release approver",()=>{
+  assert.throws(()=>NextFactoryControlInputSchema.parse({
+    action:"record_human_release_decision",args:{mission_id:"NM-test",expected_state_version:12,
+      decision:{actor_type:"MODEL",decision:"APPROVE",reason:"no",integrated_artifact_sha256:"d".repeat(64),
+        assurance_report_hash:"a".repeat(64),candidate_preview_identity:"preview://1"}},...base}));
+});
+
+test("next-factory schema accepts authorized human release decision",()=>{
+  const parsed=NextFactoryControlInputSchema.parse({
+    action:"record_human_release_decision",args:{mission_id:"NM-test",expected_state_version:12,
+      decision:{actor_type:"HUMAN",decision:"APPROVE",reason:"approved",integrated_artifact_sha256:"d".repeat(64),
+        assurance_report_hash:"a".repeat(64),candidate_preview_identity:"preview://1",approved_scope:["demo"]}},...base});
+  assert.equal(parsed.action,"record_human_release_decision");
+});
+
+test("next-factory schema accepts deployment and live verification",()=>{
+  const dep=NextFactoryControlInputSchema.parse({
+    action:"record_deployment",args:{mission_id:"NM-test",expected_state_version:13,
+      deployment:{approval_receipt_id:"NHA-1",integrated_artifact_sha256:"d".repeat(64),release_identity:"release:1",environment:"staging"}},...base});
+  assert.equal(dep.action,"record_deployment");
+  const live=NextFactoryControlInputSchema.parse({
+    action:"record_live_verification",args:{mission_id:"NM-test",expected_state_version:14,
+      verification:{deployment_receipt_id:"NDEP-1",observed_artifact_sha256:"d".repeat(64),status:"PASS",evidence_refs:["e://live"]}},...base});
+  assert.equal(live.action,"record_live_verification");
+});

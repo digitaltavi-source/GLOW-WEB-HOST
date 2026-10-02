@@ -91,7 +91,7 @@ const buildServer: McpServerFactory = ctx => {
     { name: "glow-web", version: HOST_ADAPTER_REVISION },
     {
       instructions:
-        "Use GLOW Web only for the user's explicit web mission request. ChatGPT is the reasoning/intelligence host. The backend owns Factory state, validation, approval binding, freeze/admission, evidence and delivery boundaries. Legacy RC4 and the parallel Next Factory candidate are separate control paths. Use the Next Factory tools only when the user explicitly requests the Next Factory/demo path; for current demo operation require execution_profile=DEMO_BOUNDED, preserve its degraded claim ceiling, and never describe demo capability use as hard-admitted or production-ready. When a work package is returned, perform only that bounded work, then submit the result. Never invent success, approvals, evidence, or Factory state."
+        "Use GLOW Web only for the user's explicit web mission request. ChatGPT is the reasoning/intelligence host. The backend owns Factory state, validation, approval binding, freeze/admission, evidence and delivery boundaries. The legacy RC4 flow is a frozen A/B baseline retained for controlled post-demo comparison only; it is not a fallback for a Next Factory mission. The Next Factory is the active demo candidate path. For current demo operation require execution_profile=DEMO_BOUNDED, preserve its degraded claim ceiling, and never describe demo capability use as hard-admitted or production-ready. When a work package is returned, perform only that bounded work, then submit the result. Never invent success, approvals, evidence, or Factory state."
     }
   );
 
@@ -250,7 +250,7 @@ const buildServer: McpServerFactory = ctx => {
     "glow_next_factory_control",
     {
       title:"GLOW Web Next Factory control",
-      description:"Runs one bounded action in the parallel H1?H2?H3 Next Factory candidate. The private backend owns durable state, Fork Control, work-item epochs, defect recovery and claim limits. This tool does not promote the candidate or replace RC4.",
+      description:"Runs one bounded action in the active Next Factory demo candidate. The private backend owns durable H1/H2/H3, Fork Control, work-item epochs, composition, System Assurance, Human Release authority, deployment evidence and claim limits. The frozen legacy flow remains only as a future A/B baseline and is not a fallback.",
       annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false},
       ...(toolSecuritySchemes ? { securitySchemes: toolSecuritySchemes } : {}),
       inputSchema:NextFactoryControlInputSchema
