@@ -176,7 +176,7 @@ export const NextFactoryControlInputSchema = z.discriminatedUnion("action",[
         }),
         z.object({
           action:z.literal("compose_readiness"),
-          args:z.object({mission_id:z.string().min(1).max(128)}).strict(),
+          args:z.object({mission_id:z.string().min(1).max(128)}).passthrough(),
           role:z.enum(["client","operator","unspecified"]).default("unspecified"),
           locale:z.string().min(2).max(32).default("vi-VN")
         }),
