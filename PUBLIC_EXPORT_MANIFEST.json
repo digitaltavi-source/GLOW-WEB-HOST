@@ -1,6 +1,6 @@
 {
   "schema": "GLOW_WEB_PUBLIC_EXPORT_MANIFEST_V1",
-  "state": "CANDIDATE_PUBLIC_EXPORT_CONTRACT",
+  "state": "PUBLIC_WORKING_BRANCH_SYNC_CANDIDATE_NOT_MAIN_NOT_LIVE",
   "public_source_target": "digitaltavi-source/GLOW-WEB-HOST",
   "private_source": "digitaltavi-source/GLOW-WEB-FACTORY",
   "public_allowlist": [
@@ -39,9 +39,11 @@
     "No MODEL_SESSION_PRIVATE payload may be copied into public source.",
     "No protected Factory source may be mirrored into the public repository.",
     "Public host responses must pass whitelist declassification.",
-    "A private runtime may be consumed only as an exact versioned private package/artifact.",
-    "Public export does not change Canon or Factory authority."
+    "Public export does not change Canon or Factory authority.",
+    "The public repository is a declassified component source, not the current Hostinger assembly owner.",
+    "The current deployment assembly owner is the private Factory repository, which binds exact public-host and private-runtime identities.",
+    "Public export does not change Canon, Factory authority, qualification or release state."
   ],
-  "deployment_composition": "PUBLIC_REPO + EXACT_PRIVATE_PACKAGE -> ONE_HOSTINGER_NODE_PROCESS -> ONE_PUBLIC_LISTENER -> IN_PROCESS_PROTECTED_RUNTIME",
-  "claim_limit": "Export contract only. Does not prove public repo creation, deployment, AI-host compatibility, or field verification."
+  "deployment_composition": "PRIVATE_FACTORY_ASSEMBLY_CARRIER + EXACT_PUBLIC_HOST_SHA + EXACT_PRIVATE_RUNTIME_SHA -> ONE_HOSTINGER_NODE_PROCESS -> ONE_PUBLIC_LISTENER -> IN_PROCESS_PROTECTED_RUNTIME",
+  "claim_limit": "Public export/working-branch synchronization contract only. Does not prove public-main promotion, current hPanel linked branch, Hostinger redeploy, authenticated ChatGPT integration, or field verification."
 }
