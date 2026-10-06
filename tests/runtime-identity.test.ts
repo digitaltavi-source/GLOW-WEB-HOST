@@ -30,7 +30,11 @@ test("NORMAL: runtime identity reports baked assembly and safe live topology", a
     assert.equal(out.runtime.auth_provider, "AUTH0_OAUTH");
     assert.equal(out.runtime.mcp_path, "/mcp-v2");
     assert.equal(out.runtime.state_dir_mode, "EXPLICIT_ABSOLUTE");
+    assert.equal(out.identity_source, "EXPLICIT_RUNTIME_IDENTITY");
+    assert.equal(out.security.filesystem_path_exposed, false);
     const serialized = JSON.stringify(out);
+    assert.equal(serialized.includes(identityPath), false);
+    assert.equal(serialized.includes(dir), false);
     assert.equal(serialized.includes("must-not-leak"), false);
     assert.equal(serialized.includes("SECRET_TOKEN"), false);
     assert.equal(serialized.includes("/persistent/glow-web"), false);

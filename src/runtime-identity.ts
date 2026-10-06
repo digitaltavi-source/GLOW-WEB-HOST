@@ -27,12 +27,12 @@ function mcpPath(raw: string | undefined) {
   }
 }
 
-function loadIdentityFile(candidate: string): { source: string; value: StaticIdentity } | null {
+function loadIdentityFile(candidate: string, source: string): { source: string; value: StaticIdentity } | null {
   if (!existsSync(candidate)) return null;
   try {
     const parsed = JSON.parse(readFileSync(candidate, "utf8"));
     if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      return { source: candidate, value: parsed as StaticIdentity };
+      return { source, value: parsed as StaticIdentity };
     }
   } catch {
     return null;
@@ -43,7 +43,7 @@ function loadIdentityFile(candidate: string): { source: string; value: StaticIde
 function loadStaticIdentity(env: NodeJS.ProcessEnv): { source: string; value: StaticIdentity } {
   const explicitPath = env.GLOW_RUNTIME_IDENTITY_PATH?.trim();
   if (explicitPath) {
-    return loadIdentityFile(explicitPath) ?? {
+    return loadIdentityFile(explicitPath, "EXPLICIT_RUNTIME_IDENTITY") ?? {
       source: "UNDECLARED",
       value: { state: "UNDECLARED", reason: "EXPLICIT_IDENTITY_PATH_UNAVAILABLE" }
     };
@@ -51,13 +51,13 @@ function loadStaticIdentity(env: NodeJS.ProcessEnv): { source: string; value: St
 
   const moduleDir = path.dirname(fileURLToPath(import.meta.url));
   const candidates = [
-    path.resolve(moduleDir, "../../runtime-identity.json"),
-    path.resolve(process.cwd(), "runtime-identity.json"),
-    path.resolve(process.cwd(), "combined-runtime/public-host/runtime-identity.json")
+    { path: path.resolve(moduleDir, "../../runtime-identity.json"), source: "BAKED_RUNTIME_IDENTITY" },
+    { path: path.resolve(process.cwd(), "runtime-identity.json"), source: "WORKDIR_RUNTIME_IDENTITY" },
+    { path: path.resolve(process.cwd(), "combined-runtime/public-host/runtime-identity.json"), source: "ASSEMBLED_RUNTIME_IDENTITY" }
   ];
 
   for (const candidate of candidates) {
-    const loaded = loadIdentityFile(candidate);
+    const loaded = loadIdentityFile(candidate.path, candidate.source);
     if (loaded) return loaded;
   }
 
