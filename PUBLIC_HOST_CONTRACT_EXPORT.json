@@ -1,16 +1,26 @@
 {
-  "schema": "GLOW_WEB_PUBLIC_HOST_CONTRACT_EXPORT_V1",
+  "schema": "GLOW_WEB_PUBLIC_HOST_CONTRACT_EXPORT_V2",
   "classification": "DECLASSIFIED_INTERFACE_ONLY",
-  "endpoint": "/v1/web-missions",
+  "publication_state": "PUBLIC_WORKING_BRANCH_CANDIDATE_NOT_MAIN_NOT_LIVE",
+  "canonical_ai_resource": "/mcp-v2",
+  "compatible_public_mcp_paths": [
+    "/mcp",
+    "/mcp-v2",
+    "/mcp-v3"
+  ],
   "operations": [
     "create_web_mission",
     "get_work",
+    "get_capability_plan",
+    "submit_capability_contributions",
     "submit_work",
     "inspect_blocked_stage",
     "recover_blocked_stage",
     "approve_stage",
     "get_status",
-    "get_delivery"
+    "get_delivery",
+    "get_next_factory_capability_handshake",
+    "next_factory_control"
   ],
   "exposure_classes": [
     "PUBLIC_DECLASSIFIED",
@@ -23,30 +33,44 @@
     "degraded",
     "failed"
   ],
-  "required_headers": [
-    "authorization",
-    "x-glow-subject"
-  ],
-  "request_shape": {
-    "request_id": "string",
-    "operation": "enum",
-    "role": "client|operator|unspecified",
-    "locale": "string",
-    "input": "object"
-  },
-  "response_shape": {
-    "request_id": "string",
-    "status": "enum",
-    "exposure": "enum",
-    "result": "object|null",
-    "public_evidence": "array",
-    "errors": "array"
+  "protected_backend_contract": {
+    "endpoint": "/v1/web-missions",
+    "required_headers": [
+      "authorization",
+      "x-glow-subject"
+    ],
+    "request_shape": {
+      "request_id": "string",
+      "operation": "enum",
+      "role": "client|operator|unspecified",
+      "locale": "string",
+      "input": "object"
+    },
+    "response_shape": {
+      "request_id": "string",
+      "status": "enum",
+      "exposure": "enum",
+      "result": "object|null",
+      "public_evidence": "array",
+      "errors": "array"
+    },
+    "http_semantics": {
+      "contract_request": "HTTP 200 + response envelope",
+      "transport_auth_body_error": "HTTP 4xx",
+      "application_failure": "status=failed|blocked|degraded inside HTTP 200 envelope"
+    },
+    "schemas": {
+      "request": "contracts/host-request.schema.json",
+      "response": "contracts/host-response.schema.json"
+    }
   },
   "public_host_laws": [
     "PUBLIC_HOST != PROTECTED_FACTORY",
     "PUBLIC_ADAPTER != SOURCE_OF_TRUTH",
     "MODEL_SESSION_PRIVATE != PUBLIC_DECLASSIFIED",
-    "BACKEND_UNAVAILABLE -> FAIL_CLOSED_OR_DEGRADED"
+    "BACKEND_UNAVAILABLE -> FAIL_CLOSED_OR_DEGRADED",
+    "CANONICAL_AI_RESOURCE != PROTECTED_BACKEND_ENDPOINT",
+    "PLUGIN_CONNECTION_IDENTITY != FACTORY_RUNTIME_VERSION"
   ],
   "explicitly_excluded": [
     "private runtime implementation",
@@ -55,14 +79,6 @@
     "private artifact hashes",
     "credentials"
   ],
-  "http_semantics": {
-    "contract_request": "HTTP 200 + response envelope",
-    "transport_auth_body_error": "HTTP 4xx",
-    "application_failure": "status=failed|blocked|degraded inside HTTP 200 envelope"
-  },
-  "schemas": {
-    "request": "contracts/web-request.schema.json",
-    "response": "contracts/web-response.schema.json"
-  },
-  "publication_rule": "Copy only through the private PUBLICATION_EXPORT_MANIFEST after declassification review."
+  "publication_rule": "Promote only after declassification review, exact public-component regression, private assembly rebind, mandatory release-matrix acceptance and separate release authority.",
+  "claim_limit": "Public working-branch candidate aligned to inspected runtime/schema surfaces. Does not prove main promotion, Hostinger deployment, ChatGPT authenticated integration, or field verification."
 }
