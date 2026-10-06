@@ -12,15 +12,13 @@ import { callProtectedService, checkProtectedReadiness } from "./backend.js";
 import { WebRequest } from "./contracts.js";
 import { classifyWorkResponse } from "./work-response.js";
 import { buildProtectedResourceMetadata } from "./resource-metadata.js";
-import { buildPublicAuthorizationServerMetadata } from "./authorization-server-metadata.js";
 import { createGlowMcpExpressApp } from "./mcp-app.js";
 import { NextFactoryControlInputSchema } from "./next-factory-schema.js";
 
-const HOST_ADAPTER_REVISION = "0.2.1-next-flow-rc3";
+const HOST_ADAPTER_REVISION = "0.2.2-next-flow-rc4";
 const HOST_CONTRACT_ID = "RC4_FULL_WORK_LOOP_PERSISTENT_V1";
 const config = loadConfig();
 const configuredMcpServerUrl = new URL(process.env.GLOW_PUBLIC_MCP_URL ?? `http://127.0.0.1:${config.port}/mcp`);
-const publicAuthorizationServerBase = process.env.GLOW_PUBLIC_AUTHORIZATION_SERVER?.trim() || configuredMcpServerUrl.origin;
 const configuredAuthMode = (process.env.GLOW_AUTH_MODE?.trim() || "static_bearer").toLowerCase();
 if (!["static_bearer","oauth","hybrid"].includes(configuredAuthMode)) {
   throw new Error("CONFIG_AUTH_MODE_INVALID");
@@ -43,21 +41,6 @@ const verifier = authMode === "static_bearer"
 const toolSecuritySchemes = authMode === "static_bearer"
   ? undefined
   : [{ type: "oauth2" as const, scopes: requiredScopes }];
-
-let authorizationServerMetadataPromise: Promise<Record<string,unknown>> | null = null;
-async function resolveAuthorizationServerMetadata(){
-  if(authMode === "static_bearer" || !oauthConfig) throw new Error("OAUTH_NOT_CONFIGURED");
-  if(!authorizationServerMetadataPromise){
-    authorizationServerMetadataPromise=buildPublicAuthorizationServerMetadata({
-      publicIssuer:publicAuthorizationServerBase,
-      oauthIssuer:oauthConfig.issuer
-    }).catch(error=>{
-      authorizationServerMetadataPromise=null;
-      throw error;
-    });
-  }
-  return authorizationServerMetadataPromise;
-}
 
 function toolResult(value: Record<string, unknown>) {
   return {
@@ -526,16 +509,16 @@ app.get(resourceMetadataV3Path, (_req,res) => {
   res.json(resourceMetadataV3);
 });
 
-app.get("/.well-known/oauth-authorization-server", async (_req,res) => {
+app.get("/.well-known/oauth-authorization-server", (_req,res) => {
   if (authMode === "static_bearer" || !oauthConfig) {
     res.status(404).json({error:"OAUTH_NOT_CONFIGURED"});
     return;
   }
-  try {
-    res.json(await resolveAuthorizationServerMetadata());
-  } catch {
-    res.status(503).json({error:"OAUTH_PROVIDER_METADATA_UNAVAILABLE"});
-  }
+  res.status(404).json({
+    error:"EXTERNAL_AUTHORIZATION_SERVER",
+    authorization_server:oauthConfig.issuer.replace(/\/$/,""),
+    discovery_via:"/.well-known/oauth-protected-resource/mcp-v2"
+  });
 });
 
 const publicDir=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"../public");
