@@ -1,10 +1,10 @@
-{
+﻿{
   "name": "glow-web-host",
   "version": "0.2.0-candidate",
   "private": false,
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json && esbuild src/oauth-client.ts --bundle --format=iife --global-name=GlowOAuth --outfile=dist/public/oauth-client.js && npm run copy:public",
+    "build": "node scripts/clean-dist.mjs && tsc -p tsconfig.json && esbuild src/oauth-client.ts --bundle --format=iife --global-name=GlowOAuth --outfile=dist/public/oauth-client.js && npm run copy:public && node scripts/verify-dist-tests.mjs",
     "test": "npm run build && node --test dist/tests/*.test.js",
     "dev": "tsx src/server.ts",
     "start": "node dist/src/server.js",
