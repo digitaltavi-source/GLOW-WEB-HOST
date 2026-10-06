@@ -12,10 +12,11 @@ import { callProtectedService, checkProtectedReadiness } from "./backend.js";
 import { WebRequest } from "./contracts.js";
 import { classifyWorkResponse } from "./work-response.js";
 import { buildProtectedResourceMetadata } from "./resource-metadata.js";
+import { buildPublicAuthorizationServerMetadata } from "./authorization-server-metadata.js";
 import { createGlowMcpExpressApp } from "./mcp-app.js";
 import { NextFactoryControlInputSchema } from "./next-factory-schema.js";
 
-const HOST_ADAPTER_REVISION = "0.2.0-next-flow-rc2";
+const HOST_ADAPTER_REVISION = "0.2.1-next-flow-rc3";
 const HOST_CONTRACT_ID = "RC4_FULL_WORK_LOOP_PERSISTENT_V1";
 const config = loadConfig();
 const configuredMcpServerUrl = new URL(process.env.GLOW_PUBLIC_MCP_URL ?? `http://127.0.0.1:${config.port}/mcp`);
@@ -42,6 +43,21 @@ const verifier = authMode === "static_bearer"
 const toolSecuritySchemes = authMode === "static_bearer"
   ? undefined
   : [{ type: "oauth2" as const, scopes: requiredScopes }];
+
+let authorizationServerMetadataPromise: Promise<Record<string,unknown>> | null = null;
+async function resolveAuthorizationServerMetadata(){
+  if(authMode === "static_bearer" || !oauthConfig) throw new Error("OAUTH_NOT_CONFIGURED");
+  if(!authorizationServerMetadataPromise){
+    authorizationServerMetadataPromise=buildPublicAuthorizationServerMetadata({
+      publicIssuer:publicAuthorizationServerBase,
+      oauthIssuer:oauthConfig.issuer
+    }).catch(error=>{
+      authorizationServerMetadataPromise=null;
+      throw error;
+    });
+  }
+  return authorizationServerMetadataPromise;
+}
 
 function toolResult(value: Record<string, unknown>) {
   return {
@@ -510,23 +526,16 @@ app.get(resourceMetadataV3Path, (_req,res) => {
   res.json(resourceMetadataV3);
 });
 
-app.get("/.well-known/oauth-authorization-server", (_req,res) => {
+app.get("/.well-known/oauth-authorization-server", async (_req,res) => {
   if (authMode === "static_bearer" || !oauthConfig) {
     res.status(404).json({error:"OAUTH_NOT_CONFIGURED"});
     return;
   }
-  const issuer=oauthConfig.issuer.replace(/\/$/,"");
-  res.json({
-    issuer: publicAuthorizationServerBase,
-    authorization_endpoint: `${issuer}/oauth/authorize`,
-    token_endpoint: `${issuer}/oauth/token`,
-    registration_endpoint: `${issuer}/oauth/clients/register`,
-    scopes_supported: ["email","profile","openid"],
-    response_types_supported: ["code"],
-    grant_types_supported: ["authorization_code","refresh_token"],
-    token_endpoint_auth_methods_supported: ["none","client_secret_post","client_secret_basic"],
-    code_challenge_methods_supported: ["S256"]
-  });
+  try {
+    res.json(await resolveAuthorizationServerMetadata());
+  } catch {
+    res.status(503).json({error:"OAUTH_PROVIDER_METADATA_UNAVAILABLE"});
+  }
 });
 
 const publicDir=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"../public");
