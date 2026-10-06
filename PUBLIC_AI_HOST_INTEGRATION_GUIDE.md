@@ -23,7 +23,7 @@ Recommended split:
 
 PUBLIC GitHub source:
 - public Node host
-- OAuth discovery/consent
+- OAuth Protected Resource Metadata pointing to the external Authorization Server
 - MCP endpoint
 - public request/response schemas
 - health/readiness endpoints
@@ -72,9 +72,8 @@ Co-location does not merge authority.
 A public deployment may expose:
 - /healthz
 - /readyz
-- /.well-known/oauth-authorization-server
 - /.well-known/oauth-protected-resource/*
-- /oauth/consent
+- local /.well-known/oauth-authorization-server intentionally returns 404 when authorization is owned by the external provider
 - /mcp-v2 (or declared MCP version)
 
 Protected source, state and evidence must not be public routes.
