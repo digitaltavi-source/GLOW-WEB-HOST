@@ -12,7 +12,8 @@ async function request(body:unknown,authorization='Bearer '+config.token,origin?
  const handler=createOperatorHandler(config,async(subject,raw,actor)=>{captured={subject,raw,actor};return {ok:true};});
  const req=Readable.from([Buffer.from(JSON.stringify(body))]) as unknown as IncomingMessage;
  Object.assign(req,{method:'POST',url:'/next-factory',headers:{authorization,'content-type':'application/json',...(origin?{origin}:{})}});
- const res={destroyed:false,writableEnded:false,writeHead(n:number){status=n;},end(s:string){result=s;this.writableEnded=true;}} as unknown as ServerResponse;
+ const response={destroyed:false,writableEnded:false,writeHead(n:number){status=n;},end(s:string){result=s;response.writableEnded=true;}};
+ const res=response as unknown as ServerResponse;
  await handler(req,res);return {status,result,captured};
 }
 test('operator identity is minted by server config, never client fields',async()=>{
@@ -52,3 +53,4 @@ test('loopback HTTP gate rejects model bearer and forwards only authorized opera
    const accepted=await call('Bearer '+config.token);assert.equal(accepted.status,200);assert.deepEqual(await accepted.json(),{actor:'release-operator'});
  }finally{await new Promise<void>((resolve,reject)=>server.close(error=>error?reject(error):resolve()));}
 });
+
