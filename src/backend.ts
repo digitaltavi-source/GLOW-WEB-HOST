@@ -8,6 +8,7 @@ export class BackendError extends Error {}
 
 type CombinedRuntime = {
   execute(subject: string, raw: WebRequestType): Promise<{ status_code: number; body: unknown }>;
+  executeOperator?(subject: string, raw: WebRequestType, actor: {actor_id:string;channel:string;expires_at:number}): Promise<{status_code:number;body:unknown}>;
 };
 
 let combinedRuntimePromise: Promise<CombinedRuntime> | null = null;
@@ -73,6 +74,17 @@ export async function callProtectedService(
 
   const parsed=WebResponse.safeParse(raw);
   if(!parsed.success) throw new BackendError("DECLASSIFICATION_SCHEMA_REJECTED");
+  return parsed.data;
+}
+
+export async function callProtectedOperator(config:HostConfig,subject:string,request:WebRequestType,actor:{actor_id:string;channel:string;expires_at:number}):Promise<WebResponseType>{
+  if(!config.combinedRuntimeModule)throw new BackendError('REMOTE_OPERATOR_CHANNEL_NOT_SUPPORTED');
+  const runtime=await getCombinedRuntime(config);
+  if(!runtime.executeOperator)throw new BackendError('OPERATOR_RUNTIME_NOT_BOUND');
+  const result=await runtime.executeOperator(subject,request,actor);
+  if(result.status_code!==200)throw new BackendError('OPERATOR_BACKEND_STATUS_'+result.status_code);
+  const parsed=WebResponse.safeParse(result.body);
+  if(!parsed.success)throw new BackendError('OPERATOR_RESPONSE_SCHEMA_REJECTED');
   return parsed.data;
 }
 

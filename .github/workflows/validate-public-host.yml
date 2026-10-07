@@ -2,7 +2,7 @@ name: validate-public-host
 
 on:
   push:
-    branches: [main]
+    branches: [main, sandbox]
   pull_request:
   workflow_dispatch:
 

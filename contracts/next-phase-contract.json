@@ -1,0 +1,68 @@
+{
+  "contract": "GWF_HOST_PHASE_CONTRACT_V2",
+  "phases": {
+    "H1": {
+      "required": {
+        "unknowns": "array",
+        "conflicts": "array",
+        "mission_truth": "object"
+      },
+      "optional": {
+        "authority_receipt": "object"
+      }
+    },
+    "H2": {
+      "required": {
+        "h1_identity": "string",
+        "h1_status": "string",
+        "protected_truth": "object",
+        "blueprint_revision": "integer",
+        "product_decomposition": "object",
+        "system_blueprint": "object",
+        "capability_contracts": "array",
+        "capability_contribution_receipts": "array",
+        "capability_result_reconciliation": "array",
+        "owner_dependency_graph": "object",
+        "quality_profile": "object",
+        "failure_adversarial_recovery": "object",
+        "build_sequence": "array",
+        "open_decisions": "array",
+        "do_not_reinterpret": "array",
+        "reopen_triggers": "array",
+        "decision_owner": "string",
+        "decision": "string"
+      },
+      "optional": {
+        "authority_receipt": "object",
+        "design_material": "boolean",
+        "design_contract": "object",
+        "generative_media_material": "boolean",
+        "media_plan": "object"
+      }
+    },
+    "H3": {
+      "required": {
+        "packet_id": "string",
+        "h2_identity": "string",
+        "h2_status": "string",
+        "blueprint_revision": "integer",
+        "fork_readiness": "object",
+        "kit_orders": "object",
+        "work_order_contracts": "array",
+        "production_graph": "object",
+        "capability_evidence_plan": "array",
+        "g0_g12_assurance_plan": "object",
+        "composer_contract": "object",
+        "system_assurance_contract": "object",
+        "recovery_anchor": "object",
+        "invalidation_conditions": "array",
+        "downstream_rule_ownership_map_ref": "string",
+        "claim_limit": "string"
+      },
+      "optional": {
+        "packet_hash": "string"
+      }
+    }
+  }
+}
+

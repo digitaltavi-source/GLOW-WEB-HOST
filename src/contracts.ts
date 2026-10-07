@@ -5,8 +5,7 @@ export const WebRequest = z.object({
   operation: z.enum(["create_web_mission","get_work","get_capability_plan","submit_capability_contributions","submit_work","inspect_blocked_stage","recover_blocked_stage","approve_stage","get_status","get_delivery","get_next_factory_capability_handshake","next_factory_control"]),
   role: z.enum(["client","operator","unspecified"]).default("unspecified"),
   input: z.record(z.string(), z.unknown()),
-  locale: z.string().min(2).max(32).default("vi-VN"),
-  client_context: z.record(z.string(), z.unknown()).optional()
+  locale: z.string().min(2).max(32).default("vi-VN")
 }).strict();
 
 export const PublicError = z.object({

@@ -9,6 +9,7 @@
     "host-export/GLOW-WEB-HOST/.gitignore",
     "host-export/GLOW-WEB-HOST/.env.example",
     "host-export/GLOW-WEB-HOST/README.md",
+    "host-export/GLOW-WEB-HOST/OPERATOR_GATEWAY.md",
     "host-export/GLOW-WEB-HOST/PUBLIC_HOST_CONTRACT_EXPORT.json",
     "host-export/GLOW-WEB-HOST/HOSTINGER_PUBLIC_NODE_DEPLOYMENT_PROFILE_v0.1.0.json",
     "host-export/GLOW-WEB-HOST/PUBLIC_AI_HOST_INTEGRATION_GUIDE.md",
