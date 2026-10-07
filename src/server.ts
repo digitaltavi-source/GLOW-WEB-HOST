@@ -8,14 +8,15 @@ import { createMcpHandler, McpServer } from "@modelcontextprotocol/server";
 import * as z from "zod/v4";
 import { loadConfig } from "./config.js";
 import { loadOAuthConfig, loadStaticBearerConfig, createJwtVerifier, createStaticBearerVerifier, createHybridVerifier } from "./oauth.js";
-import { callProtectedService, checkProtectedReadiness } from "./backend.js";
+import { callProtectedService, callProtectedOperator, checkProtectedReadiness } from "./backend.js";
+import { loadOperatorConfig, startOperatorGateway } from './operator-gateway.js';
 import { WebRequest } from "./contracts.js";
 import { classifyWorkResponse } from "./work-response.js";
 import { buildProtectedResourceMetadata } from "./resource-metadata.js";
 import { createGlowMcpExpressApp } from "./mcp-app.js";
 import { NextFactoryControlInputSchema } from "./next-factory-schema.js";
 
-const HOST_ADAPTER_REVISION = "0.2.5-next-flow-rc7";
+const HOST_ADAPTER_REVISION = "0.3.0-gateway-trust-candidate";
 const HOST_CONTRACT_ID = "RC4_FULL_WORK_LOOP_PERSISTENT_V1";
 const config = loadConfig();
 const configuredMcpServerUrl = new URL(process.env.GLOW_PUBLIC_MCP_URL ?? `http://127.0.0.1:${config.port}/mcp`);
@@ -24,11 +25,18 @@ if (!["static_bearer","oauth","hybrid"].includes(configuredAuthMode)) {
   throw new Error("CONFIG_AUTH_MODE_INVALID");
 }
 const authMode = configuredAuthMode as "static_bearer"|"oauth"|"hybrid";
+const gatewayProfile=process.env.GLOW_GATEWAY_PROFILE?.trim()||(config.combinedRuntimeModule?'DEMO':'DEVELOPMENT');
+if(!['DEVELOPMENT','DEMO','PRODUCTION'].includes(gatewayProfile))throw Error('GATEWAY_PROFILE_INVALID');
+if(gatewayProfile!=='DEVELOPMENT'&&authMode!=='oauth')throw Error('GATEWAY_OAUTH_ONLY_REQUIRED');
 const oauthConfig = authMode === "static_bearer" ? null : loadOAuthConfig();
 const requiredScopes = authMode === "static_bearer"
   ? ["web.run"]
-  : (process.env.GLOW_OAUTH_REQUIRED_SCOPES ?? "email")
+  : (process.env.GLOW_OAUTH_REQUIRED_SCOPES ?? "web.run")
       .split(/\s+/).map(v=>v.trim()).filter(Boolean);
+if(!requiredScopes.length)throw Error('GATEWAY_ACTION_SCOPE_REQUIRED');
+if(gatewayProfile!=='DEVELOPMENT'&&requiredScopes.some(x=>['email','openid','profile'].includes(x)))throw Error('GATEWAY_ACTION_SCOPE_REQUIRED');
+const operatorConfig=loadOperatorConfig();
+if(operatorConfig&&!config.combinedRuntimeModule)throw Error('OPERATOR_COMBINED_RUNTIME_REQUIRED');
 const verifier = authMode === "static_bearer"
   ? createStaticBearerVerifier(loadStaticBearerConfig())
   : authMode === "hybrid"
@@ -78,6 +86,7 @@ async function invoke(
   request_id?: string
 ) {
   const subject = subjectFrom(ctx);
+  if(operation==='approve_stage'||operation==='recover_blocked_stage')throw Error('LEGACY_AUTHORITY_MUTATION_DISABLED');
   const request = WebRequest.parse({
     request_id: request_id ?? randomUUID(),
     operation, role, locale, input
@@ -249,7 +258,7 @@ const buildServer: McpServerFactory = ctx => {
     "glow_next_factory_control",
     {
       title:"GLOW Web Next Factory control",
-      description:"Runs one bounded action in the active Next Factory demo candidate. The private backend owns durable H1/H2/H3, Fork Control, work-item epochs, composition, System Assurance, Human Release authority, deployment evidence and claim limits. The frozen legacy flow remains only as a future A/B baseline and is not a fallback.",
+      description:"Prepares and inspects bounded Next Factory work. H1/H2 acceptance, assurance, release and deployment require the separate private operator channel; this tool cannot mint approval authority or trusted evidence. Factory Control owns state and exact versions. Do not retry authority errors with invented HUMAN labels or legacy routes.",
       annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false},
       ...(toolSecuritySchemes ? { securitySchemes: toolSecuritySchemes } : {}),
       inputSchema:NextFactoryControlInputSchema
@@ -557,6 +566,12 @@ app.get("/healthz", (_req,res) => {
 });
 
 app.get("/readyz", async (_req,res) => {
+  if(gatewayProfile!=='DEVELOPMENT'&&!operatorConfig){
+    res.status(503).json({ok:false,product:'GLOW Web',code:'OPERATOR_CHANNEL_NOT_CONFIGURED'});return;
+  }
+  if(operatorConfig&&Date.now()/1000>=operatorConfig.expiresAt){
+    res.status(503).json({ok:false,product:'GLOW Web',code:'OPERATOR_AUTHORITY_EXPIRED'});return;
+  }
   const readiness = await checkProtectedReadiness(config);
   res.status(readiness.ok ? 200 : 503).json({
     ok: readiness.ok,
@@ -572,6 +587,16 @@ app.get("/readyz", async (_req,res) => {
 app.all("/mcp",auth,(req,res)=>void node(req,res,req.body));
 app.all("/mcp-v2",authV2,(req,res)=>void node(req,res,req.body));
 app.all("/mcp-v3",authV3,(req,res)=>void node(req,res,req.body));
+
+startOperatorGateway(operatorConfig,async(subject,request,actor)=>{
+  const parsed=WebRequest.parse(request);
+  const action=parsed.input['action'];
+  if(!['register_artifact','register_evidence','revoke_evidence'].includes(String(action))){
+    const checked=NextFactoryControlInputSchema.parse({action,args:parsed.input['args'],role:parsed.role,locale:parsed.locale});
+    parsed.input={action:checked.action,args:checked.args};
+  }
+  return callProtectedOperator(config,subject,parsed,actor);
+});
 
 app.listen(config.port,()=>{
   console.error(`GLOW Web public host listening on :${config.port}`);

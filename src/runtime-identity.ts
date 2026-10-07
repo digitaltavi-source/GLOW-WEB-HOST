@@ -31,8 +31,13 @@ function loadIdentityFile(candidate: string, source: string): { source: string; 
   if (!existsSync(candidate)) return null;
   try {
     const parsed = JSON.parse(readFileSync(candidate, "utf8"));
-    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      return { source, value: parsed as StaticIdentity };
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed) && parsed.contract === 'GLOW_ASSEMBLY_IDENTITY_V1') {
+      const allowed=['contract','assembly_id','assembly_state','carrier_sha','public_host_repository','public_host_sha','private_factory_repository','private_factory_sha','runtime_binding','deployment_target','source_branch'];
+      const safe:StaticIdentity={};
+      for(const key of allowed){
+        if(typeof parsed[key]==='string'&&parsed[key].length<=160)safe[key]=parsed[key];
+      }
+      return { source, value: safe };
     }
   } catch {
     return null;

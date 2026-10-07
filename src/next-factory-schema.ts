@@ -1,4 +1,5 @@
 import * as z from "zod/v4";
+import {H1PhaseSchema,H2PhaseSchema,H3PhaseSchema} from './phase-schema.js';
 
 export const NextFactoryControlInputSchema = z.discriminatedUnion("action",[
         z.object({
@@ -30,31 +31,19 @@ export const NextFactoryControlInputSchema = z.discriminatedUnion("action",[
               mission_id:z.string().min(1).max(128),
               expected_state_version:z.number().int().min(1),
               phase:z.literal("H1"),
-              payload:z.object({
-                unknowns:z.array(z.unknown()),
-                conflicts:z.array(z.unknown()),
-                mission_truth:z.record(z.string(),z.unknown())
-              }).strict()
+              payload:H1PhaseSchema
             }).strict(),
             z.object({
               mission_id:z.string().min(1).max(128),
               expected_state_version:z.number().int().min(1),
               phase:z.literal("H2"),
-              payload:z.object({
-                blueprint_revision:z.number().int().min(1),
-                product_decomposition:z.record(z.string(),z.unknown()),
-                system_blueprint:z.record(z.string(),z.unknown())
-              }).strict()
+              payload:H2PhaseSchema
             }).strict(),
             z.object({
               mission_id:z.string().min(1).max(128),
               expected_state_version:z.number().int().min(1),
               phase:z.literal("H3"),
-              payload:z.object({
-                packet_id:z.string().min(1),
-                fork_readiness:z.record(z.string(),z.unknown()),
-                kit_orders:z.record(z.string(),z.unknown())
-              }).strict()
+              payload:H3PhaseSchema
             }).strict()
           ]),
           role:z.enum(["client","operator","unspecified"]).default("unspecified"),
@@ -130,7 +119,8 @@ export const NextFactoryControlInputSchema = z.discriminatedUnion("action",[
             mission_id:z.string().min(1).max(128),
             defect_id:z.string().min(1).max(128),
             repair_succeeded:z.boolean().optional(),
-            repair_evidence:z.array(z.unknown()).optional()
+            repair_evidence:z.array(z.string().min(1)).optional(),
+            repair_artifact_sha256:z.string().regex(/^[0-9a-f]{64}$/).optional()
           }).strict(),
           role:z.enum(["client","operator","unspecified"]).default("unspecified"),
           locale:z.string().min(2).max(32).default("vi-VN")
@@ -143,7 +133,9 @@ export const NextFactoryControlInputSchema = z.discriminatedUnion("action",[
             choice:z.string().min(1),
             reason:z.string().optional(),
             verified:z.boolean().optional(),
-            accepted_risk:z.array(z.unknown()).optional()
+            accepted_risk:z.array(z.unknown()).optional(),
+            repair_evidence:z.array(z.string().min(1)).optional(),
+            repair_artifact_sha256:z.string().regex(/^[0-9a-f]{64}$/).optional()
           }).strict(),
           role:z.enum(["client","operator","unspecified"]).default("unspecified"),
           locale:z.string().min(2).max(32).default("vi-VN")
@@ -188,7 +180,8 @@ export const NextFactoryControlInputSchema = z.discriminatedUnion("action",[
             result:z.object({
               integrated_artifact_sha256:z.string().regex(/^[0-9a-f]{64}$/),
               candidate_preview_identity:z.string().min(1),
-              composition_manifest:z.record(z.string(),z.unknown())
+              composition_manifest:z.record(z.string(),z.unknown()),
+              evidence_refs:z.array(z.string().min(1)).min(1)
             }).strict()
           }).strict(),
           role:z.enum(["client","operator","unspecified"]).default("unspecified"),
@@ -201,9 +194,17 @@ export const NextFactoryControlInputSchema = z.discriminatedUnion("action",[
             expected_state_version:z.number().int().min(1),
             report:z.object({
               integrated_artifact_sha256:z.string().regex(/^[0-9a-f]{64}$/),
+              frozen_acceptance_refs:z.array(z.string().min(1)).min(1),
+              g0_g12:z.record(z.string(),z.record(z.string(),z.unknown())),
+              false_green_probes:z.record(z.string(),z.record(z.string(),z.unknown())),
+              claim_limit:z.enum(['DEMO_ONLY_UNQUALIFIED_CAPABILITIES_NOT_PRODUCTION_EVIDENCE','DEV_INTEGRATION']),
               dimensions:z.record(z.string(),z.object({
                 status:z.enum(["PASS","FAIL"]),
+                criteria_refs:z.array(z.string().min(1)).min(1),
                 evidence_refs:z.array(z.string().min(1)).min(1),
+                evidence_type:z.string().min(1),
+                evaluator_class:z.literal('OPERATOR_REVIEW'),
+                observed_result:z.string().min(1),
                 notes:z.string().optional()
               }).strict())
             }).strict()
@@ -240,7 +241,8 @@ export const NextFactoryControlInputSchema = z.discriminatedUnion("action",[
               approval_receipt_id:z.string().min(1),
               integrated_artifact_sha256:z.string().regex(/^[0-9a-f]{64}$/),
               release_identity:z.string().min(1),
-              environment:z.string().min(1)
+              environment:z.string().min(1),
+              evidence_refs:z.array(z.string().min(1)).min(1)
             }).strict()
           }).strict(),
           role:z.enum(["client","operator","unspecified"]).default("unspecified"),

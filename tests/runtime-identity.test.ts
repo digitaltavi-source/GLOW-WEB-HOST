@@ -63,3 +63,14 @@ test("ADVERSARIAL: malformed URLs are reported without echoing raw values", () =
   const serialized = JSON.stringify(out);
   assert.equal(serialized.includes("secretish"), false);
 });
+
+test('ADVERSARIAL: identity JSON does not declassify extra private fields',async()=>{
+  const dir=await mkdtemp(path.join(tmpdir(),'glow-id-whitelist-'));
+  const file=path.join(dir,'identity.json');
+  try{
+    await writeFile(file,JSON.stringify({contract:'GLOW_ASSEMBLY_IDENTITY_V1',assembly_id:'test',operator_token:'private-value',customer_truth:{secret:'private-value'}}));
+    const out=loadRuntimeIdentity({GLOW_RUNTIME_IDENTITY_PATH:file});
+    assert.equal(JSON.stringify(out).includes('private-value'),false);
+    assert.equal((out.assembly as any).assembly_id,'test');
+  }finally{await rm(dir,{recursive:true,force:true});}
+});
