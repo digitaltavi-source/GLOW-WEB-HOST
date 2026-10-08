@@ -15,9 +15,9 @@ import { classifyWorkResponse } from "./work-response.js";
 import { buildProtectedResourceMetadata } from "./resource-metadata.js";
 import { createGlowMcpExpressApp } from "./mcp-app.js";
 import { NextFactoryControlInputSchema } from "./next-factory-schema.js";
-import {PHASE_ACCEPTANCE_SCOPE,PHASE_ACCEPTANCE_MISSION_PATTERN,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,phaseAcceptanceAuthorityStatus,validateAcceptanceBytes} from './phase-acceptance.js';
+import {PHASE_ACCEPTANCE_SCOPE,PHASE_ACCEPTANCE_MISSION_PATTERN,toolOAuthMetadata,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,phaseAcceptanceAuthorityStatus,validateAcceptanceBytes} from './phase-acceptance.js';
 
-const HOST_ADAPTER_REVISION = "0.3.3-v2-portable-acceptance-schema-candidate";
+const HOST_ADAPTER_REVISION = "0.3.4-v2-wire-scope-metadata-candidate";
 const HOST_CONTRACT_ID = "GWF_NEXT_FACTORY_ACTIVE_DEMO_CANDIDATE_V2";
 const config = loadConfig();
 const configuredMcpServerUrl = new URL(process.env.GLOW_PUBLIC_MCP_URL ?? `http://127.0.0.1:${config.port}/mcp`);
@@ -459,7 +459,7 @@ const buildServer: McpServerFactory = ctx => {
     title:'Prepare an exact V2 phase approval',
     description:'Read-only validation and exact JSON/hash preparation for H1/H2/H3 review. Does not approve, advance or grant authority. Present the proposed content for explicit user approval, then pass the unchanged returned JSON/hash to acceptance.',
     annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false},
-    ...(toolSecuritySchemes?{securitySchemes:toolSecuritySchemes}:{}),
+    ...(toolSecuritySchemes?toolOAuthMetadata(requiredScopes):{}),
     inputSchema:z.object({mission_id:z.string().regex(PHASE_ACCEPTANCE_MISSION_PATTERN).max(128),expected_state_version:z.number().int().min(1),phase:z.enum(['H1','H2','H3']),payload:z.record(z.string(),z.unknown()),locale:z.string().min(2).max(32).default('vi-VN')}).strict()
   },async input=>{
     try{
@@ -471,7 +471,7 @@ const buildServer: McpServerFactory = ctx => {
     title:'Accept a bound V2 phase',
     description:'Accept H1/H2/H3 only with verified OAuth web.accept authority. Requires explicit approval of the exact payload JSON/hash and mission/state version. Never invent authority, reset missions, or use role labels. Reuse request_id only for the identical approval; reconcile UNKNOWN_OUTCOME instead of blindly retrying.',
     annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false},
-    ...(authMode==='oauth'?{securitySchemes:[{type:'oauth2' as const,scopes:[...new Set([...requiredScopes,PHASE_ACCEPTANCE_SCOPE])]}]}:{}),
+    ...(authMode==='oauth'?toolOAuthMetadata([...requiredScopes,PHASE_ACCEPTANCE_SCOPE]):{}),
     inputSchema:z.object({request_id:z.string().min(1).max(128),mission_id:z.string().regex(PHASE_ACCEPTANCE_MISSION_PATTERN).max(128),expected_state_version:z.number().int().min(1),phase:z.enum(['H1','H2','H3']),payload_json:z.string().min(2).max(1024*1024),payload_sha256:z.string().regex(/^[0-9a-f]{64}$/),locale:z.string().min(2).max(32).default('vi-VN')}).strict()
   },async input=>{
     try{

@@ -2,11 +2,16 @@ import {createHash} from 'node:crypto';
 
 export const PHASE_ACCEPTANCE_SCOPE='web.accept';
 export const PHASE_ACCEPTANCE_MISSION_PATTERN=/^NM-[a-f0-9]{12}$/;
+export function toolOAuthMetadata(scopes:string[]){
+  const securitySchemes=[{type:'oauth2' as const,scopes:[...new Set(scopes)]}];
+  // SDK v2 preserves _meta in tools/list; unknown top-level config keys may drop.
+  return {securitySchemes,_meta:{securitySchemes}};
+}
 export function phaseAcceptanceAuthChallenge(code:string,metadataUrl:string){
   if(!['OPERATOR_ACCEPTANCE_SCOPE_REQUIRED','OPERATOR_AUTHORITY_EXPIRED'].includes(code))return null;
   const resource=new URL(metadataUrl).toString();
   const error=code==='OPERATOR_AUTHORITY_EXPIRED'?'invalid_token':'insufficient_scope';
-  return { 'mcp/www_authenticate':[`Bearer resource_metadata="${resource}", error="${error}", scope="web.run web.accept"`] };
+  return { 'mcp/www_authenticate':[`Bearer resource_metadata="${resource}", error="${error}", error_description="GLOW Web phase acceptance requires web.accept authorization", scope="web.run web.accept"`] };
 }
 export type AcceptanceAuth={scopes:string[];expiresAt?:number;extra?:Record<string,unknown>};
 export function phaseAcceptanceAuthorityStatus(auth:AcceptanceAuth|undefined,now=Date.now()/1000){

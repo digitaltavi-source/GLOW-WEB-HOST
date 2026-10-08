@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {PHASE_ACCEPTANCE_MISSION_PATTERN,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,phaseAcceptanceAuthorityStatus,validateAcceptanceBytes} from '../src/phase-acceptance.js';
+import {PHASE_ACCEPTANCE_MISSION_PATTERN,toolOAuthMetadata,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,phaseAcceptanceAuthorityStatus,validateAcceptanceBytes} from '../src/phase-acceptance.js';
+import {McpServer,createMcpHandler} from '@modelcontextprotocol/server';
 import * as z from 'zod/v4';
 import {createServer} from 'node:http';
 import {generateKeyPair,exportJWK,SignJWT} from 'jose';
@@ -47,7 +48,27 @@ test('missing scope triggers OAuth step-up but missing RBAC does not loop login'
   const challenge=phaseAcceptanceAuthChallenge('OPERATOR_ACCEPTANCE_SCOPE_REQUIRED',metadata);
   assert.match(challenge!['mcp/www_authenticate'][0]!,/error="insufficient_scope"/);
   assert.match(challenge!['mcp/www_authenticate'][0]!,/scope="web.run web.accept"/);
+  assert.match(challenge!['mcp/www_authenticate'][0]!,/error_description=/);
   assert.equal(phaseAcceptanceAuthChallenge('OPERATOR_RBAC_PERMISSION_REQUIRED',metadata),null);
+});
+test('actual SDK tools/list preserves separate read and acceptance scope metadata',async t=>{
+  const handler=createMcpHandler(()=>{
+    const server=new McpServer({name:'scope-wire-test',version:'1'});
+    server.registerTool('prepare',{inputSchema:z.object({}),...toolOAuthMetadata(['web.run'])},async()=>({content:[]}));
+    server.registerTool('accept',{inputSchema:z.object({}),...toolOAuthMetadata(['web.run','web.accept'])},async()=>({content:[]}));
+    return server;
+  });
+  t.after(()=>handler.close());
+  const response=await handler.fetch(new Request('https://glow.test/mcp',{
+    method:'POST',headers:{'content-type':'application/json',accept:'application/json, text/event-stream','mcp-protocol-version':'2025-11-25'},
+    body:JSON.stringify({jsonrpc:'2.0',id:1,method:'tools/list'})
+  }));
+  assert.equal(response.status,200);
+  const raw=await response.text();
+  const packet=JSON.parse(raw.startsWith('data:')||raw.startsWith('event:')?raw.split('\n').find(line=>line.startsWith('data:'))!.slice(5):raw);
+  const tools=packet.result.tools as Array<{name:string;_meta:{securitySchemes:Array<{type:string;scopes:string[]}>}}>;
+  assert.deepEqual(tools.find(tool=>tool.name==='accept')!._meta.securitySchemes,[{type:'oauth2',scopes:['web.run','web.accept']}]);
+  assert.deepEqual(tools.find(tool=>tool.name==='prepare')!._meta.securitySchemes,[{type:'oauth2',scopes:['web.run']}]);
 });
 test('exact payload bytes are bound, including whitespace and Unicode',()=>{
   const raw='{"mission_truth":{"business_outcome":"Khách hàng thật"}}';
