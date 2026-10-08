@@ -1,6 +1,7 @@
 import {createHash} from 'node:crypto';
 
 export const PHASE_ACCEPTANCE_SCOPE='web.accept';
+export const PHASE_ACCEPTANCE_MISSION_PATTERN=/^NM-[a-f0-9]{12}$/;
 export function phaseAcceptanceAuthChallenge(code:string,metadataUrl:string){
   if(!['OPERATOR_ACCEPTANCE_SCOPE_REQUIRED','OPERATOR_AUTHORITY_EXPIRED'].includes(code))return null;
   const resource=new URL(metadataUrl).toString();

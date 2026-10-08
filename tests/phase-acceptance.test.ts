@@ -1,11 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {phaseAcceptanceActor,phaseAcceptanceAuthChallenge,validateAcceptanceBytes} from '../src/phase-acceptance.js';
+import {PHASE_ACCEPTANCE_MISSION_PATTERN,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,validateAcceptanceBytes} from '../src/phase-acceptance.js';
+import * as z from 'zod/v4';
 import {createServer} from 'node:http';
 import {generateKeyPair,exportJWK,SignJWT} from 'jose';
 import {createJwtVerifier} from '../src/oauth.js';
 const auth={scopes:['web.run','web.accept'],expiresAt:200,extra:{sub:'operator-1',iss:'https://issuer.test/',authentication:'JWT_VERIFIED',operator_acceptance_granted:true}};
+test('published mission schema accepts real IDs in full-match connector validators',()=>{
+  const schema=z.toJSONSchema(z.string().regex(PHASE_ACCEPTANCE_MISSION_PATTERN));
+  if(typeof schema.pattern!=='string')throw Error('EXPORTED_PATTERN_REQUIRED');
+  const consumer=new RegExp('^(?:'+schema.pattern+')$');
+  assert.equal(consumer.test('NM-c4ca97029aa2'),true);
+  assert.equal(consumer.test('NM-000000000000'),true);
+  assert.equal(consumer.test('NM-'),false);
+  assert.equal(consumer.test('NM-c4ca97029aa2-suffix'),false);
+});
 test('acceptance identity is verified issuer/subject with bounded expiry',()=>{
   assert.equal(phaseAcceptanceActor(auth,100).actor_id,'https://issuer.test/#operator-1');
   assert.equal(phaseAcceptanceActor(auth,100).expires_at,200);
