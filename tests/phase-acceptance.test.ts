@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {phaseAcceptanceActor,validateAcceptanceBytes} from '../src/phase-acceptance.js';
+import {phaseAcceptanceActor,phaseAcceptanceAuthChallenge,validateAcceptanceBytes} from '../src/phase-acceptance.js';
 import {createServer} from 'node:http';
 import {generateKeyPair,exportJWK,SignJWT} from 'jose';
 import {createJwtVerifier} from '../src/oauth.js';
@@ -20,6 +20,13 @@ test('expired and missing expiry credentials fail before execution',()=>{
 });
 test('requested scope without administrator RBAC grant cannot escalate',()=>{
   assert.throws(()=>phaseAcceptanceActor({...auth,extra:{...auth.extra,operator_acceptance_granted:false}},100),/RBAC_PERMISSION_REQUIRED/);
+});
+test('missing scope triggers OAuth step-up but missing RBAC does not loop login',()=>{
+  const metadata='https://glow.test/.well-known/oauth-protected-resource/mcp-v2';
+  const challenge=phaseAcceptanceAuthChallenge('OPERATOR_ACCEPTANCE_SCOPE_REQUIRED',metadata);
+  assert.match(challenge!['mcp/www_authenticate'][0]!,/error="insufficient_scope"/);
+  assert.match(challenge!['mcp/www_authenticate'][0]!,/scope="web.run web.accept"/);
+  assert.equal(phaseAcceptanceAuthChallenge('OPERATOR_RBAC_PERMISSION_REQUIRED',metadata),null);
 });
 test('exact payload bytes are bound, including whitespace and Unicode',()=>{
   const raw='{"mission_truth":{"business_outcome":"Khách hàng thật"}}';

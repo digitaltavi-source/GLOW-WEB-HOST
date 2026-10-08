@@ -1,6 +1,12 @@
 import {createHash} from 'node:crypto';
 
 export const PHASE_ACCEPTANCE_SCOPE='web.accept';
+export function phaseAcceptanceAuthChallenge(code:string,metadataUrl:string){
+  if(!['OPERATOR_ACCEPTANCE_SCOPE_REQUIRED','OPERATOR_AUTHORITY_EXPIRED'].includes(code))return null;
+  const resource=new URL(metadataUrl).toString();
+  const error=code==='OPERATOR_AUTHORITY_EXPIRED'?'invalid_token':'insufficient_scope';
+  return { 'mcp/www_authenticate':[`Bearer resource_metadata="${resource}", error="${error}", scope="web.run web.accept"`] };
+}
 export type AcceptanceAuth={scopes:string[];expiresAt?:number;extra?:Record<string,unknown>};
 export function phaseAcceptanceActor(auth:AcceptanceAuth|undefined,now=Date.now()/1000){
   if(!auth||auth.extra?.authentication!=='JWT_VERIFIED'||typeof auth.extra.sub!=='string'||!auth.extra.sub||typeof auth.extra.iss!=='string'||!auth.extra.iss)throw Error('OPERATOR_OAUTH_IDENTITY_REQUIRED');

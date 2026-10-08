@@ -15,7 +15,7 @@ import { classifyWorkResponse } from "./work-response.js";
 import { buildProtectedResourceMetadata } from "./resource-metadata.js";
 import { createGlowMcpExpressApp } from "./mcp-app.js";
 import { NextFactoryControlInputSchema } from "./next-factory-schema.js";
-import {PHASE_ACCEPTANCE_SCOPE,phaseAcceptanceActor,validateAcceptanceBytes} from './phase-acceptance.js';
+import {PHASE_ACCEPTANCE_SCOPE,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,validateAcceptanceBytes} from './phase-acceptance.js';
 
 const HOST_ADAPTER_REVISION = "0.3.2-v2-scoped-phase-acceptance-candidate";
 const HOST_CONTRACT_ID = "GWF_NEXT_FACTORY_ACTIVE_DEMO_CANDIDATE_V2";
@@ -481,7 +481,11 @@ const buildServer: McpServerFactory = ctx => {
       const {request_id,locale,...args}=input;
       const request=WebRequest.parse({request_id,operation:'next_factory_control',role:'unspecified',locale,input:{action:'accept_phase',args}});
       return toolResult(await callProtectedOperator(config,subject,request,actor) as unknown as Record<string,unknown>);
-    }catch(error){return toolError(error instanceof Error?error.message:'PHASE_ACCEPTANCE_FAILED');}
+    }catch(error){
+      const code=error instanceof Error?error.message:'PHASE_ACCEPTANCE_FAILED';
+      const challenge=phaseAcceptanceAuthChallenge(code,resourceMetadataV2Url);
+      return {...toolError(code),...(challenge?{_meta:challenge}:{})};
+    }
   });
   return server;
 };
