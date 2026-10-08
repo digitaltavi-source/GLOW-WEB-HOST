@@ -17,7 +17,7 @@ import { createGlowMcpExpressApp } from "./mcp-app.js";
 import { NextFactoryControlInputSchema } from "./next-factory-schema.js";
 import {PHASE_ACCEPTANCE_SCOPE,PHASE_ACCEPTANCE_MISSION_PATTERN,toolOAuthMetadata,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,phaseAcceptanceAuthorityStatus,validateAcceptanceBytes} from './phase-acceptance.js';
 
-const HOST_ADAPTER_REVISION = "0.3.4-v2-wire-scope-metadata-candidate";
+const HOST_ADAPTER_REVISION = "0.3.5-v2-readonly-operator-preflight-candidate";
 const HOST_CONTRACT_ID = "GWF_NEXT_FACTORY_ACTIVE_DEMO_CANDIDATE_V2";
 const config = loadConfig();
 const configuredMcpServerUrl = new URL(process.env.GLOW_PUBLIC_MCP_URL ?? `http://127.0.0.1:${config.port}/mcp`);
@@ -457,15 +457,21 @@ const buildServer: McpServerFactory = ctx => {
 
   server.registerTool('glow_prepare_phase_acceptance',{
     title:'Prepare an exact V2 phase approval',
-    description:'Read-only validation and exact JSON/hash preparation for H1/H2/H3 review. Does not approve, advance or grant authority. Present the proposed content for explicit user approval, then pass the unchanged returned JSON/hash to acceptance.',
+    description:'Read-only operator authorization preflight, validation and exact JSON/hash preparation for H1/H2/H3 review. Requires verified OAuth web.accept authority and triggers scope authorization before review. Does not approve, advance or grant authority. Present the proposed content for explicit user approval, then pass the unchanged returned JSON/hash to acceptance.',
     annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false},
-    ...(toolSecuritySchemes?toolOAuthMetadata(requiredScopes):{}),
+    ...(authMode==='oauth'?toolOAuthMetadata([...requiredScopes,PHASE_ACCEPTANCE_SCOPE]):{}),
     inputSchema:z.object({mission_id:z.string().regex(PHASE_ACCEPTANCE_MISSION_PATTERN).max(128),expected_state_version:z.number().int().min(1),phase:z.enum(['H1','H2','H3']),payload:z.record(z.string(),z.unknown()),locale:z.string().min(2).max(32).default('vi-VN')}).strict()
   },async input=>{
     try{
+      if(authMode!=='oauth')throw Error('OPERATOR_OAUTH_ONLY_REQUIRED');
+      phaseAcceptanceActor(ctx.authInfo);
       const {locale,...args}=input;
       return toolResult(await invoke(ctx,'next_factory_control','unspecified',locale,{action:'prepare_phase_acceptance',args}) as unknown as Record<string,unknown>);
-    }catch(error){return toolError(error instanceof Error?error.message:'PHASE_ACCEPTANCE_PREPARATION_FAILED');}
+    }catch(error){
+      const code=error instanceof Error?error.message:'PHASE_ACCEPTANCE_PREPARATION_FAILED';
+      const challenge=phaseAcceptanceAuthChallenge(code,resourceMetadataV2Url);
+      return {...toolError(code),...(challenge?{_meta:challenge}:{})};
+    }
   });
   server.registerTool('glow_next_factory_accept_phase',{
     title:'Accept a bound V2 phase',
