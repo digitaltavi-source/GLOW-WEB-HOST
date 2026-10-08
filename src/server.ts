@@ -16,8 +16,8 @@ import { buildProtectedResourceMetadata } from "./resource-metadata.js";
 import { createGlowMcpExpressApp } from "./mcp-app.js";
 import { NextFactoryControlInputSchema } from "./next-factory-schema.js";
 
-const HOST_ADAPTER_REVISION = "0.3.0-gateway-trust-candidate";
-const HOST_CONTRACT_ID = "RC4_FULL_WORK_LOOP_PERSISTENT_V1";
+const HOST_ADAPTER_REVISION = "0.3.1-v2-authority-routing-candidate";
+const HOST_CONTRACT_ID = "GWF_NEXT_FACTORY_ACTIVE_DEMO_CANDIDATE_V2";
 const config = loadConfig();
 const configuredMcpServerUrl = new URL(process.env.GLOW_PUBLIC_MCP_URL ?? `http://127.0.0.1:${config.port}/mcp`);
 const configuredAuthMode = (process.env.GLOW_AUTH_MODE?.trim() || "static_bearer").toLowerCase();
@@ -115,7 +115,9 @@ const buildServer: McpServerFactory = ctx => {
       product: "GLOW Web",
       version: HOST_ADAPTER_REVISION,
       contract_id: HOST_CONTRACT_ID,
-      status: "CHATGPT_FULL_WORK_LOOP_PERSISTENCE_VERIFIED_CANDIDATE",
+      status: "NEXT_FACTORY_V2_BOUNDED_DEMO_CANDIDATE_NOT_PRODUCTION_QUALIFIED",
+      legacy_contract_id: "RC4_FULL_WORK_LOOP_PERSISTENT_V1",
+      legacy_route_is_next_factory_authority: false,
       next_factory_demo: "DEMO_BOUNDED_CONNECTED_CANDIDATE",
       next_factory_production_fork: "BLOCKED_HARD_ADMISSION_REQUIRED"
     })
