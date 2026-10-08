@@ -9,6 +9,12 @@ export function phaseAcceptanceAuthChallenge(code:string,metadataUrl:string){
   return { 'mcp/www_authenticate':[`Bearer resource_metadata="${resource}", error="${error}", scope="web.run web.accept"`] };
 }
 export type AcceptanceAuth={scopes:string[];expiresAt?:number;extra?:Record<string,unknown>};
+export function phaseAcceptanceAuthorityStatus(auth:AcceptanceAuth|undefined,now=Date.now()/1000){
+  let code='ELIGIBLE_FOR_SCOPED_PHASE_ACCEPTANCE';
+  try{phaseAcceptanceActor(auth,now);}catch(error){code=error instanceof Error?error.message:'OPERATOR_AUTHORITY_INVALID';}
+  const verified=auth?.extra?.authentication==='JWT_VERIFIED';
+  return {verified_oauth:verified,token_has_acceptance_scope:verified&&Boolean(auth?.scopes.includes(PHASE_ACCEPTANCE_SCOPE)),token_has_rbac_permission:verified&&auth?.extra?.operator_acceptance_granted===true,eligible:code==='ELIGIBLE_FOR_SCOPED_PHASE_ACCEPTANCE',code};
+}
 export function phaseAcceptanceActor(auth:AcceptanceAuth|undefined,now=Date.now()/1000){
   if(!auth||auth.extra?.authentication!=='JWT_VERIFIED'||typeof auth.extra.sub!=='string'||!auth.extra.sub||typeof auth.extra.iss!=='string'||!auth.extra.iss)throw Error('OPERATOR_OAUTH_IDENTITY_REQUIRED');
   if(!auth.scopes.includes('web.run')||!auth.scopes.includes(PHASE_ACCEPTANCE_SCOPE))throw Error('OPERATOR_ACCEPTANCE_SCOPE_REQUIRED');

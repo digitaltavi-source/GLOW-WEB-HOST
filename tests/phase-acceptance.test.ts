@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {PHASE_ACCEPTANCE_MISSION_PATTERN,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,validateAcceptanceBytes} from '../src/phase-acceptance.js';
+import {PHASE_ACCEPTANCE_MISSION_PATTERN,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,phaseAcceptanceAuthorityStatus,validateAcceptanceBytes} from '../src/phase-acceptance.js';
 import * as z from 'zod/v4';
 import {createServer} from 'node:http';
 import {generateKeyPair,exportJWK,SignJWT} from 'jose';
@@ -19,6 +19,17 @@ test('published mission schema accepts real IDs in full-match connector validato
 test('acceptance identity is verified issuer/subject with bounded expiry',()=>{
   assert.equal(phaseAcceptanceActor(auth,100).actor_id,'https://issuer.test/#operator-1');
   assert.equal(phaseAcceptanceActor(auth,100).expires_at,200);
+});
+test('read-only connection diagnostics distinguish scope, permission and expiry without secrets',()=>{
+  assert.equal(phaseAcceptanceAuthorityStatus(auth,100).eligible,true);
+  const narrow=phaseAcceptanceAuthorityStatus({...auth,scopes:['web.run']},100);
+  assert.equal(narrow.token_has_rbac_permission,true);
+  assert.equal(narrow.token_has_acceptance_scope,false);
+  assert.equal(narrow.code,'OPERATOR_ACCEPTANCE_SCOPE_REQUIRED');
+  assert.equal(phaseAcceptanceAuthorityStatus({...auth,extra:{...auth.extra,operator_acceptance_granted:false}},100).code,'OPERATOR_RBAC_PERMISSION_REQUIRED');
+  assert.equal(phaseAcceptanceAuthorityStatus(auth,200).eligible,false);
+  assert.equal('actor_id' in narrow,false);
+  assert.equal('token' in narrow,false);
 });
 test('role labels and general web scope cannot grant acceptance',()=>{
   assert.throws(()=>phaseAcceptanceActor({...auth,scopes:['web.run'],extra:{...auth.extra,role:'operator'}},100),/SCOPE_REQUIRED/);

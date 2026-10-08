@@ -15,7 +15,7 @@ import { classifyWorkResponse } from "./work-response.js";
 import { buildProtectedResourceMetadata } from "./resource-metadata.js";
 import { createGlowMcpExpressApp } from "./mcp-app.js";
 import { NextFactoryControlInputSchema } from "./next-factory-schema.js";
-import {PHASE_ACCEPTANCE_SCOPE,PHASE_ACCEPTANCE_MISSION_PATTERN,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,validateAcceptanceBytes} from './phase-acceptance.js';
+import {PHASE_ACCEPTANCE_SCOPE,PHASE_ACCEPTANCE_MISSION_PATTERN,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,phaseAcceptanceAuthorityStatus,validateAcceptanceBytes} from './phase-acceptance.js';
 
 const HOST_ADAPTER_REVISION = "0.3.3-v2-portable-acceptance-schema-candidate";
 const HOST_CONTRACT_ID = "GWF_NEXT_FACTORY_ACTIVE_DEMO_CANDIDATE_V2";
@@ -120,6 +120,7 @@ const buildServer: McpServerFactory = ctx => {
       legacy_contract_id: "RC4_FULL_WORK_LOOP_PERSISTENT_V1",
       legacy_route_is_next_factory_authority: false,
       next_factory_demo: "DEMO_BOUNDED_CONNECTED_CANDIDATE",
+      current_connection_phase_acceptance: phaseAcceptanceAuthorityStatus(ctx.authInfo),
       next_factory_production_fork: "BLOCKED_HARD_ADMISSION_REQUIRED"
     })
   );
