@@ -1,38 +1,86 @@
-# GLOW Web Host — Repository Layout & Release Boundary
+# GLOW Web Host — Repository Layout
 
-Date: 2026-10-09
-Status: `SANDBOX_CANDIDATE / DOCUMENTATION_ONLY / NO_RUNTIME_CHANGE`
+This repository is the **public experience, trust and transport component** for the protected GLOW Web Factory. It is intentionally separate from the private Factory repository.
 
-## Branch roles
-- `main`: canonical accepted public Host release source.
-- `sandbox`: engineering, contract, transport and public-experience candidate work.
+## Stable top-level structure
 
-## Source layout
-- `public/` — public website/workspace assets.
-- `src/` — public host transport/runtime implementation only.
-- `adapters/` — public-safe adapters; no protected Factory implementation.
-- `contracts/` — public schemas/contracts.
-- `tests/` — public Host tests and boundary checks.
-- root public documentation — role, security, deployment and integration contracts.
+```text
+GLOW-WEB-HOST/
+├── README.md
+├── SECURITY_BOUNDARY.md
+├── PUBLIC_EXPERIENCE_CONTRACT.md
+├── PUBLIC_TRUST_CENTER_CONTRACT.md
+├── PUBLIC_EXPORT_MANIFEST.json
+├── PUBLIC_HOST_CONTRACT_EXPORT.json
+├── PUBLIC_AI_HOST_INTEGRATION_GUIDE.md
+├── OPERATOR_GATEWAY.md
+├── HOSTINGER_PUBLIC_NODE_DEPLOYMENT_PROFILE_v0.1.0.json
+├── REPOSITORY_LAYOUT.md
+├── package.json
+├── package-lock.json
+├── tsconfig.json
+├── src/
+├── public/
+├── adapters/
+├── contracts/
+├── tests/
+└── scripts/
+```
 
-## Non-negotiable boundary
+## Why selected documents remain at root
 
-The public repository must remain reconstructable without becoming a mirror of the private Factory. Protected Factory code and evidence are referenced by explicit contracts/immutable package identity at assembly time, never copied into this source tree merely for convenience.
+Several public contracts and deployment documents remain top-level by design because current export/deployment contracts reference their exact paths. Moving them only for cosmetic organization would become a runtime/build-contract refactor and is outside repository-hygiene scope.
 
-## Current normalization scope
+The rule is:
 
-This candidate only clarifies Host responsibility and adds the Trust Center contract. It does not modify `src/**`, `public/**`, adapters, OAuth behavior, MCP behavior, package dependencies, Hostinger settings or the currently pinned Host component SHA used by the private Factory assembly.
+`PATH_STABILITY > COSMETIC_RENAMING`
 
-Preservation anchor before this documentation change: `sandbox@d87309dbaab784fc35c152b245c38d56a8ab9d4a`.
+until an evidence-backed migration explicitly updates all consumers and regression proves parity.
 
-## Promotion gate
+## Directory ownership
 
-Before public Host `sandbox` can be promoted to `main`:
-1. verify exact diff and source identity;
-2. run current Host regression/security/declassification checks;
-3. prove no protected Factory content leaked into public source;
-4. bind the accepted exact Host SHA in the Factory assembly;
-5. rerun affected combined assembly/runtime verification;
-6. promote/deploy only under separate release authority.
+- `public/` — declassified customer/recruiter/partner-facing web experience.
+- `src/` — public Host implementation: HTTP/MCP/OAuth/declassification and bounded gateway behavior.
+- `contracts/` — public schemas and versioned Host/Factory interaction contracts.
+- `adapters/` — public-safe integration adapters only.
+- `tests/` — Host behavior and contract regressions.
+- `scripts/` — build/release verification helpers for this public component.
 
-Claim ceiling: `PUBLIC_HOST_LAYOUT_CANDIDATE / NO_RUNTIME_CHANGE / NOT_PROMOTED / NOT_DEPLOYED`.
+## Root-document ownership
+
+- `README.md` — entry point and current public role.
+- `SECURITY_BOUNDARY.md` — public/private trust boundary.
+- `PUBLIC_EXPERIENCE_CONTRACT.md` — customer/workspace experience ownership.
+- `PUBLIC_TRUST_CENTER_CONTRACT.md` — recruiter/partner/reviewer trust surface.
+- `PUBLIC_EXPORT_MANIFEST.json` — exact public export allow/deny policy.
+- `PUBLIC_HOST_CONTRACT_EXPORT.json` — public Host contract export.
+- `PUBLIC_AI_HOST_INTEGRATION_GUIDE.md` — AI-host connection guidance.
+- `OPERATOR_GATEWAY.md` — bounded operator-channel documentation.
+- `HOSTINGER_PUBLIC_NODE_DEPLOYMENT_PROFILE_v0.1.0.json` — public Node deployment profile.
+
+## What must never be copied here
+
+- private Factory source;
+- Factory Control internals;
+- KIT or Capability implementation;
+- proprietary production methods;
+- private evidence or qualification material;
+- credentials, tokens or private runtime state;
+- confidential prompts or internal evaluation rules.
+
+See `SECURITY_BOUNDARY.md` and `PUBLIC_EXPORT_MANIFEST.json` for the enforceable boundary.
+
+## Branch discipline
+
+- `main` — canonical public release line.
+- `sandbox` — public Host candidate/development line.
+
+A Factory assembly may pin an exact immutable Host SHA. Branch names do not replace exact component identity.
+
+## Hygiene rule
+
+Do not introduce one-off logs, private handoffs, Factory evidence dumps, temporary patches or duplicate preservation trees at repository root. Keep this repo public-product oriented and move experimental material to `sandbox`-only bounded locations when required.
+
+Current documentation normalization is structure-only. It does not change `src/**`, `public/**`, adapters, OAuth/MCP behavior, package dependencies, Hostinger settings or the currently pinned Host component used by the private Factory assembly.
+
+`PUBLIC HOST != PROTECTED FACTORY`
