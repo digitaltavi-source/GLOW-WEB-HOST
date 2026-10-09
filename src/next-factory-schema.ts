@@ -3,6 +3,20 @@ import {H1PhaseSchema,H2PhaseSchema,H3PhaseSchema} from './phase-schema.js';
 
 export const NextFactoryControlInputSchema = z.discriminatedUnion("action",[
         z.object({
+          action:z.literal("get_preproduction_capability_plan"),
+          args:z.object({mission_id:z.string().min(1).max(128),expected_state_version:z.number().int().min(1),blueprint_revision:z.number().int().min(1)}).strict(),
+          role:z.enum(["client","operator","unspecified"]).default("unspecified"),
+          locale:z.string().min(2).max(32).default("vi-VN")
+        }),
+        z.object({
+          action:z.literal("record_preproduction_capability_contribution"),
+          args:z.object({mission_id:z.string().min(1).max(128),expected_state_version:z.number().int().min(1),blueprint_revision:z.number().int().min(1),
+            phase_work_id:z.string().min(1).max(128),capability_id:z.string().min(1).max(128),contribution_result:z.record(z.string(),z.unknown()),
+            evidence_refs:z.array(z.string().min(1)).min(1)}).strict(),
+          role:z.enum(["client","operator","unspecified"]).default("unspecified"),
+          locale:z.string().min(2).max(32).default("vi-VN")
+        }),
+        z.object({
           action:z.literal("create_mission"),
           args:z.object({
             mission_input:z.object({

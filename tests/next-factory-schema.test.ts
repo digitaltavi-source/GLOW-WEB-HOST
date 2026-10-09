@@ -96,3 +96,14 @@ test('thin H2 packet and inflated assurance claim are rejected',()=>{
   assert.equal(NextFactoryControlInputSchema.safeParse({action:'submit_phase',args:{mission_id:'NM-test',expected_state_version:1,phase:'H2',payload:{blueprint_revision:1,product_decomposition:{},system_blueprint:{}}},...base}).success,false);
   assert.equal(NextFactoryControlInputSchema.safeParse({action:'submit_system_assurance',args:{mission_id:'NM-test',expected_state_version:1,report:{integrated_artifact_sha256:'d'.repeat(64),claim_limit:'FIELD_VERIFIED'}},...base}).success,false);
 });
+
+test("H2 preproduction capability plan has exact state and revision binding",()=>{
+  const args={mission_id:"NM-test",expected_state_version:2,blueprint_revision:1};
+  assert.equal(NextFactoryControlInputSchema.safeParse({action:"get_preproduction_capability_plan",args,...base}).success,true);
+  assert.equal(NextFactoryControlInputSchema.safeParse({action:"get_preproduction_capability_plan",args:{...args,blueprint_revision:true},...base}).success,false);
+});
+test("H2 contribution cannot use a production work_item binding",()=>{
+  const args={mission_id:"NM-test",expected_state_version:2,blueprint_revision:1,phase_work_id:"NPW-test",capability_id:"CAP.WEB.ART_DIRECTION",contribution_result:{},evidence_refs:["GE-test"]};
+  assert.equal(NextFactoryControlInputSchema.safeParse({action:"record_preproduction_capability_contribution",args,...base}).success,true);
+  assert.equal(NextFactoryControlInputSchema.safeParse({action:"record_preproduction_capability_contribution",args:{...args,work_item_id:"forged"},...base}).success,false);
+});

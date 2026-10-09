@@ -30,11 +30,12 @@
         "do_not_reinterpret": "array",
         "reopen_triggers": "array",
         "decision_owner": "string",
-        "decision": "string"
+        "decision": "string",
+        "design_material": "boolean",
+        "capability_coverage": "array"
       },
       "optional": {
         "authority_receipt": "object",
-        "design_material": "boolean",
         "design_contract": "object",
         "generative_media_material": "boolean",
         "media_plan": "object"
@@ -65,4 +66,3 @@
     }
   }
 }
-
