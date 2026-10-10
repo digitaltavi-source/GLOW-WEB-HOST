@@ -21,6 +21,20 @@ The Host may publish declassified summaries of:
 - human approval/release responsibilities;
 - collaboration and integration model.
 
+## Runtime authorization diagnostics
+
+OAuth authorization for GLOW Web is **tool-scoped**. A read-only public/profile invocation may carry only the scopes needed for that tool, while an acceptance tool may trigger a separate step-up authorization for `web.accept`.
+
+Therefore:
+
+`PROFILE_REQUEST_TOKEN_SCOPE != GLOBAL_CONNECTION_AUTHORITY`
+
+`MISSING web.accept ON A READ-ONLY PROFILE CALL != ACCEPTANCE_TOOL_UNAVAILABLE`
+
+The authoritative field check for the acceptance lane is a **non-mutating** invocation of the acceptance-preparation tool. If that call passes OAuth/RBAC enforcement and reaches a Factory semantic validation error, the scoped authorization seam is operating for that invocation. This does not approve or advance a mission.
+
+Public status text must not convert a per-request token diagnostic into a connection-wide or production-readiness claim.
+
 ## Forbidden disclosures
 
 The Trust Center must not publish:
@@ -41,6 +55,8 @@ The Trust Center must not publish:
 `CAPABILITY SUMMARY != CAPABILITY IMPLEMENTATION`
 
 `QUALITY CLAIM != QUALIFICATION UNLESS THE REQUIRED EVIDENCE CLASS EXISTS`
+
+`READ-ONLY AUTH DIAGNOSTIC != PHASE ACCEPTANCE`
 
 ## Recommended public sections
 
