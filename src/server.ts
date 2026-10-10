@@ -11,13 +11,14 @@ import { loadOAuthConfig, loadStaticBearerConfig, createJwtVerifier, createStati
 import { callProtectedService, callProtectedOperator, checkProtectedReadiness } from "./backend.js";
 import { loadOperatorConfig, startOperatorGateway } from './operator-gateway.js';
 import { WebRequest } from "./contracts.js";
+import {EVIDENCE_ADMISSION_SCOPE,ArtifactAdmissionSchema,EvidenceAdmissionSchema,evidenceAdmissionStatus,evidenceAdmissionChallenge,createEvidenceAdmissionExecutor} from './evidence-admission.js';
 import { classifyWorkResponse } from "./work-response.js";
 import { buildProtectedResourceMetadata } from "./resource-metadata.js";
 import { createGlowMcpExpressApp } from "./mcp-app.js";
 import { NextFactoryControlInputSchema } from "./next-factory-schema.js";
 import {PHASE_ACCEPTANCE_SCOPE,PHASE_ACCEPTANCE_MISSION_PATTERN,toolOAuthMetadata,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,phaseAcceptanceAuthorityStatus,validateAcceptanceBytes} from './phase-acceptance.js';
 
-const HOST_ADAPTER_REVISION = "0.3.5-v2-readonly-operator-preflight-candidate";
+const HOST_ADAPTER_REVISION = "0.3.6-scoped-evidence-admission-candidate";
 const HOST_CONTRACT_ID = "GWF_NEXT_FACTORY_ACTIVE_DEMO_CANDIDATE_V2";
 const config = loadConfig();
 const configuredMcpServerUrl = new URL(process.env.GLOW_PUBLIC_MCP_URL ?? `http://127.0.0.1:${config.port}/mcp`);
@@ -95,6 +96,10 @@ async function invoke(
   return callProtectedService(config, subject, request);
 }
 
+const admitEvidence=createEvidenceAdmissionExecutor(
+ (subject,request)=>callProtectedService(config,subject,request),
+ (subject,request,actor)=>callProtectedOperator(config,subject,request,actor!)
+);
 const buildServer: McpServerFactory = ctx => {
   const server = new McpServer(
     { name: "glow-web", version: HOST_ADAPTER_REVISION },
@@ -121,6 +126,7 @@ const buildServer: McpServerFactory = ctx => {
       legacy_route_is_next_factory_authority: false,
       next_factory_demo: "DEMO_BOUNDED_CONNECTED_CANDIDATE",
       current_connection_phase_acceptance: phaseAcceptanceAuthorityStatus(ctx.authInfo),
+      current_request_evidence_admission: evidenceAdmissionStatus(ctx.authInfo),
       next_factory_production_fork: "BLOCKED_HARD_ADMISSION_REQUIRED"
     })
   );
@@ -494,12 +500,59 @@ const buildServer: McpServerFactory = ctx => {
       return {...toolError(code),...(challenge?{_meta:challenge}:{})};
     }
   });
+
+  server.registerTool('glow_evidence_admission_preflight',{
+    title:'Check evidence admission authority',
+    description:'Read-only check of this request token for dedicated evidence admission scope and RBAC. Does not register evidence, approve a phase or certify quality.',
+    annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false},
+    ...(authMode==='oauth'?toolOAuthMetadata([...requiredScopes,EVIDENCE_ADMISSION_SCOPE]):{}),
+    inputSchema:z.object({}).strict()
+  },async()=> {
+    const status=evidenceAdmissionStatus(ctx.authInfo);
+    const challenge=evidenceAdmissionChallenge(status.code,resourceMetadataV2Url);
+    return {...toolResult(status),...(challenge?{_meta:challenge}:{})};
+  });
+  server.registerTool('glow_register_factory_artifact',{
+    title:'Register actual H2 artifact bytes',
+    description:'Requires dedicated web.evidence.admit scope and RBAC. Upload actual bytes bound to the current mission/work/version. Returns identity only, not quality approval. Never upload dummy bytes or invent evidence.',
+    annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false},
+    ...(authMode==='oauth'?toolOAuthMetadata([...requiredScopes,EVIDENCE_ADMISSION_SCOPE]):{}),
+    inputSchema:ArtifactAdmissionSchema
+  },async args=>{
+    try{
+      if(authMode!=='oauth')throw Error('EVIDENCE_OAUTH_ONLY_REQUIRED');
+      const out=await admitEvidence(ctx.authInfo,{action:'register_artifact',args});
+      return {...toolResult(out as unknown as Record<string,unknown>),...(out.status==='failed'?{isError:true}:{})};
+    }catch(error){
+      const code=error instanceof Error?error.message:'ARTIFACT_ADMISSION_FAILED';
+      const challenge=evidenceAdmissionChallenge(code,resourceMetadataV2Url);
+      return {...toolError(code),...(challenge?{_meta:challenge}:{})};
+    }
+  });
+  server.registerTool('glow_register_factory_evidence',{
+    title:'Admit reviewed H2 evidence',
+    description:'Requires dedicated web.evidence.admit scope and RBAC. Registers CAPABILITY or ASSURANCE evidence for actual previously admitted bytes with exact H2 binding. Returns server-issued GE. Registration is operator attestation, not independent qualification or phase approval.',
+    annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false},
+    ...(authMode==='oauth'?toolOAuthMetadata([...requiredScopes,EVIDENCE_ADMISSION_SCOPE]):{}),
+    inputSchema:EvidenceAdmissionSchema
+  },async args=>{
+    try{
+      if(authMode!=='oauth')throw Error('EVIDENCE_OAUTH_ONLY_REQUIRED');
+      const out=await admitEvidence(ctx.authInfo,{action:'register_evidence',args});
+      return {...toolResult(out as unknown as Record<string,unknown>),...(out.status==='failed'?{isError:true}:{})};
+    }catch(error){
+      const code=error instanceof Error?error.message:'EVIDENCE_ADMISSION_FAILED';
+      const challenge=evidenceAdmissionChallenge(code,resourceMetadataV2Url);
+      return {...toolError(code),...(challenge?{_meta:challenge}:{})};
+    }
+  });
   return server;
 };
 
 const handler = createMcpHandler(buildServer);
 const app = createGlowMcpExpressApp(
-  (process.env.GLOW_ALLOWED_HOSTS ?? "localhost,127.0.0.1").split(",").map(v=>v.trim()).filter(Boolean)
+  (process.env.GLOW_ALLOWED_HOSTS ?? "localhost,127.0.0.1").split(",").map(v=>v.trim()).filter(Boolean),
+  "12mb"
 );
 
 const mcpServerUrl = configuredMcpServerUrl;
@@ -508,7 +561,7 @@ const resourceMetadata = buildProtectedResourceMetadata({
   resource:mcpServerUrl.toString(),
   authMode,
   oauthIssuer:authMode === "static_bearer" ? null : oauthConfig!.issuer,
-  scopes:[...new Set([...requiredScopes,PHASE_ACCEPTANCE_SCOPE])]
+  scopes:[...new Set([...requiredScopes,PHASE_ACCEPTANCE_SCOPE,EVIDENCE_ADMISSION_SCOPE])]
 });
 const auth = requireBearerAuth({
   verifier,
@@ -522,7 +575,7 @@ const resourceMetadataV2 = buildProtectedResourceMetadata({
   resource:mcpV2ServerUrl.toString(),
   authMode,
   oauthIssuer:authMode === "static_bearer" ? null : oauthConfig!.issuer,
-  scopes:[...new Set([...requiredScopes,PHASE_ACCEPTANCE_SCOPE])]
+  scopes:[...new Set([...requiredScopes,PHASE_ACCEPTANCE_SCOPE,EVIDENCE_ADMISSION_SCOPE])]
 });
 const authV2 = requireBearerAuth({
   verifier,
@@ -536,7 +589,7 @@ const resourceMetadataV3 = buildProtectedResourceMetadata({
   resource:mcpV3ServerUrl.toString(),
   authMode,
   oauthIssuer:authMode === "static_bearer" ? null : oauthConfig!.issuer,
-  scopes:[...new Set([...requiredScopes,PHASE_ACCEPTANCE_SCOPE])]
+  scopes:[...new Set([...requiredScopes,PHASE_ACCEPTANCE_SCOPE,EVIDENCE_ADMISSION_SCOPE])]
 });
 const authV3 = requireBearerAuth({
   verifier,
@@ -589,6 +642,31 @@ app.get("/app.css",(_req,res) => {
 
 app.get("/app.js",(_req,res) => {
   res.type("application/javascript").sendFile(path.join(publicDir,"app.js"));
+});
+
+
+app.get('/operator',(_req,res)=>{
+ res.set({'Cache-Control':'no-store','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://"+new URL(oauthConfig?.issuer||'https://localhost').host+"; object-src 'none'; frame-ancestors 'none'; base-uri 'none'",'Referrer-Policy':'no-referrer'});
+ res.type('html').sendFile(path.join(publicDir,'operator.html'));
+});
+app.get('/operator.js',(_req,res)=>res.type('application/javascript').sendFile(path.join(publicDir,'operator.js')));
+app.get('/operator.css',(_req,res)=>res.type('text/css').sendFile(path.join(publicDir,'operator.css')));
+app.get('/api/operator/config',(_req,res)=>{
+ const clientId=process.env.GLOW_OPERATOR_SPA_CLIENT_ID?.trim()||'';
+ res.set('Cache-Control','no-store').json({enabled:authMode==='oauth'&&Boolean(config.combinedRuntimeModule),login_configured:Boolean(clientId),issuer:oauthConfig?.issuer||null,audience:oauthConfig?.audience||null,client_id:clientId,redirect_uri:new URL('/operator',mcpServerUrl.origin).href,scope:'openid web.run '+EVIDENCE_ADMISSION_SCOPE});
+});
+const operatorHttpAuth=requireBearerAuth({verifier,requiredScopes:['web.run',EVIDENCE_ADMISSION_SCOPE],resourceMetadataUrl:resourceMetadataV2Url});
+app.post('/api/operator/admission',operatorHttpAuth,async(req,res)=>{
+ res.set('Cache-Control','no-store');
+ try{
+  if(authMode!=='oauth')throw Error('EVIDENCE_OAUTH_ONLY_REQUIRED');
+  if(req.headers.origin&&req.headers.origin!==mcpServerUrl.origin){res.status(403).json({error:'EVIDENCE_ORIGIN_FORBIDDEN'});return;}
+  const out=await admitEvidence(req.auth,req.body);
+  res.status(out.status==='failed'?422:200).json(out);
+ }catch(error){
+  const code=error instanceof z.ZodError?'EVIDENCE_INPUT_INVALID':error instanceof Error?error.message:'EVIDENCE_ADMISSION_FAILED';
+  res.status(code==='EVIDENCE_ADMISSION_RBAC_REQUIRED'?403:code==='EVIDENCE_ADMISSION_BACKPRESSURE'?429:code==='EVIDENCE_AUTHORITY_EXPIRED'?401:400).json({error:code});
+ }
 });
 
 app.get("/api/public/profile",(_req,res) => {

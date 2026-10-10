@@ -93,7 +93,7 @@ export function createJwtVerifier(config: OAuthConfig): OAuthTokenVerifier {
           clientId,
           scopes,
           expiresAt: exp,
-          extra: { sub: subject, iss: config.issuer, authentication: 'JWT_VERIFIED', operator_acceptance_granted: Array.isArray(payload.permissions) && payload.permissions.includes('web.accept') }
+          extra: { sub: subject, iss: config.issuer, authentication: 'JWT_VERIFIED', operator_acceptance_granted: Array.isArray(payload.permissions) && payload.permissions.includes('web.accept'), operator_evidence_admission_granted: Array.isArray(payload.permissions) && payload.permissions.includes('web.evidence.admit') }
         };
       } catch (error) {
         if (error instanceof OAuthError) throw error;
