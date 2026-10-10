@@ -485,7 +485,9 @@ app.get("/readyz", async (_req,res) => {
 
 app.all("/mcp-v2",authV2,(req,res)=>void node(req,res,req.body));
 
-if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
+// Hostinger imports its entrypoint; startup cannot depend on argv/main identity.
+// Only the explicitly isolated test fixture suppresses the network listener.
+if(process.env.NODE_ENV!=='test'||process.env.GLOW_HOST_INPROCESS_TEST!=='1'){
  app.listen(config.port,()=>{
   console.error(`GLOW Web public host listening on :${config.port}`);
 });
