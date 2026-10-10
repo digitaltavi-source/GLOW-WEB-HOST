@@ -18,7 +18,15 @@ export function phaseAcceptanceAuthorityStatus(auth:AcceptanceAuth|undefined,now
   let code='ELIGIBLE_FOR_SCOPED_PHASE_ACCEPTANCE';
   try{phaseAcceptanceActor(auth,now);}catch(error){code=error instanceof Error?error.message:'OPERATOR_AUTHORITY_INVALID';}
   const verified=auth?.extra?.authentication==='JWT_VERIFIED';
-  return {verified_oauth:verified,token_has_acceptance_scope:verified&&Boolean(auth?.scopes.includes(PHASE_ACCEPTANCE_SCOPE)),token_has_rbac_permission:verified&&auth?.extra?.operator_acceptance_granted===true,eligible:code==='ELIGIBLE_FOR_SCOPED_PHASE_ACCEPTANCE',code};
+  return {
+    diagnostic_scope:'CURRENT_TOOL_REQUEST_TOKEN' as const,
+    global_connection_authority_claimed:false,
+    verified_oauth:verified,
+    token_has_acceptance_scope:verified&&Boolean(auth?.scopes.includes(PHASE_ACCEPTANCE_SCOPE)),
+    token_has_rbac_permission:verified&&auth?.extra?.operator_acceptance_granted===true,
+    eligible:code==='ELIGIBLE_FOR_SCOPED_PHASE_ACCEPTANCE',
+    code
+  };
 }
 export function phaseAcceptanceActor(auth:AcceptanceAuth|undefined,now=Date.now()/1000){
   if(!auth||auth.extra?.authentication!=='JWT_VERIFIED'||typeof auth.extra.sub!=='string'||!auth.extra.sub||typeof auth.extra.iss!=='string'||!auth.extra.iss)throw Error('OPERATOR_OAUTH_IDENTITY_REQUIRED');
