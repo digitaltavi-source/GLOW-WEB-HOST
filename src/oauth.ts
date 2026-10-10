@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import { createRemoteJWKSet, jwtVerify } from "jose";
+import { createRemoteJWKSet, jwtVerify, customFetch } from "jose";
 import type { OAuthTokenVerifier } from "@modelcontextprotocol/express";
 import type { AuthInfo } from "@modelcontextprotocol/server";
 import { OAuthError, OAuthErrorCode } from "@modelcontextprotocol/server";
@@ -55,8 +55,8 @@ export function createStaticBearerVerifier(config: StaticBearerConfig): OAuthTok
   };
 }
 
-export function createJwtVerifier(config: OAuthConfig): OAuthTokenVerifier {
-  const jwks = createRemoteJWKSet(new URL(config.jwksUrl));
+export function createJwtVerifier(config: OAuthConfig, fetchImpl:typeof fetch=fetch): OAuthTokenVerifier {
+  const jwks = createRemoteJWKSet(new URL(config.jwksUrl),{[customFetch]:fetchImpl});
 
   return {
     async verifyAccessToken(token: string): Promise<AuthInfo> {

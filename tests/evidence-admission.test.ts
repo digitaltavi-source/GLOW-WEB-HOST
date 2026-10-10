@@ -74,11 +74,7 @@ test('assurance input is bounded H2; release/deployment and extra claims rejecte
 });
 test('signed JWT permission cannot be substituted with web.accept or role labels',async t=>{
  const {publicKey,privateKey}=await generateKeyPair('RS256');const jwk={...await exportJWK(publicKey),kid:'admission-test',alg:'RS256'};
- const http=createServer((_req,res)=>{res.setHeader('content-type','application/json');res.end(JSON.stringify({keys:[jwk]}));});
- await new Promise<void>(resolve=>http.listen(0,'127.0.0.1',resolve));
- t.after(()=>new Promise<void>((resolve,reject)=>http.close(err=>err?reject(err):resolve())));
- const address=http.address();if(!address||typeof address==='string')throw Error('TEST_LISTENER_REQUIRED');
- const verifier=createJwtVerifier({issuer:'https://issuer.test/',audience:'https://glow.test/mcp-v2',jwksUrl:`http://127.0.0.1:${address.port}/jwks`});
+ const verifier=createJwtVerifier({issuer:'https://issuer.test/',audience:'https://glow.test/mcp-v2',jwksUrl:'https://jwks.fixture/keys'},async()=>new Response(JSON.stringify({keys:[jwk]}),{headers:{'content-type':'application/json'}}));
  const sign=(permissions:string[])=>new SignJWT({scope:'web.run web.evidence.admit',permissions,role:'operator'}).setProtectedHeader({alg:'RS256',kid:jwk.kid}).setSubject('owner').setIssuer('https://issuer.test/').setAudience('https://glow.test/mcp-v2').setExpirationTime('5m').sign(privateKey);
  const denied=await verifier.verifyAccessToken(await sign(['web.accept']));assert.throws(()=>evidenceAdmissionActor(denied),/RBAC_REQUIRED/);
  const granted=await verifier.verifyAccessToken(await sign(['web.evidence.admit']));assert.equal(evidenceAdmissionActor(granted).actor_id,'https://issuer.test/#owner');

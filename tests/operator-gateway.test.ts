@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Readable} from 'node:stream';
 import {createServer,type IncomingMessage,type ServerResponse} from 'node:http';
-import type {AddressInfo} from 'node:net';
+import {fetchHttpHandler} from './http-fixture.js';
 import {authorizeOperator,createOperatorHandler,loadOperatorConfig,type OperatorConfig} from '../src/operator-gateway.js';
 
 const config:OperatorConfig={port:3101,token:'o'.repeat(40),actorId:'release-operator',subjects:['mission-owner'],expiresAt:Math.floor(Date.now()/1000)+1000};
@@ -42,15 +42,9 @@ test('artifact registration uses only the private control channel',async()=>{
  const unsupported=await request({subject:'mission-owner',request:{...envelope,input:{action:'unsupported'}}});assert.equal(unsupported.status,400);
 });
 
-test('loopback HTTP gate rejects model bearer and forwards only authorized operator',async()=>{
+test('native HTTP operator handler rejects model bearer and forwards only authorized operator',async()=>{
  const handler=createOperatorHandler(config,async(_subject,_request,actor)=>({actor:actor.actor_id}));
- const server=createServer((req,res)=>{void handler(req,res);});
- await new Promise<void>((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
- const port=(server.address() as AddressInfo).port;
- try{
-   const call=(authorization:string)=>fetch(`http://127.0.0.1:${port}/next-factory`,{method:'POST',headers:{authorization,'content-type':'application/json'},body:JSON.stringify({subject:'mission-owner',request:envelope}),signal:AbortSignal.timeout(2000)});
-   assert.equal((await call('Bearer model-token')).status,401);
-   const accepted=await call('Bearer '+config.token);assert.equal(accepted.status,200);assert.deepEqual(await accepted.json(),{actor:'release-operator'});
- }finally{await new Promise<void>((resolve,reject)=>server.close(error=>error?reject(error):resolve()));}
+ const call=(authorization:string)=>fetchHttpHandler(handler,'http://127.0.0.1:3101/next-factory',{method:'POST',headers:{authorization,'content-type':'application/json'},body:JSON.stringify({subject:'mission-owner',request:envelope})});
+ assert.equal((await call('Bearer model-token')).status,401);
+ const accepted=await call('Bearer '+config.token);assert.equal(accepted.status,200);assert.deepEqual(await accepted.json(),{actor:'release-operator'});
 });
-

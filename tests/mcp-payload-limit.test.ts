@@ -1,25 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import type { AddressInfo } from "node:net";
+import {fetchHttpHandler,type Dispatch} from "./http-fixture.js";
 import { createGlowMcpExpressApp, DEFAULT_MCP_JSON_LIMIT } from "../src/mcp-app.js";
 
-async function withServer(run:(base:string)=>Promise<void>) {
-  const app=createGlowMcpExpressApp(["127.0.0.1","localhost"]);
-  app.post("/echo-size",(req,res)=>{
-    const payload=(req.body ?? {}) as { pad?: string };
-    res.json({size:typeof payload.pad==="string" ? payload.pad.length : 0});
-  });
-  const server=app.listen(0,"127.0.0.1");
-  await new Promise<void>((resolve,reject)=>{
-    server.once("listening",()=>resolve());
-    server.once("error",reject);
-  });
-  try {
-    const {port}=server.address() as AddressInfo;
-    await run(`http://127.0.0.1:${port}`);
-  } finally {
-    await new Promise<void>(resolve=>server.close(()=>resolve()));
-  }
+async function withServer(run:(base:string,call:typeof fetch)=>Promise<void>){
+ const app=createGlowMcpExpressApp(["127.0.0.1","localhost"]);
+ app.post("/echo-size",(req,res)=>res.json({size:typeof req.body?.pad==="string"?req.body.pad.length:0}));
+ const call=((input:RequestInfo|URL,init?:RequestInit)=>fetchHttpHandler(app as unknown as Dispatch,input instanceof Request?input:String(input),init)) as typeof fetch;
+ await run("http://127.0.0.1:3100",call);
 }
 
 test("MCP JSON body limit is explicitly bounded at 512kb", () => {
@@ -27,8 +15,8 @@ test("MCP JSON body limit is explicitly bounded at 512kb", () => {
 });
 
 test("RECOVERY: H2-sized MCP payload above Express default 100kb is accepted", async () => {
-  await withServer(async base=>{
-    const response=await fetch(base+"/echo-size",{
+  await withServer(async (base,call)=>{
+    const response=await call(base+"/echo-size",{
       method:"POST",
       headers:{"content-type":"application/json"},
       body:JSON.stringify({pad:"x".repeat(140_000)})
@@ -40,8 +28,8 @@ test("RECOVERY: H2-sized MCP payload above Express default 100kb is accepted", a
 });
 
 test("ADVERSARIAL: MCP payload beyond bounded 512kb ceiling is rejected", async () => {
-  await withServer(async base=>{
-    const response=await fetch(base+"/echo-size",{
+  await withServer(async (base,call)=>{
+    const response=await call(base+"/echo-size",{
       method:"POST",
       headers:{"content-type":"application/json"},
       body:JSON.stringify({pad:"x".repeat(600_000)})

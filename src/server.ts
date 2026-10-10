@@ -9,7 +9,6 @@ import * as z from "zod/v4";
 import { loadConfig } from "./config.js";
 import { loadOAuthConfig, loadStaticBearerConfig, createJwtVerifier, createStaticBearerVerifier, createHybridVerifier } from "./oauth.js";
 import { callProtectedService, callProtectedOperator, checkProtectedReadiness } from "./backend.js";
-import { loadOperatorConfig, startOperatorGateway } from './operator-gateway.js';
 import { WebRequest } from "./contracts.js";
 import {EVIDENCE_ADMISSION_SCOPE,ArtifactAdmissionSchema,EvidenceAdmissionSchema,evidenceAdmissionStatus,evidenceAdmissionChallenge,createEvidenceAdmissionExecutor} from './evidence-admission.js';
 import { classifyWorkResponse } from "./work-response.js";
@@ -18,7 +17,7 @@ import { createGlowMcpExpressApp } from "./mcp-app.js";
 import { NextFactoryControlInputSchema } from "./next-factory-schema.js";
 import {PHASE_ACCEPTANCE_SCOPE,PHASE_ACCEPTANCE_MISSION_PATTERN,toolOAuthMetadata,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,phaseAcceptanceAuthorityStatus,validateAcceptanceBytes} from './phase-acceptance.js';
 
-const HOST_ADAPTER_REVISION = "0.3.6-scoped-evidence-admission-candidate";
+const HOST_ADAPTER_REVISION = "0.3.7-canonical-oauth-admission-candidate";
 const HOST_CONTRACT_ID = "GWF_NEXT_FACTORY_ACTIVE_DEMO_CANDIDATE_V2";
 const config = loadConfig();
 const configuredMcpServerUrl = new URL(process.env.GLOW_PUBLIC_MCP_URL ?? `http://127.0.0.1:${config.port}/mcp`);
@@ -37,8 +36,6 @@ const requiredScopes = authMode === "static_bearer"
       .split(/\s+/).map(v=>v.trim()).filter(Boolean);
 if(!requiredScopes.length)throw Error('GATEWAY_ACTION_SCOPE_REQUIRED');
 if(gatewayProfile!=='DEVELOPMENT'&&requiredScopes.some(x=>['email','openid','profile'].includes(x)))throw Error('GATEWAY_ACTION_SCOPE_REQUIRED');
-const operatorConfig=loadOperatorConfig();
-if(operatorConfig&&!config.combinedRuntimeModule)throw Error('OPERATOR_COMBINED_RUNTIME_REQUIRED');
 const verifier = authMode === "static_bearer"
   ? createStaticBearerVerifier(loadStaticBearerConfig())
   : authMode === "hybrid"
@@ -129,26 +126,6 @@ const buildServer: McpServerFactory = ctx => {
       current_request_evidence_admission: evidenceAdmissionStatus(ctx.authInfo),
       next_factory_production_fork: "BLOCKED_HARD_ADMISSION_REQUIRED"
     })
-  );
-
-  server.registerTool(
-    "glow_start_web_mission",
-    {
-      title: "Start a GLOW Web mission",
-      description: "Creates a protected Factory mission. After this, call glow_get_factory_work.",
-      annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false},
-      ...(toolSecuritySchemes ? { securitySchemes: toolSecuritySchemes } : {}),
-      inputSchema: z.object({
-        request_id: z.string().min(1).max(128).optional(),
-        role: z.enum(["client","operator","unspecified"]).default("unspecified"),
-        locale: z.string().min(2).max(32).default("vi-VN"),
-        input: z.record(z.string(), z.unknown())
-      })
-    },
-    async ({request_id,role,locale,input}) => {
-      try { return toolResult(await invoke(ctx,"create_web_mission",role,locale,input,request_id) as unknown as Record<string,unknown>); }
-      catch(error){ return toolError(error instanceof Error?error.message:"HOST_REQUEST_FAILED"); }
-    }
   );
 
   server.registerTool(
@@ -268,7 +245,7 @@ const buildServer: McpServerFactory = ctx => {
     "glow_next_factory_control",
     {
       title:"GLOW Web Next Factory control",
-      description:"Prepares and inspects bounded Next Factory work. H1/H2 acceptance, assurance, release and deployment require the separate private operator channel; this tool cannot mint approval authority or trusted evidence. Factory Control owns state and exact versions. Do not retry authority errors with invented HUMAN labels or legacy routes.",
+      description:"Prepares and inspects bounded Next Factory work. Canonical V2 work route. Evidence admission and acceptance use separate verified OAuth scopes on this same MCP endpoint; role labels cannot grant authority. Factory Control owns state and exact versions. Do not retry authority errors with invented HUMAN labels or legacy routes.",
       annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false},
       ...(toolSecuritySchemes ? { securitySchemes: toolSecuritySchemes } : {}),
       inputSchema:NextFactoryControlInputSchema
@@ -278,119 +255,6 @@ const buildServer: McpServerFactory = ctx => {
         const out=await invoke(ctx,"next_factory_control",role,locale,{action,args});
         const classification=classifyWorkResponse(out);
         if(classification==="SAFE_PUBLIC_FAILURE") return {isError:true,...toolResult(out as unknown as Record<string,unknown>)};
-        return toolResult(out as unknown as Record<string,unknown>);
-      } catch(error){ return toolError(error instanceof Error?error.message:"HOST_REQUEST_FAILED"); }
-    }
-  );
-
-  server.registerTool(
-    "glow_inspect_blocked_factory_stage",
-    {
-      title:"Inspect a blocked GLOW Web Factory stage",
-      description:"MODEL_SESSION_PRIVATE diagnosis binding for the exact blocked mission version. It records diagnosis only; it does not recover, approve or advance Process state.",
-      annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false},
-      ...(toolSecuritySchemes ? { securitySchemes: toolSecuritySchemes } : {}),
-      inputSchema:z.object({
-        mission_id:z.string().min(1).max(128),
-        expected_state_version:z.number().int().min(1),
-        diagnosis:z.object({
-          summary:z.string().min(1).max(4000),
-          evidence_refs:z.array(z.string().min(1).max(1000)).min(1)
-        }).strict(),
-        inspector_type:z.enum(["MODEL","HUMAN","AUTHORIZED_OPERATOR"]).default("MODEL"),
-        role:z.enum(["client","operator","unspecified"]).default("unspecified"),
-        locale:z.string().min(2).max(32).default("vi-VN")
-      })
-    },
-    async ({mission_id,expected_state_version,diagnosis,inspector_type,role,locale}) => {
-      try {
-        const out=await invoke(ctx,"inspect_blocked_stage",role,locale,{mission_id,expected_state_version,diagnosis,inspector_type});
-        const classification=classifyWorkResponse(out);
-        if(classification==="SAFE_PUBLIC_FAILURE") return {isError:true,...toolResult(out as unknown as Record<string,unknown>)};
-        return toolResult(out as unknown as Record<string,unknown>);
-      } catch(error){ return toolError(error instanceof Error?error.message:"HOST_REQUEST_FAILED"); }
-    }
-  );
-
-  server.registerTool(
-    "glow_recover_blocked_factory_stage",
-    {
-      title:"Request bounded Factory recovery for a blocked stage",
-      description:"Requests recovery bound to the current state version and diagnosis receipt. Factory Control alone decides whether recovery is allowed.",
-      annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false},
-      ...(toolSecuritySchemes ? { securitySchemes: toolSecuritySchemes } : {}),
-      inputSchema:z.object({
-        mission_id:z.string().min(1).max(128),
-        expected_state_version:z.number().int().min(1),
-        actor_type:z.enum(["HUMAN","AUTHORIZED_OPERATOR"]),
-        recovery_action:z.string().min(1).max(4000),
-        diagnosis_id:z.string().min(1).max(128),
-        role:z.enum(["client","operator","unspecified"]).default("unspecified"),
-        locale:z.string().min(2).max(32).default("vi-VN")
-      })
-    },
-    async ({mission_id,expected_state_version,actor_type,recovery_action,diagnosis_id,role,locale}) => {
-      try {
-        const out=await invoke(ctx,"recover_blocked_stage",role,locale,{
-          mission_id,expected_state_version,actor_type,recovery_action,diagnosis_id
-        });
-        if(out.exposure!=="PUBLIC_DECLASSIFIED") throw new Error("RECOVERY_RESPONSE_EXPOSURE_INVALID");
-        return toolResult(out as unknown as Record<string,unknown>);
-      } catch(error){ return toolError(error instanceof Error?error.message:"HOST_REQUEST_FAILED"); }
-    }
-  );
-
-  server.registerTool(
-    "glow_submit_factory_work",
-    {
-      title:"Submit completed bounded Factory work",
-      description:"Submits the exact current Factory work binding. Requires state_version, work_id and work_contract_revision returned by glow_get_factory_work; no synthetic work token is accepted.",
-      annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false},
-      ...(toolSecuritySchemes ? { securitySchemes: toolSecuritySchemes } : {}),
-      inputSchema:z.object({
-        mission_id:z.string().min(1).max(128),
-        expected_state_version:z.number().int().min(1),
-        work_id:z.string().min(1).max(128),
-        work_contract_revision:z.number().int().min(1),
-        result:z.record(z.string(),z.unknown()),
-        role:z.enum(["client","operator","unspecified"]).default("unspecified"),
-        locale:z.string().min(2).max(32).default("vi-VN")
-      })
-    },
-    async ({mission_id,expected_state_version,work_id,work_contract_revision,result,role,locale}) => {
-      try {
-        const out=await invoke(ctx,"submit_work",role,locale,{
-          mission_id,expected_state_version,work_id,work_contract_revision,result
-        });
-        if(out.exposure!=="PUBLIC_DECLASSIFIED") throw new Error("SUBMIT_RESPONSE_EXPOSURE_INVALID");
-        return toolResult(out as unknown as Record<string,unknown>);
-      } catch(error){ return toolError(error instanceof Error?error.message:"HOST_REQUEST_FAILED"); }
-    }
-  );
-
-  server.registerTool(
-    "glow_approve_factory_stage",
-    {
-      title:"Approve or reject the current Factory stage candidate",
-      description:"Submits a human/authorized-operator decision bound to the current Factory state version. The model cannot self-approve KIT_A.",
-      annotations:{readOnlyHint:false,destructiveHint:true,openWorldHint:false},
-      ...(toolSecuritySchemes ? { securitySchemes: toolSecuritySchemes } : {}),
-      inputSchema:z.object({
-        mission_id:z.string().min(1).max(128),
-        expected_state_version:z.number().int().min(1),
-        actor_type:z.enum(["HUMAN","AUTHORIZED_OPERATOR"]),
-        decision:z.enum(["APPROVE","REJECT"]),
-        approval_note:z.string().min(1).max(4000),
-        role:z.enum(["client","operator","unspecified"]).default("unspecified"),
-        locale:z.string().min(2).max(32).default("vi-VN")
-      })
-    },
-    async ({mission_id,expected_state_version,actor_type,decision,approval_note,role,locale}) => {
-      try {
-        const out=await invoke(ctx,"approve_stage",role,locale,{
-          mission_id,expected_state_version,actor_type,decision,approval_note
-        });
-        if(out.exposure!=="PUBLIC_DECLASSIFIED") throw new Error("APPROVAL_RESPONSE_EXPOSURE_INVALID");
         return toolResult(out as unknown as Record<string,unknown>);
       } catch(error){ return toolError(error instanceof Error?error.message:"HOST_REQUEST_FAILED"); }
     }
@@ -415,49 +279,6 @@ const buildServer: McpServerFactory = ctx => {
         if(out.exposure!=="PUBLIC_DECLASSIFIED") throw new Error("STATUS_EXPOSURE_INVALID");
         return toolResult(out as unknown as Record<string,unknown>);
       } catch(error){ return toolError(error instanceof Error?error.message:"HOST_REQUEST_FAILED"); }
-    }
-  );
-
-  server.registerTool(
-    "glow_get_delivery",
-    {
-      title: "Get the final GLOW Web delivery",
-      description: "Returns only the final PUBLIC_DECLASSIFIED delivery after H3 admission.",
-      annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false},
-      ...(toolSecuritySchemes ? { securitySchemes: toolSecuritySchemes } : {}),
-      inputSchema: z.object({
-        mission_id: z.string().min(1).max(128),
-        role: z.enum(["client","operator","unspecified"]).default("unspecified"),
-        locale: z.string().min(2).max(32).default("vi-VN")
-      })
-    },
-    async ({mission_id,role,locale}) => {
-      try {
-        const out=await invoke(ctx,"get_delivery",role,locale,{mission_id});
-        if(out.exposure!=="PUBLIC_DECLASSIFIED") throw new Error("DELIVERY_EXPOSURE_INVALID");
-        return toolResult(out as unknown as Record<string,unknown>);
-      } catch(error){ return toolError(error instanceof Error?error.message:"HOST_REQUEST_FAILED"); }
-    }
-  );
-
-  // Compatibility alias for the old single-tool profile. It now only starts a mission.
-  server.registerTool(
-    "glow_create_web_mission",
-    {
-      title: "Start a GLOW web mission (compatibility alias)",
-      description: "Starts a Factory mission; use the work-loop tools to continue it.",
-      annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false},
-      ...(toolSecuritySchemes ? { securitySchemes: toolSecuritySchemes } : {}),
-      inputSchema: z.object({
-        request_id: z.string().min(1).max(128).optional(),
-        role: z.enum(["client","operator","unspecified"]).default("unspecified"),
-        locale: z.string().min(2).max(32).default("vi-VN"),
-        input: z.record(z.string(), z.unknown())
-      })
-    },
-    async ({request_id,role,locale,input}) => {
-      try { return toolResult(await invoke(ctx,"create_web_mission",role,locale,input,request_id) as unknown as Record<string,unknown>); }
-      catch(error){ return toolError(error instanceof Error?error.message:"HOST_REQUEST_FAILED"); }
     }
   );
 
@@ -549,8 +370,8 @@ const buildServer: McpServerFactory = ctx => {
   return server;
 };
 
-const handler = createMcpHandler(buildServer);
-const app = createGlowMcpExpressApp(
+export const handler = createMcpHandler(buildServer);
+export const app = createGlowMcpExpressApp(
   (process.env.GLOW_ALLOWED_HOSTS ?? "localhost,127.0.0.1").split(",").map(v=>v.trim()).filter(Boolean),
   "12mb"
 );
@@ -569,49 +390,14 @@ const auth = requireBearerAuth({
   resourceMetadataUrl
 });
 
-const mcpV2ServerUrl = new URL("/mcp-v2", mcpServerUrl.origin);
-const resourceMetadataV2Url = getOAuthProtectedResourceMetadataUrl(mcpV2ServerUrl);
-const resourceMetadataV2 = buildProtectedResourceMetadata({
-  resource:mcpV2ServerUrl.toString(),
-  authMode,
-  oauthIssuer:authMode === "static_bearer" ? null : oauthConfig!.issuer,
-  scopes:[...new Set([...requiredScopes,PHASE_ACCEPTANCE_SCOPE,EVIDENCE_ADMISSION_SCOPE])]
-});
-const authV2 = requireBearerAuth({
-  verifier,
-  requiredScopes,
-  resourceMetadataUrl: resourceMetadataV2Url
-});
-
-const mcpV3ServerUrl = new URL("/mcp-v3", mcpServerUrl.origin);
-const resourceMetadataV3Url = getOAuthProtectedResourceMetadataUrl(mcpV3ServerUrl);
-const resourceMetadataV3 = buildProtectedResourceMetadata({
-  resource:mcpV3ServerUrl.toString(),
-  authMode,
-  oauthIssuer:authMode === "static_bearer" ? null : oauthConfig!.issuer,
-  scopes:[...new Set([...requiredScopes,PHASE_ACCEPTANCE_SCOPE,EVIDENCE_ADMISSION_SCOPE])]
-});
-const authV3 = requireBearerAuth({
-  verifier,
-  requiredScopes,
-  resourceMetadataUrl: resourceMetadataV3Url
-});
+const resourceMetadataV2Url=resourceMetadataUrl;
+const authV2=auth;
 
 const node = toNodeHandler(handler);
 
 const resourceMetadataPath = new URL(resourceMetadataUrl).pathname;
 app.get(resourceMetadataPath, (_req,res) => {
   res.json(resourceMetadata);
-});
-
-const resourceMetadataV2Path = new URL(resourceMetadataV2Url).pathname;
-app.get(resourceMetadataV2Path, (_req,res) => {
-  res.json(resourceMetadataV2);
-});
-
-const resourceMetadataV3Path = new URL(resourceMetadataV3Url).pathname;
-app.get(resourceMetadataV3Path, (_req,res) => {
-  res.json(resourceMetadataV3);
 });
 
 app.get("/.well-known/oauth-authorization-server", (_req,res) => {
@@ -645,30 +431,6 @@ app.get("/app.js",(_req,res) => {
 });
 
 
-app.get('/operator',(_req,res)=>{
- res.set({'Cache-Control':'no-store','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://"+new URL(oauthConfig?.issuer||'https://localhost').host+"; object-src 'none'; frame-ancestors 'none'; base-uri 'none'",'Referrer-Policy':'no-referrer'});
- res.type('html').sendFile(path.join(publicDir,'operator.html'));
-});
-app.get('/operator.js',(_req,res)=>res.type('application/javascript').sendFile(path.join(publicDir,'operator.js')));
-app.get('/operator.css',(_req,res)=>res.type('text/css').sendFile(path.join(publicDir,'operator.css')));
-app.get('/api/operator/config',(_req,res)=>{
- const clientId=process.env.GLOW_OPERATOR_SPA_CLIENT_ID?.trim()||'';
- res.set('Cache-Control','no-store').json({enabled:authMode==='oauth'&&Boolean(config.combinedRuntimeModule),login_configured:Boolean(clientId),issuer:oauthConfig?.issuer||null,audience:oauthConfig?.audience||null,client_id:clientId,redirect_uri:new URL('/operator',mcpServerUrl.origin).href,scope:'openid web.run '+EVIDENCE_ADMISSION_SCOPE});
-});
-const operatorHttpAuth=requireBearerAuth({verifier,requiredScopes:['web.run',EVIDENCE_ADMISSION_SCOPE],resourceMetadataUrl:resourceMetadataV2Url});
-app.post('/api/operator/admission',operatorHttpAuth,async(req,res)=>{
- res.set('Cache-Control','no-store');
- try{
-  if(authMode!=='oauth')throw Error('EVIDENCE_OAUTH_ONLY_REQUIRED');
-  if(req.headers.origin&&req.headers.origin!==mcpServerUrl.origin){res.status(403).json({error:'EVIDENCE_ORIGIN_FORBIDDEN'});return;}
-  const out=await admitEvidence(req.auth,req.body);
-  res.status(out.status==='failed'?422:200).json(out);
- }catch(error){
-  const code=error instanceof z.ZodError?'EVIDENCE_INPUT_INVALID':error instanceof Error?error.message:'EVIDENCE_ADMISSION_FAILED';
-  res.status(code==='EVIDENCE_ADMISSION_RBAC_REQUIRED'?403:code==='EVIDENCE_ADMISSION_BACKPRESSURE'?429:code==='EVIDENCE_AUTHORITY_EXPIRED'?401:400).json({error:code});
- }
-});
-
 app.get("/api/public/profile",(_req,res) => {
   res.json({
     product:"GLOW Web",
@@ -687,11 +449,8 @@ app.get("/healthz", (_req,res) => {
 });
 
 app.get("/readyz", async (_req,res) => {
-  if(gatewayProfile!=='DEVELOPMENT'&&!operatorConfig){
-    res.status(503).json({ok:false,product:'GLOW Web',code:'OPERATOR_CHANNEL_NOT_CONFIGURED'});return;
-  }
-  if(operatorConfig&&Date.now()/1000>=operatorConfig.expiresAt){
-    res.status(503).json({ok:false,product:'GLOW Web',code:'OPERATOR_AUTHORITY_EXPIRED'});return;
+  if(gatewayProfile!=='DEVELOPMENT'&&(authMode!=='oauth'||!config.combinedRuntimeModule)){
+    res.status(503).json({ok:false,product:'GLOW Web',code:'CANONICAL_OAUTH_RUNTIME_NOT_CONFIGURED'});return;
   }
   const readiness = await checkProtectedReadiness(config);
   res.status(readiness.ok ? 200 : 503).json({
@@ -701,24 +460,18 @@ app.get("/readyz", async (_req,res) => {
     contract_id: HOST_CONTRACT_ID,
     public_host: "running",
     protected_factory: readiness.ok ? "reachable_authenticated" : "unavailable",
-    code: readiness.code
+    code: readiness.code,
+    evidence_admission_transport:"CANONICAL_OAUTH_MCP_IN_PROCESS",
+    authority:"DEDICATED_SCOPE_AND_RBAC_CHECKED_PER_REQUEST",
+    quality_acceptance:false
   });
 });
 
-app.all("/mcp",auth,(req,res)=>void node(req,res,req.body));
 app.all("/mcp-v2",authV2,(req,res)=>void node(req,res,req.body));
-app.all("/mcp-v3",authV3,(req,res)=>void node(req,res,req.body));
 
-startOperatorGateway(operatorConfig,async(subject,request,actor)=>{
-  const parsed=WebRequest.parse(request);
-  const action=parsed.input['action'];
-  if(!['register_artifact','register_evidence','revoke_evidence'].includes(String(action))){
-    const checked=NextFactoryControlInputSchema.parse({action,args:parsed.input['args'],role:parsed.role,locale:parsed.locale});
-    parsed.input={action:checked.action,args:checked.args};
-  }
-  return callProtectedOperator(config,subject,parsed,actor);
-});
-
-app.listen(config.port,()=>{
+if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
+ app.listen(config.port,()=>{
   console.error(`GLOW Web public host listening on :${config.port}`);
 });
+
+}

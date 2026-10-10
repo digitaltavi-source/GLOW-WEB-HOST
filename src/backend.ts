@@ -94,10 +94,10 @@ export async function checkProtectedReadiness(
 ):Promise<{ok:boolean;protected_service_authenticated:boolean;code:string}>{
   const probe:WebRequestType={
     request_id:"r3-readiness-probe-v1",
-    operation:"get_status",
+    operation:"next_factory_control",
     role:"unspecified",
     locale:"vi-VN",
-    input:{mission_id:"M-R3-READINESS-NONEXISTENT"}
+    input:{action:"status",args:{mission_id:"NM-000000000000"}}
   };
   try{
     const out=await callProtectedService(config,"r3-readiness-probe",probe,fetchImpl);

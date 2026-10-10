@@ -89,12 +89,8 @@ test('caller-provided authority receipts cannot be laundered',()=>{
 test('signed OAuth permissions confer authority; scope or role alone cannot',async t=>{
   const {publicKey,privateKey}=await generateKeyPair('RS256');
   const jwk={...await exportJWK(publicKey),kid:'acceptance-test',alg:'RS256'};
-  const http=createServer((_req,res)=>{res.setHeader('content-type','application/json');res.end(JSON.stringify({keys:[jwk]}));});
-  await new Promise<void>(resolve=>http.listen(0,'127.0.0.1',resolve));
-  t.after(()=>new Promise<void>((resolve,reject)=>http.close(err=>err?reject(err):resolve())));
-  const address=http.address();if(!address||typeof address==='string')throw Error('TEST_LISTENER_REQUIRED');
   const issuer='https://issuer.test/',audience='https://glow.test/mcp-v2';
-  const verifier=createJwtVerifier({issuer,audience,jwksUrl:`http://127.0.0.1:${address.port}/jwks`});
+  const verifier=createJwtVerifier({issuer,audience,jwksUrl:'https://jwks.fixture/keys'},async()=>new Response(JSON.stringify({keys:[jwk]}),{headers:{'content-type':'application/json'}}));
   const sign=(permissions:string[])=>new SignJWT({scope:'web.run web.accept',permissions,role:'operator'}).setProtectedHeader({alg:'RS256',kid:jwk.kid}).setSubject('operator-1').setIssuer(issuer).setAudience(audience).setIssuedAt().setExpirationTime('5m').sign(privateKey);
   const ordinary=await verifier.verifyAccessToken(await sign([]));
   assert.throws(()=>phaseAcceptanceActor(ordinary),/RBAC_PERMISSION_REQUIRED/);

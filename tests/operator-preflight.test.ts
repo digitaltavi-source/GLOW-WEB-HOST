@@ -1,45 +1,30 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {spawn} from 'node:child_process';
-import {once} from 'node:events';
-import {createServer as httpServer} from 'node:http';
-import {createServer as netServer} from 'node:net';
 import {generateKeyPair,exportJWK,SignJWT} from 'jose';
-
-test('real OAuth MCP preparation: step-up before backend, reject scope-only privilege, recover without acceptance',async t=>{
-  const {publicKey,privateKey}=await generateKeyPair('RS256');
-  const jwk={...await exportJWK(publicKey),kid:'preflight-test',alg:'RS256'};
-  let backendCalls=0;
-  const stub=httpServer((req,res)=>{
-    res.setHeader('content-type','application/json');
-    if(req.url==='/jwks'){res.end(JSON.stringify({keys:[jwk]}));return;}
-    backendCalls++;
-    res.end(JSON.stringify({request_id:'readonly-probe',status:'failed',exposure:'PUBLIC_DECLASSIFIED',result:null,public_evidence:[],errors:[{code:'H1_CONTRACT_MISSING_UNKNOWNS',message:'H1_CONTRACT_MISSING_UNKNOWNS',retryable:false}]}));
-  });
-  stub.listen(0,'127.0.0.1'); await once(stub,'listening');
-  t.after(()=>new Promise<void>(resolve=>stub.close(()=>resolve())));
-  const stubAddress=stub.address();if(!stubAddress||typeof stubAddress==='string')throw Error('STUB_PORT_REQUIRED');
-  const probe=netServer();probe.listen(0,'127.0.0.1');await once(probe,'listening');
-  const address=probe.address();if(!address||typeof address==='string')throw Error('HOST_PORT_REQUIRED');
-  const port=address.port;probe.close();await once(probe,'close');
-  const base=`http://127.0.0.1:${port}`,issuer='https://issuer.test/',audience=base+'/mcp-v2';
-  const child=spawn(process.execPath,['dist/src/server.js'],{env:{...process.env,
-    PORT:String(port),GLOW_AUTH_MODE:'oauth',GLOW_GATEWAY_PROFILE:'DEVELOPMENT',
-    GLOW_ALLOWED_HOSTS:'127.0.0.1,localhost',GLOW_PUBLIC_MCP_URL:audience,
-    GLOW_PROTECTED_SERVICE_URL:`http://127.0.0.1:${stubAddress.port}`,GLOW_ALLOW_INSECURE_LOCAL:'1',
-    GLOW_PROTECTED_SERVICE_TOKEN:'test-only-backend-token',GLOW_COMBINED_RUNTIME_MODULE:'',
-    GLOW_OAUTH_ISSUER:issuer,GLOW_OAUTH_AUDIENCE:audience,
-    GLOW_OAUTH_JWKS_URL:`http://127.0.0.1:${stubAddress.port}/jwks`,GLOW_OAUTH_REQUIRED_SCOPES:'web.run',
-    GLOW_OPERATOR_TOKEN:'',GLOW_OPERATOR_ACTOR_ID:''},stdio:'ignore'});
-  t.after(async()=>{if(child.exitCode===null){child.kill();await once(child,'exit');}});
-  const deadline=Date.now()+10000;
-  for(;;){try{if((await fetch(base+'/healthz')).ok)break;}catch{}
-    if(Date.now()>deadline)throw Error('HOST_START_TIMEOUT');await new Promise(resolve=>setTimeout(resolve,50));}
+import {hostFixture,fetchHttpHandler} from './http-fixture.js';
+test('real OAuth MCP preparation: step-up before backend, reject scope-only privilege, recover without acceptance',async()=>{
+ const {publicKey,privateKey}=await generateKeyPair('RS256');
+ const jwk={...await exportJWK(publicKey),kid:'preflight-test',alg:'RS256'};
+ let backendCalls=0;
+ const issuer='https://issuer.test/',audience='http://127.0.0.1:3100/mcp-v2';
+ const previousFetch=globalThis.fetch;
+ globalThis.fetch=async(input:RequestInfo|URL,init?:RequestInit)=>{
+  const url=input instanceof Request?input.url:String(input);
+  if(url==='https://issuer.test/jwks')return new Response(JSON.stringify({keys:[jwk]}),{headers:{'content-type':'application/json'}});
+  if(url==='https://backend.fixture/v1/web-missions'){
+   backendCalls++;
+   return new Response(JSON.stringify({request_id:'readonly-probe',status:'failed',exposure:'PUBLIC_DECLASSIFIED',result:null,public_evidence:[],errors:[{code:'H1_CONTRACT_MISSING_UNKNOWNS',message:'H1_CONTRACT_MISSING_UNKNOWNS',retryable:false}]}),{headers:{'content-type':'application/json'}});
+  }
+  return previousFetch(input,init);
+ };
+ try{
+ await hostFixture({GLOW_AUTH_MODE:'oauth',GLOW_OAUTH_ISSUER:issuer,GLOW_OAUTH_AUDIENCE:audience,GLOW_OAUTH_JWKS_URL:'https://issuer.test/jwks',GLOW_OAUTH_REQUIRED_SCOPES:'web.run'},async({app,handler})=>{
+  try{
   const sign=(scope:string,permissions:string[])=>new SignJWT({scope,permissions})
     .setProtectedHeader({alg:'RS256',kid:jwk.kid}).setSubject('test-operator').setIssuer(issuer)
     .setAudience(audience).setExpirationTime('5m').sign(privateKey);
   const rpc=async(token:string,method:string,params:unknown)=>{
-    const response=await fetch(audience,{method:'POST',headers:{authorization:'Bearer '+token,
+    const response=await fetchHttpHandler(app,audience,{method:'POST',headers:{authorization:'Bearer '+token,
       'content-type':'application/json',accept:'application/json, text/event-stream','mcp-protocol-version':'2025-11-25'},
       body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})});
     assert.equal(response.status,200);const raw=await response.text();
@@ -63,4 +48,12 @@ test('real OAuth MCP preparation: step-up before backend, reject scope-only priv
   assert.equal(backendCalls,1);
   const profile=await rpc(narrow,'tools/call',{name:'glow_public_profile',arguments:{}});
   assert.equal(profile.result.structuredContent.current_connection_phase_acceptance.eligible,false);
+   const routes=await rpc(narrow,'tools/list',{});
+   const names=routes.result.tools.map((tool:{name:string})=>tool.name);
+   assert.ok(names.includes('glow_register_factory_artifact'));
+   assert.ok(!names.includes('glow_recover_blocked_factory_stage'));
+   assert.ok(!names.includes('glow_approve_factory_stage'));
+  }finally{await handler.close();}
+ });
+ }finally{globalThis.fetch=previousFetch;}
 });
