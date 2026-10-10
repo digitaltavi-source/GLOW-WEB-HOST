@@ -21,9 +21,14 @@ test('acceptance identity is verified issuer/subject with bounded expiry',()=>{
   assert.equal(phaseAcceptanceActor(auth,100).actor_id,'https://issuer.test/#operator-1');
   assert.equal(phaseAcceptanceActor(auth,100).expires_at,200);
 });
-test('read-only connection diagnostics distinguish scope, permission and expiry without secrets',()=>{
-  assert.equal(phaseAcceptanceAuthorityStatus(auth,100).eligible,true);
+test('read-only diagnostics are explicitly scoped to the current tool-request token',()=>{
+  const full=phaseAcceptanceAuthorityStatus(auth,100);
+  assert.equal(full.diagnostic_scope,'CURRENT_TOOL_REQUEST_TOKEN');
+  assert.equal(full.global_connection_authority_claimed,false);
+  assert.equal(full.eligible,true);
   const narrow=phaseAcceptanceAuthorityStatus({...auth,scopes:['web.run']},100);
+  assert.equal(narrow.diagnostic_scope,'CURRENT_TOOL_REQUEST_TOKEN');
+  assert.equal(narrow.global_connection_authority_claimed,false);
   assert.equal(narrow.token_has_rbac_permission,true);
   assert.equal(narrow.token_has_acceptance_scope,false);
   assert.equal(narrow.code,'OPERATOR_ACCEPTANCE_SCOPE_REQUIRED');
