@@ -10,7 +10,8 @@ export async function fetchHttpHandler(dispatch:Dispatch,input:Request|string|UR
  Object.defineProperty(socket,'remoteAddress',{value:'127.0.0.1'});
  Object.defineProperty(socket,'encrypted',{value:url.protocol==='https:'});
  const req=new IncomingMessage(socket);
- req.method=request.method;req.url=url.pathname+url.search;req.httpVersion='1.1';
+ req.method=request.method;req.url=url.pathname+url.search;req.httpVersion='1.1';req.httpVersionMajor=1;req.httpVersionMinor=1;
+ req.complete=true; // Entire request is supplied below; native HTTP parser would mark this before EOF.
  req.headers=Object.fromEntries(request.headers);req.headers.host=url.host;
  if(bytes.length&&!req.headers['content-length'])req.headers['content-length']=String(bytes.length);
  req.rawHeaders=Object.entries(req.headers).flatMap(([k,v])=>[k,String(v)]);
@@ -26,7 +27,7 @@ export async function fetchHttpHandler(dispatch:Dispatch,input:Request|string|UR
   return (end as Function)(chunk,...args);
  }) as typeof res.end;
  return new Promise<Response>((resolve,reject)=>{
-  const deadline=setTimeout(()=>{socket.destroy();reject(Error('INPROCESS_HTTP_DEADLINE'));},8000);
+  const deadline=setTimeout(()=>{socket.destroy();reject(Error('INPROCESS_HTTP_DEADLINE:'+request.method+' '+url.pathname+' socketDestroyed='+socket.destroyed+' responseEnded='+res.writableEnded));},8000);
   res.once('finish',()=>{
    clearTimeout(deadline);
    const headers=new Headers();
