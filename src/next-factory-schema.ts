@@ -1,7 +1,11 @@
+import {ArtifactAdmissionSchema,EvidenceAdmissionSchema} from './evidence-admission.js';
 import * as z from "zod/v4";
 import {H1PhaseSchema,H2PhaseSchema,H3PhaseSchema} from './phase-schema.js';
 
 export const NextFactoryControlInputSchema = z.discriminatedUnion("action",[
+ z.object({action:z.literal("evidence_admission_preflight"),args:z.object({}).strict(),role:z.enum(["client","operator","unspecified"]).default("unspecified"),locale:z.string().default("vi-VN")}).strict(),
+ z.object({action:z.literal("register_artifact"),args:ArtifactAdmissionSchema,role:z.enum(["client","operator","unspecified"]).default("unspecified"),locale:z.string().default("vi-VN")}).strict(),
+ z.object({action:z.literal("register_evidence"),args:EvidenceAdmissionSchema,role:z.enum(["client","operator","unspecified"]).default("unspecified"),locale:z.string().default("vi-VN")}).strict(),
         z.object({
           action:z.literal("get_preproduction_capability_plan"),
           args:z.object({mission_id:z.string().min(1).max(128),expected_state_version:z.number().int().min(1),blueprint_revision:z.number().int().min(1)}).strict(),

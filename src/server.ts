@@ -252,6 +252,22 @@ const buildServer: McpServerFactory = ctx => {
     },
     async ({action,args,role,locale}) => {
       try {
+        if(action==='evidence_admission_preflight'){
+          const status=evidenceAdmissionStatus(ctx.authInfo);
+          const challenge=evidenceAdmissionChallenge(status.code,resourceMetadataV2Url);
+          return {...toolResult(status),...(!status.eligible?{isError:true}:{}),...(challenge?{_meta:challenge}:{})};
+        }
+        if(action==='register_artifact'||action==='register_evidence'){
+          if(authMode!=='oauth')throw Error('EVIDENCE_OAUTH_ONLY_REQUIRED');
+          try{
+            const out=await admitEvidence(ctx.authInfo,{action,args});
+            return {...toolResult(out as unknown as Record<string,unknown>),...(out.status==='failed'?{isError:true}:{})};
+          }catch(error){
+            const code=error instanceof Error?error.message:'EVIDENCE_ADMISSION_FAILED';
+            const challenge=evidenceAdmissionChallenge(code,resourceMetadataV2Url);
+            return {...toolError(code),...(challenge?{_meta:challenge}:{})};
+          }
+        }
         const out=await invoke(ctx,"next_factory_control",role,locale,{action,args});
         const classification=classifyWorkResponse(out);
         if(classification==="SAFE_PUBLIC_FAILURE") return {isError:true,...toolResult(out as unknown as Record<string,unknown>)};

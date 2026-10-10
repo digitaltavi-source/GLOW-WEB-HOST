@@ -32,7 +32,7 @@ export async function fetchHttpHandler(dispatch:Dispatch,input:Request|string|UR
    const headers=new Headers();
    for(const [name,value] of Object.entries(res.getHeaders()))if(value!==undefined)headers.set(name,Array.isArray(value)?value.join(', '):String(value));
    const body=[204,304].includes(res.statusCode)?null:Buffer.concat(chunks);
-   resolve(new Response(body,{status:res.statusCode,headers}));socket.destroy();
+   resolve(new Response(body===null?null:new Uint8Array(body),{status:res.statusCode,headers}));socket.destroy();
   });
   res.once('error',error=>{clearTimeout(deadline);reject(error);});
   req.once('error',error=>{clearTimeout(deadline);reject(error);});
