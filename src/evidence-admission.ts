@@ -30,7 +30,7 @@ export function evidenceAdmissionStatus(auth:AcceptanceAuth|undefined){
 }
 export function evidenceAdmissionChallenge(code:string,metadataUrl:string){
  if(!['EVIDENCE_ADMISSION_SCOPE_REQUIRED','EVIDENCE_AUTHORITY_EXPIRED'].includes(code))return null;
- return {'mcp/www_authenticate':[`Bearer resource_metadata="${new URL(metadataUrl)}", error="${code==='EVIDENCE_AUTHORITY_EXPIRED'?'invalid_token':'insufficient_scope'}", scope="web.run ${EVIDENCE_ADMISSION_SCOPE}"`]};
+ return {'mcp/www_authenticate':[`Bearer resource_metadata="${new URL(metadataUrl)}", error="${code==='EVIDENCE_AUTHORITY_EXPIRED'?'invalid_token':'insufficient_scope'}", error_description="${code==='EVIDENCE_AUTHORITY_EXPIRED'?'Your access token expired. Reconnect to continue.':'Reconnect to grant web.evidence.admit for evidence registration.'}", scope="web.run ${EVIDENCE_ADMISSION_SCOPE}"`]};
 }
 type Execute=(subject:string,request:WebRequestType,actor?:ReturnType<typeof evidenceAdmissionActor>)=>Promise<WebResponseType>;
 export function createEvidenceAdmissionExecutor(read:Execute,write:Execute){

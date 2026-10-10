@@ -27,6 +27,10 @@ test('identity, RBAC and expiry are independently mandatory',()=>{
  assert.equal(evidenceAdmissionStatus(auth).eligible,true);
  assert.equal('actor_id' in evidenceAdmissionStatus(auth),false);
  assert.match(evidenceAdmissionChallenge('EVIDENCE_ADMISSION_SCOPE_REQUIRED','https://glow.test/metadata')!['mcp/www_authenticate'][0]!,/web.evidence.admit/);
+ for(const [code,error] of [['EVIDENCE_ADMISSION_SCOPE_REQUIRED','insufficient_scope'],['EVIDENCE_AUTHORITY_EXPIRED','invalid_token']]){
+  const challenge=evidenceAdmissionChallenge(code!,'https://glow.test/metadata')!['mcp/www_authenticate'][0]!;
+  assert.ok(challenge.includes('error="'+error+'"'));assert.match(challenge,/error_description="[^"]+"/);assert.match(challenge,/resource_metadata="https:\/\/glow.test\/metadata"/);assert.match(challenge,/scope="web.run web.evidence.admit"/);
+ }
  assert.equal(evidenceAdmissionChallenge('EVIDENCE_ADMISSION_RBAC_REQUIRED','https://glow.test/metadata'),null);
 });
 test('artifact uses authenticated owner and server-owned scoped actor only',async()=>{
