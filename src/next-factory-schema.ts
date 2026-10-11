@@ -1,8 +1,13 @@
+import {ArtifactLookupSchema} from './artifact-lookup.js';
+import {SystemAuditSchema,GetSystemAuditSchema} from './system-audit.js';
 import {ArtifactAdmissionSchema,EvidenceAdmissionSchema} from './evidence-admission.js';
 import * as z from "zod/v4";
 import {H1PhaseSchema,H2PhaseSchema,H3PhaseSchema} from './phase-schema.js';
 
 export const NextFactoryControlInputSchema = z.discriminatedUnion("action",[
+ z.object({action:z.literal("inspect_artifact_admission"),args:ArtifactLookupSchema,role:z.enum(["client","operator","unspecified"]).default("unspecified"),locale:z.string().default("vi-VN")}).strict(),
+ z.object({action:z.literal("register_system_audit"),args:SystemAuditSchema,role:z.enum(["client","operator","unspecified"]).default("unspecified"),locale:z.string().default("vi-VN")}).strict(),
+ z.object({action:z.literal("get_system_audit"),args:GetSystemAuditSchema,role:z.enum(["client","operator","unspecified"]).default("unspecified"),locale:z.string().default("vi-VN")}).strict(),
  z.object({action:z.literal("evidence_admission_preflight"),args:z.object({}).strict(),role:z.enum(["client","operator","unspecified"]).default("unspecified"),locale:z.string().default("vi-VN")}).strict(),
  z.object({action:z.literal("register_artifact"),args:ArtifactAdmissionSchema,role:z.enum(["client","operator","unspecified"]).default("unspecified"),locale:z.string().default("vi-VN")}).strict(),
  z.object({action:z.literal("register_evidence"),args:EvidenceAdmissionSchema,role:z.enum(["client","operator","unspecified"]).default("unspecified"),locale:z.string().default("vi-VN")}).strict(),

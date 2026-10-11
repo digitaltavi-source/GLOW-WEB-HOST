@@ -1,3 +1,5 @@
+import {ArtifactLookupSchema} from './artifact-lookup.js';
+import {SystemAuditSchema,GetSystemAuditSchema,createSystemAuditExecutor} from './system-audit.js';
 import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -17,7 +19,7 @@ import { createGlowMcpExpressApp } from "./mcp-app.js";
 import { NextFactoryControlInputSchema } from "./next-factory-schema.js";
 import {PHASE_ACCEPTANCE_SCOPE,PHASE_ACCEPTANCE_MISSION_PATTERN,toolOAuthMetadata,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,phaseAcceptanceAuthorityStatus,validateAcceptanceBytes} from './phase-acceptance.js';
 
-const HOST_ADAPTER_REVISION = "0.3.7-canonical-oauth-admission-candidate";
+const HOST_ADAPTER_REVISION = "0.3.8-system-audit-candidate";
 const HOST_CONTRACT_ID = "GWF_NEXT_FACTORY_ACTIVE_DEMO_CANDIDATE_V2";
 const config = loadConfig();
 const configuredMcpServerUrl = new URL(process.env.GLOW_PUBLIC_MCP_URL ?? `http://127.0.0.1:${config.port}/mcp`);
@@ -97,12 +99,13 @@ const admitEvidence=createEvidenceAdmissionExecutor(
  (subject,request)=>callProtectedService(config,subject,request),
  (subject,request,actor)=>callProtectedOperator(config,subject,request,actor!)
 );
+const reportSystemAudit=createSystemAuditExecutor((subject,request,actor)=>callProtectedOperator(config,subject,request,actor));
 const buildServer: McpServerFactory = ctx => {
   const server = new McpServer(
     { name: "glow-web", version: HOST_ADAPTER_REVISION },
     {
       instructions:
-        "Use GLOW Web only for the user's explicit web mission request. ChatGPT is the reasoning/intelligence host. The backend owns Factory state, validation, approval binding, freeze/admission, evidence and delivery boundaries. The legacy RC4 flow is a frozen A/B baseline retained for controlled post-demo comparison only; it is not a fallback for a Next Factory mission. The Next Factory is the active demo candidate path. For current demo operation require execution_profile=DEMO_BOUNDED, preserve its degraded claim ceiling, and never describe demo capability use as hard-admitted or production-ready. When a work package is returned, perform only that bounded work, then submit the result. Never invent success, approvals, evidence, or Factory state."
+        "Use GLOW Web for the user's explicit web mission or Factory audit request. Audit reports record bounded observations and repair proposals; registration is not verified quality, automatic defect closure or phase approval. ChatGPT is the reasoning/intelligence host. The backend owns Factory state, validation, approval binding, freeze/admission, evidence and delivery boundaries. The legacy RC4 flow is a frozen A/B baseline retained for controlled post-demo comparison only; it is not a fallback for a Next Factory mission. The Next Factory is the active demo candidate path. For current demo operation require execution_profile=DEMO_BOUNDED, preserve its degraded claim ceiling, and never describe demo capability use as hard-admitted or production-ready. When a work package is returned, perform only that bounded work, then submit the result. Never invent success, approvals, evidence, or Factory state."
     }
   );
 
@@ -124,6 +127,7 @@ const buildServer: McpServerFactory = ctx => {
       next_factory_demo: "DEMO_BOUNDED_CONNECTED_CANDIDATE",
       current_connection_phase_acceptance: phaseAcceptanceAuthorityStatus(ctx.authInfo),
       current_request_evidence_admission: evidenceAdmissionStatus(ctx.authInfo),
+      system_audit_contract: {version:"GWF_SYSTEM_AUDIT_V1",report_tool:"glow_report_system_audit",read_tool:"glow_get_system_audit",required_scope:"web.evidence.admit",coverage:"FACTORY_OR_ANY_MISSION_PHASE",finding_verification:"REPORTER_SUPPLIED"},
       next_factory_production_fork: "BLOCKED_HARD_ADMISSION_REQUIRED"
     })
   );
@@ -252,6 +256,17 @@ const buildServer: McpServerFactory = ctx => {
     },
     async ({action,args,role,locale}) => {
       try {
+        if(action==='register_system_audit'){
+          if(authMode!=='oauth')throw Error('EVIDENCE_OAUTH_ONLY_REQUIRED');
+          try{
+            const out=await reportSystemAudit(ctx.authInfo,args);
+            return {...toolResult(out as unknown as Record<string,unknown>),...(out.status==='failed'?{isError:true}:{})};
+          }catch(error){
+            const code=error instanceof Error?error.message:'SYSTEM_AUDIT_FAILED';
+            const challenge=evidenceAdmissionChallenge(code,resourceMetadataV2Url);
+            return {...toolError(code),...(challenge?{_meta:challenge}:{})};
+          }
+        }
         if(action==='evidence_admission_preflight'){
           const status=evidenceAdmissionStatus(ctx.authInfo);
           const challenge=evidenceAdmissionChallenge(status.code,resourceMetadataV2Url);
@@ -382,6 +397,47 @@ const buildServer: McpServerFactory = ctx => {
       const challenge=evidenceAdmissionChallenge(code,resourceMetadataV2Url);
       return {...toolError(code),...(challenge?{_meta:challenge}:{})};
     }
+  });
+  server.registerTool('glow_report_system_audit',{
+    title:'Record a Factory-wide or mission audit',
+    description:'Requires web.run and web.evidence.admit plus RBAC. Records actual observations, evidence references, reproduction, severity and recommended repairs for any Factory stage. Findings and source identity are reporter supplied. Does not scan automatically, issue GE receipts, certify quality, close defects or approve phases. Redact secrets from reports.',
+    annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false},
+    ...(authMode==='oauth'?toolOAuthMetadata([...requiredScopes,EVIDENCE_ADMISSION_SCOPE]):{}),
+    inputSchema:SystemAuditSchema
+  },async report=>{
+    try{
+      if(authMode!=='oauth')throw Error('EVIDENCE_OAUTH_ONLY_REQUIRED');
+      const out=await reportSystemAudit(ctx.authInfo,report);
+      return {...toolResult(out as unknown as Record<string,unknown>),...(out.status==='failed'?{isError:true}:{})};
+    }catch(error){
+      const code=error instanceof Error?error.message:'SYSTEM_AUDIT_FAILED';
+      const challenge=evidenceAdmissionChallenge(code,resourceMetadataV2Url);
+      return {...toolError(code),...(challenge?{_meta:challenge}:{})};
+    }
+  });
+  server.registerTool('glow_get_system_audit',{
+    title:'Read an audit submitted by this identity',
+    description:'Read the persisted audit report for the current authenticated subject. Does not expose other users reports or certify their findings.',
+    annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false},
+    ...(toolSecuritySchemes?{securitySchemes:toolSecuritySchemes}:{}),
+    inputSchema:GetSystemAuditSchema
+  },async args=>{
+    try{
+      const out=await invoke(ctx,'next_factory_control','unspecified','vi-VN',{action:'get_system_audit',args});
+      return {...toolResult(out as unknown as Record<string,unknown>),...(out.status==='failed'?{isError:true}:{})};
+    }catch(error){return toolError(error instanceof Error?error.message:'SYSTEM_AUDIT_READ_FAILED');}
+  });
+  server.registerTool('glow_inspect_factory_artifact',{
+    title:'Inspect current artifact admission',
+    description:'Read-only owner-scoped lookup by exact mission and actual artifact SHA256. Verifies stored bytes. Current presence does not prove the outcome of an earlier lost-response call, quality, GE evidence or phase acceptance.',
+    annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false},
+    ...(toolSecuritySchemes?{securitySchemes:toolSecuritySchemes}:{}),
+    inputSchema:ArtifactLookupSchema
+  },async args=>{
+    try{
+      const out=await invoke(ctx,'next_factory_control','unspecified','vi-VN',{action:'inspect_artifact_admission',args});
+      return {...toolResult(out as unknown as Record<string,unknown>),...(out.status==='failed'?{isError:true}:{})};
+    }catch(error){return toolError(error instanceof Error?error.message:'ARTIFACT_LOOKUP_FAILED');}
   });
   return server;
 };

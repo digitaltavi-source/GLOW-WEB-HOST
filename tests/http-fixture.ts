@@ -1,56 +1,18 @@
-import {IncomingMessage,ServerResponse} from 'node:http';
-import {Duplex} from 'node:stream';
-import type {Socket} from 'node:net';
+import {createServer, type IncomingMessage, type ServerResponse} from 'node:http';
 
 export type Dispatch=(req:IncomingMessage,res:ServerResponse)=>unknown;
 export async function fetchHttpHandler(dispatch:Dispatch,input:Request|string|URL,init?:RequestInit):Promise<Response>{
  const request=input instanceof Request?input:new Request(input,init);
  const url=new URL(request.url),bytes=Buffer.from(await request.arrayBuffer());
- const wire:Buffer[]=[];
- const socket=new Duplex({read(){},write(chunk,_encoding,done){wire.push(Buffer.from(chunk));done();}}) as Socket;
- Object.defineProperty(socket,'remoteAddress',{value:'127.0.0.1'});
- Object.defineProperty(socket,'encrypted',{value:url.protocol==='https:'});
- const req=new IncomingMessage(socket);
- req.method=request.method;req.url=url.pathname+url.search;req.httpVersion='1.1';req.httpVersionMajor=1;req.httpVersionMinor=1;
- req.complete=true; // Entire request is supplied below; native HTTP parser would mark this before EOF.
- req.headers=Object.fromEntries(request.headers);req.headers.host=url.host;
- if(bytes.length&&!req.headers['content-length'])req.headers['content-length']=String(bytes.length);
- req.rawHeaders=Object.entries(req.headers).flatMap(([k,v])=>[k,String(v)]);
- const res=new ServerResponse(req);res.assignSocket(socket);
- return new Promise<Response>((resolve,reject)=>{
-  const deadline=setTimeout(()=>{socket.destroy();reject(Error('INPROCESS_HTTP_DEADLINE:'+request.method+' '+url.pathname+' socketDestroyed='+socket.destroyed+' responseEnded='+res.writableEnded));},8000);
-  res.once('finish',()=>{
-   clearTimeout(deadline);
-   try{
-    const raw=Buffer.concat(wire),boundary=raw.indexOf('\r\n\r\n');
-    if(boundary<0)throw Error('HTTP_RESPONSE_HEADERS_REQUIRED');
-    const headers=new Headers();
-    for(const line of raw.subarray(0,boundary).toString('utf8').split('\r\n').slice(1)){
-     const colon=line.indexOf(':');if(colon>0)headers.append(line.slice(0,colon),line.slice(colon+1).trim());
-    }
-    let body=raw.subarray(boundary+4);
-    if(headers.get('transfer-encoding')?.includes('chunked')){
-     const chunks:Buffer[]=[];let position=0;
-     while(position<body.length){
-      const end=body.indexOf('\r\n',position);if(end<0)throw Error('HTTP_CHUNK_SIZE_REQUIRED');
-      const size=parseInt(body.subarray(position,end).toString('ascii').split(';')[0]!,16);
-      if(!Number.isFinite(size))throw Error('HTTP_CHUNK_SIZE_INVALID');
-      position=end+2;if(size===0)break;
-      if(position+size+2>body.length)throw Error('HTTP_CHUNK_DATA_INCOMPLETE');
-      chunks.push(body.subarray(position,position+size));position+=size+2;
-     }
-     body=Buffer.concat(chunks);headers.delete('transfer-encoding');
-    }
-    headers.delete('content-length');
-    resolve(new Response([204,304].includes(res.statusCode)?null:new Uint8Array(body),{status:res.statusCode,headers}));
-   }catch(error){reject(error);}
-   socket.destroy();
-  });
-  res.once('error',error=>{clearTimeout(deadline);reject(error);});
-  req.once('error',error=>{clearTimeout(deadline);reject(error);});
-  try{Promise.resolve(dispatch(req,res)).catch(error=>{clearTimeout(deadline);reject(error);});req.push(bytes.length?bytes:null);if(bytes.length)req.push(null);}
-  catch(error){clearTimeout(deadline);reject(error);}
- });
+ // Use the native HTTP parser and stream lifecycle, including response backpressure.
+ const listener=createServer((req,res)=>{Promise.resolve(dispatch(req,res)).catch(()=>{res.statusCode=500;res.end('FIXTURE_DISPATCH_FAILED');});});
+ await new Promise<void>((resolve,reject)=>{listener.once('error',reject);listener.listen(0,'127.0.0.1',resolve);});
+ try{
+  const address=listener.address();if(!address||typeof address==='string')throw Error('FIXTURE_ADDRESS_REQUIRED');
+  const response=await fetch('http://127.0.0.1:'+address.port+url.pathname+url.search,{method:request.method,headers:Object.fromEntries(request.headers),body:['GET','HEAD'].includes(request.method)?undefined:bytes,signal:AbortSignal.timeout(8000)});
+  const body=await response.arrayBuffer();
+  return new Response([204,304].includes(response.status)?null:body,{status:response.status,headers:response.headers});
+ }finally{listener.closeAllConnections();await new Promise<void>(resolve=>listener.close(()=>resolve()));}
 }
 export async function hostFixture(env:Record<string,string>,run:(host:{app:Dispatch;handler:{close:()=>Promise<void>}})=>Promise<void>){
  const previous={...process.env};
