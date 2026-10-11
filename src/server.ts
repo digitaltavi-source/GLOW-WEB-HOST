@@ -19,7 +19,7 @@ import { createGlowMcpExpressApp } from "./mcp-app.js";
 import { NextFactoryControlInputSchema } from "./next-factory-schema.js";
 import {PHASE_ACCEPTANCE_SCOPE,PHASE_ACCEPTANCE_MISSION_PATTERN,toolOAuthMetadata,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,phaseAcceptanceAuthorityStatus,validateAcceptanceBytes} from './phase-acceptance.js';
 
-const HOST_ADAPTER_REVISION = "0.3.8-system-audit-candidate";
+const HOST_ADAPTER_REVISION = "0.3.9-oauth-scope-challenge-candidate";
 const HOST_CONTRACT_ID = "GWF_NEXT_FACTORY_ACTIVE_DEMO_CANDIDATE_V2";
 const config = loadConfig();
 const configuredMcpServerUrl = new URL(process.env.GLOW_PUBLIC_MCP_URL ?? `http://127.0.0.1:${config.port}/mcp`);
@@ -362,7 +362,7 @@ const buildServer: McpServerFactory = ctx => {
   },async()=> {
     const status=evidenceAdmissionStatus(ctx.authInfo);
     const challenge=evidenceAdmissionChallenge(status.code,resourceMetadataV2Url);
-    return {...toolResult(status),...(challenge?{_meta:challenge}:{})};
+    return {...toolResult(status),...(challenge?{isError:true,_meta:challenge}:{})};
   });
   server.registerTool('glow_register_factory_artifact',{
     title:'Register actual H2 artifact bytes',

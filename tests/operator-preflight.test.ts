@@ -34,6 +34,17 @@ test('real OAuth MCP preparation: step-up before backend, reject scope-only priv
   const listed=await rpc(narrow,'tools/list',{});
   assert.deepEqual(listed.result.tools.find((tool:{name:string})=>tool.name==='glow_prepare_phase_acceptance')._meta.securitySchemes,
     [{type:'oauth2',scopes:['web.run','web.accept']}]);
+  // Missing scope must be an MCP error result so the client can start OAuth step-up.
+  const admissionMissing=await rpc(narrow,'tools/call',{name:'glow_evidence_admission_preflight',arguments:{}});
+  assert.equal(admissionMissing.result.isError,true);
+  assert.equal(admissionMissing.result.structuredContent.code,'EVIDENCE_ADMISSION_SCOPE_REQUIRED');
+  assert.match(admissionMissing.result._meta['mcp/www_authenticate'][0],/scope="web.run web.evidence.admit"/);
+  assert.equal(backendCalls,0);
+  const admissionReady=await rpc(await sign('web.run web.evidence.admit',['web.evidence.admit']),'tools/call',{name:'glow_evidence_admission_preflight',arguments:{}});
+  assert.equal(admissionReady.result.structuredContent.eligible,true);
+  assert.notEqual(admissionReady.result.isError,true);
+  assert.equal(admissionReady.result._meta?.['mcp/www_authenticate'],undefined);
+  assert.equal(backendCalls,0);
   const params={name:'glow_prepare_phase_acceptance',arguments:{mission_id:'NM-000000000000',phase:'H1',expected_state_version:1,payload:{}}};
   const missing=await rpc(narrow,'tools/call',params);
   assert.equal(missing.result.isError,true);
