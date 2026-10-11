@@ -21,7 +21,9 @@ test('artifact admission schema and decoded-byte ceiling are one exact contract'
   assert.equal(atLimit.length,ARTIFACT_ADMISSION_MAX_BASE64_CHARS);
   assert.equal(ArtifactAdmissionSchema.safeParse({...common,data_base64:atLimit}).success,true);
 
+  // 8 MiB is congruent to 2 mod 3, so +1 decoded byte can have the same
+  // base64 character length. Character-count validation alone is insufficient.
   const overLimit=Buffer.alloc(ARTIFACT_ADMISSION_MAX_BYTES+1).toString('base64');
-  assert.equal(overLimit.length>ARTIFACT_ADMISSION_MAX_BASE64_CHARS,true);
+  assert.equal(overLimit.length,ARTIFACT_ADMISSION_MAX_BASE64_CHARS);
   assert.equal(ArtifactAdmissionSchema.safeParse({...common,data_base64:overLimit}).success,false);
 });
