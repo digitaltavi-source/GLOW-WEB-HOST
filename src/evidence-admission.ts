@@ -4,11 +4,23 @@ import type {AcceptanceAuth} from './phase-acceptance.js';
 import type {WebRequestType,WebResponseType} from './contracts.js';
 
 export const EVIDENCE_ADMISSION_SCOPE='web.evidence.admit';
+export const ARTIFACT_ADMISSION_MAX_BYTES=8*1024*1024;
+export const ARTIFACT_ADMISSION_MAX_BASE64_CHARS=4*Math.ceil(ARTIFACT_ADMISSION_MAX_BYTES/3);
 const HASH=z.string().regex(/^[0-9a-f]{64}$/);
+function decodeArtifactBytes(encoded:string){
+ const bytes=Buffer.from(encoded,'base64');
+ if(bytes.length===0||bytes.length>ARTIFACT_ADMISSION_MAX_BYTES||bytes.toString('base64')!==encoded)throw Error('ARTIFACT_ENCODING_OR_SIZE_INVALID');
+ return bytes;
+}
+const ArtifactBase64=z.string().min(4).max(ARTIFACT_ADMISSION_MAX_BASE64_CHARS).superRefine((encoded,ctx)=>{
+ try{decodeArtifactBytes(encoded);}catch{
+  ctx.addIssue({code:'custom',message:'ARTIFACT_ENCODING_OR_SIZE_INVALID'});
+ }
+});
 const Common={mission_id:z.string().regex(/^NM-[a-f0-9]{12}$/),expected_state_version:z.number().int().min(1),phase_work_id:z.string().min(1).max(128),work_contract_revision:z.number().int().min(1)};
 const capabilityBindings=z.object({phase:z.literal('H2'),phase_work_id:z.string().min(1),capability_id:z.string().min(1).max(128),h1_payload_sha256:HASH,state_version:z.number().int().min(1),blueprint_revision:z.number().int().min(1),result_sha256:HASH.optional()}).strict();
 const assuranceBindings=z.object({phase:z.literal('H2'),state_version:z.number().int().min(1),blueprint_revision:z.number().int().min(1),h1_identity:z.string().min(1).max(256),h1_payload_sha256:HASH,design_contract_sha256:HASH}).strict();
-export const ArtifactAdmissionSchema=z.object({...Common,data_base64:z.string().min(4).max(12*1024*1024)}).strict();
+export const ArtifactAdmissionSchema=z.object({...Common,data_base64:ArtifactBase64}).strict();
 export const CapabilityAdmissionSchema=z.object({...Common,kind:z.literal('CAPABILITY'),artifact_sha256:HASH,evidence_sha256:HASH,reviewed_result:z.record(z.string(),z.unknown()),bindings:capabilityBindings}).strict();
 export const AssuranceAdmissionSchema=z.object({...Common,kind:z.literal('ASSURANCE'),artifact_sha256:HASH,evidence_sha256:HASH,bindings:assuranceBindings}).strict();
 export const EvidenceAdmissionSchema=z.discriminatedUnion('kind',[CapabilityAdmissionSchema,AssuranceAdmissionSchema]);
@@ -59,8 +71,7 @@ export function createEvidenceAdmissionExecutor(read:Execute,write:Execute){
      if(input.args.reviewed_result.artifact_sha256!==input.args.artifact_sha256)throw Error('EVIDENCE_CANDIDATE_ARTIFACT_MISMATCH');
     }
    }else{
-    const encoded=input.args.data_base64,bytes=Buffer.from(encoded,'base64');
-    if(bytes.length===0||bytes.length>8*1024*1024||bytes.toString('base64')!==encoded)throw Error('ARTIFACT_ENCODING_OR_SIZE_INVALID');
+    decodeArtifactBytes(input.args.data_base64);
    }
    // Revalidate expiry after the read; no caller-supplied actor, subject, scope or operation survives.
    evidenceAdmissionActor(auth);
