@@ -1,4 +1,5 @@
 import {ArtifactLookupSchema} from './artifact-lookup.js';
+import {connectionDiagnostics} from './connection-diagnostics.js';
 import {SystemAuditSchema,GetSystemAuditSchema,createSystemAuditExecutor} from './system-audit.js';
 import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
@@ -127,6 +128,7 @@ const buildServer: McpServerFactory = ctx => {
       next_factory_demo: "DEMO_BOUNDED_CONNECTED_CANDIDATE",
       current_connection_phase_acceptance: phaseAcceptanceAuthorityStatus(ctx.authInfo),
       current_request_evidence_admission: evidenceAdmissionStatus(ctx.authInfo),
+      connection_diagnostics: connectionDiagnostics(ctx.authInfo),
       system_audit_contract: {version:"GWF_SYSTEM_AUDIT_V1",report_tool:"glow_report_system_audit",read_tool:"glow_get_system_audit",required_scope:"web.evidence.admit",coverage:"FACTORY_OR_ANY_MISSION_PHASE",finding_verification:"REPORTER_SUPPLIED"},
       next_factory_production_fork: "BLOCKED_HARD_ADMISSION_REQUIRED"
     })
@@ -353,6 +355,17 @@ const buildServer: McpServerFactory = ctx => {
     }
   });
 
+  server.registerTool('glow_phase_acceptance_preflight',{
+    title:'Check phase acceptance authority',
+    description:'Read-only check of this request token for web.accept scope and RBAC. Requires no mission or approval payload. Does not prepare, approve, advance or grant authority.',
+    annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false},
+    ...(authMode==='oauth'?toolOAuthMetadata([...requiredScopes,PHASE_ACCEPTANCE_SCOPE]):{}),
+    inputSchema:z.object({}).strict()
+  },async()=>{
+    const status=phaseAcceptanceAuthorityStatus(ctx.authInfo);
+    const challenge=phaseAcceptanceAuthChallenge(status.code,resourceMetadataV2Url);
+    return {...toolResult(status),...(challenge?{isError:true,_meta:challenge}:{})};
+  });
   server.registerTool('glow_evidence_admission_preflight',{
     title:'Check evidence admission authority',
     description:'Read-only check of this request token for dedicated evidence admission scope and RBAC. Does not register evidence, approve a phase or certify quality.',
