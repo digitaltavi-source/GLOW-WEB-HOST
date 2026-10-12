@@ -93,7 +93,7 @@ export function createJwtVerifier(config: OAuthConfig, fetchImpl:typeof fetch=fe
           clientId,
           scopes,
           expiresAt: exp,
-          extra: { sub: subject, iss: config.issuer, authentication: 'JWT_VERIFIED', operator_acceptance_granted: Array.isArray(payload.permissions) && payload.permissions.includes('web.accept'), operator_evidence_admission_granted: Array.isArray(payload.permissions) && payload.permissions.includes('web.evidence.admit') }
+          extra: { sub: subject, iss: config.issuer, authentication: 'JWT_VERIFIED', verified_oauth_client_id: typeof payload.azp === 'string' && payload.azp ? payload.azp : typeof payload.client_id === 'string' && payload.client_id ? payload.client_id : null, operator_acceptance_granted: Array.isArray(payload.permissions) && payload.permissions.includes('web.accept'), operator_evidence_admission_granted: Array.isArray(payload.permissions) && payload.permissions.includes('web.evidence.admit') }
         };
       } catch (error) {
         if (error instanceof OAuthError) throw error;
