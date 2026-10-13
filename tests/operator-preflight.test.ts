@@ -81,6 +81,10 @@ test('real OAuth MCP preparation: step-up before backend, reject scope-only priv
    const routes=await rpc(narrow,'tools/list',{});
    const names=routes.result.tools.map((tool:{name:string})=>tool.name);
    assert.ok(names.includes('glow_register_factory_artifact'));
+   assert.ok(names.includes('glow_register_factory_artifact_file'));
+   const fileTool=routes.result.tools.find((tool:{name:string})=>tool.name==='glow_register_factory_artifact_file');
+   assert.deepEqual(fileTool?._meta?.['openai/fileParams'],['file']);
+   assert.ok(fileTool?.inputSchema?.properties?.file);
    assert.ok(!names.includes('glow_recover_blocked_factory_stage'));
    assert.ok(!names.includes('glow_approve_factory_stage'));
   }finally{await handler.close();}

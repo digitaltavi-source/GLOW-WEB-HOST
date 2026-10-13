@@ -8,6 +8,7 @@ const HASH=z.string().regex(/^[0-9a-f]{64}$/);
 const Common={mission_id:z.string().regex(/^NM-[a-f0-9]{12}$/),expected_state_version:z.number().int().min(1),phase_work_id:z.string().min(1).max(128),work_contract_revision:z.number().int().min(1)};
 const capabilityBindings=z.object({phase:z.literal('H2'),phase_work_id:z.string().min(1),capability_id:z.string().min(1).max(128),h1_payload_sha256:HASH,state_version:z.number().int().min(1),blueprint_revision:z.number().int().min(1),result_sha256:HASH.optional()}).strict();
 const assuranceBindings=z.object({phase:z.literal('H2'),state_version:z.number().int().min(1),blueprint_revision:z.number().int().min(1),h1_identity:z.string().min(1).max(256),h1_payload_sha256:HASH,design_contract_sha256:HASH}).strict();
+export const ArtifactBindingSchema=z.object({...Common}).strict();
 export const ArtifactAdmissionSchema=z.object({...Common,data_base64:z.string().min(4).max(12*1024*1024)}).strict();
 export const CapabilityAdmissionSchema=z.object({...Common,kind:z.literal('CAPABILITY'),artifact_sha256:HASH,evidence_sha256:HASH,reviewed_result:z.record(z.string(),z.unknown()),bindings:capabilityBindings}).strict();
 export const AssuranceAdmissionSchema=z.object({...Common,kind:z.literal('ASSURANCE'),artifact_sha256:HASH,evidence_sha256:HASH,bindings:assuranceBindings}).strict();
@@ -33,6 +34,25 @@ export function evidenceAdmissionChallenge(code:string,metadataUrl:string){
  return {'mcp/www_authenticate':[`Bearer resource_metadata="${new URL(metadataUrl)}", error="${code==='EVIDENCE_AUTHORITY_EXPIRED'?'invalid_token':'insufficient_scope'}", error_description="${code==='EVIDENCE_AUTHORITY_EXPIRED'?'Your access token expired. Reconnect to continue.':'Reconnect to grant web.evidence.admit for evidence registration.'}", scope="web.run ${EVIDENCE_ADMISSION_SCOPE}"`]};
 }
 type Execute=(subject:string,request:WebRequestType,actor?:ReturnType<typeof evidenceAdmissionActor>)=>Promise<WebResponseType>;
+
+export function createArtifactAdmissionPreflight(read:Execute){
+ return async(auth:AcceptanceAuth|undefined,raw:unknown)=>{
+  evidenceAdmissionActor(auth);
+  const input=ArtifactBindingSchema.parse(raw);
+  const subject=String(auth!.extra!.sub);
+  const request:WebRequestType={request_id:randomUUID(),operation:'next_factory_control',role:'unspecified',locale:'vi-VN',input:{action:'get_work',args:{mission_id:input.mission_id}}};
+  const work=await read(subject,request);
+  if(work.status==='failed'||!work.result)return work;
+  const payload=work.result.payload as Record<string,unknown>|undefined;
+  const plan=payload?.preproduction_capability_plan as Record<string,unknown>|undefined;
+  if(payload?.phase!=='H2'||!plan)throw Error('H2_ADMISSION_WORK_REQUIRED');
+  if(payload.state_version!==input.expected_state_version)throw Error('STATE_CONFLICT');
+  if(plan.phase_work_id!==input.phase_work_id)throw Error('WORK_ID_MISMATCH');
+  if(plan.work_contract_revision!==input.work_contract_revision)throw Error('WORK_CONTRACT_REVISION_MISMATCH');
+  evidenceAdmissionActor(auth);
+  return work;
+ };
+}
 export function createEvidenceAdmissionExecutor(read:Execute,write:Execute){
  let inFlight=0;
  return async(auth:AcceptanceAuth|undefined,raw:unknown):Promise<WebResponseType>=>{

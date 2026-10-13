@@ -1,7 +1,7 @@
 import {ArtifactLookupSchema} from './artifact-lookup.js';
 import {connectionDiagnostics} from './connection-diagnostics.js';
 import {SystemAuditSchema,GetSystemAuditSchema,createSystemAuditExecutor} from './system-audit.js';
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { getOAuthProtectedResourceMetadataUrl, requireBearerAuth } from "@modelcontextprotocol/express";
@@ -13,14 +13,15 @@ import { loadConfig } from "./config.js";
 import { loadOAuthConfig, loadStaticBearerConfig, createJwtVerifier, createStaticBearerVerifier, createHybridVerifier } from "./oauth.js";
 import { callProtectedService, callProtectedOperator, checkProtectedReadiness } from "./backend.js";
 import { WebRequest } from "./contracts.js";
-import {EVIDENCE_ADMISSION_SCOPE,ArtifactAdmissionSchema,EvidenceAdmissionSchema,evidenceAdmissionStatus,evidenceAdmissionChallenge,createEvidenceAdmissionExecutor} from './evidence-admission.js';
+import {EVIDENCE_ADMISSION_SCOPE,ArtifactAdmissionSchema,EvidenceAdmissionSchema,evidenceAdmissionStatus,evidenceAdmissionChallenge,createEvidenceAdmissionExecutor,createArtifactAdmissionPreflight} from './evidence-admission.js';
+import {fetchAuthorizedFile} from './file-input.js';
 import { classifyWorkResponse } from "./work-response.js";
 import { buildProtectedResourceMetadata } from "./resource-metadata.js";
 import { createGlowMcpExpressApp } from "./mcp-app.js";
 import { NextFactoryControlInputSchema } from "./next-factory-schema.js";
 import {PHASE_ACCEPTANCE_SCOPE,PHASE_ACCEPTANCE_MISSION_PATTERN,toolOAuthMetadata,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,phaseAcceptanceAuthorityStatus,validateAcceptanceBytes} from './phase-acceptance.js';
 
-const HOST_ADAPTER_REVISION = "0.3.9-oauth-scope-challenge-candidate";
+const HOST_ADAPTER_REVISION = "0.3.10-file-artifact-input-candidate";
 const HOST_CONTRACT_ID = "GWF_NEXT_FACTORY_ACTIVE_DEMO_CANDIDATE_V2";
 const config = loadConfig();
 const configuredMcpServerUrl = new URL(process.env.GLOW_PUBLIC_MCP_URL ?? `http://127.0.0.1:${config.port}/mcp`);
@@ -39,6 +40,19 @@ const requiredScopes = authMode === "static_bearer"
       .split(/\s+/).map(v=>v.trim()).filter(Boolean);
 if(!requiredScopes.length)throw Error('GATEWAY_ACTION_SCOPE_REQUIRED');
 if(gatewayProfile!=='DEVELOPMENT'&&requiredScopes.some(x=>['email','openid','profile'].includes(x)))throw Error('GATEWAY_ACTION_SCOPE_REQUIRED');
+const AuthorizedFileAdmissionSchema=z.object({
+  mission_id:z.string().regex(/^NM-[a-f0-9]{12}$/),
+  expected_state_version:z.number().int().min(1),
+  phase_work_id:z.string().min(1).max(128),
+  work_contract_revision:z.number().int().min(1),
+  file:z.object({
+    download_url:z.string().min(1),
+    file_id:z.string().min(1),
+    mime_type:z.string().min(1).optional(),
+    file_name:z.string().min(1).optional()
+  }).strict()
+}).strict();
+
 const verifier = authMode === "static_bearer"
   ? createStaticBearerVerifier(loadStaticBearerConfig())
   : authMode === "hybrid"
@@ -100,6 +114,7 @@ const admitEvidence=createEvidenceAdmissionExecutor(
  (subject,request)=>callProtectedService(config,subject,request),
  (subject,request,actor)=>callProtectedOperator(config,subject,request,actor!)
 );
+const preflightArtifactFile=createArtifactAdmissionPreflight((subject,request)=>callProtectedService(config,subject,request));
 const reportSystemAudit=createSystemAuditExecutor((subject,request,actor)=>callProtectedOperator(config,subject,request,actor));
 const buildServer: McpServerFactory = ctx => {
   const server = new McpServer(
@@ -390,6 +405,36 @@ const buildServer: McpServerFactory = ctx => {
       return {...toolResult(out as unknown as Record<string,unknown>),...(out.status==='failed'?{isError:true}:{})};
     }catch(error){
       const code=error instanceof Error?error.message:'ARTIFACT_ADMISSION_FAILED';
+      const challenge=evidenceAdmissionChallenge(code,resourceMetadataV2Url);
+      return {...toolError(code),...(challenge?{_meta:challenge}:{})};
+    }
+  });
+  server.registerTool('glow_register_factory_artifact_file',{
+    title:'Register actual H2 artifact from authorized ChatGPT file',
+    description:'Requires dedicated web.evidence.admit scope and RBAC. Reads one ChatGPT-authorized file reference, enforces bounded HTTPS transport, then submits the exact bytes through the existing canonical artifact admission path. Returns identity only, not quality approval. Never upload dummy bytes or invent evidence.',
+    annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:true},
+    ...(authMode==='oauth'?toolOAuthMetadata([...requiredScopes,EVIDENCE_ADMISSION_SCOPE]):{}),
+    _meta:{'openai/fileParams':['file']},
+    inputSchema:AuthorizedFileAdmissionSchema
+  },async ({file,...binding})=>{
+    try{
+      if(authMode!=='oauth')throw Error('EVIDENCE_OAUTH_ONLY_REQUIRED');
+      const preflight=await preflightArtifactFile(ctx.authInfo,binding);
+      if(preflight.status==='failed'||!preflight.result)return {...toolResult(preflight as unknown as Record<string,unknown>),isError:true};
+      const fetched=await fetchAuthorizedFile(file);
+      const localSha=createHash('sha256').update(fetched.bytes).digest('hex');
+      const args={...binding,data_base64:fetched.bytes.toString('base64')};
+      const out=await admitEvidence(ctx.authInfo,{action:'register_artifact',args});
+      if(out.status!=='accepted')return {...toolResult(out as unknown as Record<string,unknown>),isError:true};
+      const payload=(out.result as {payload?:Record<string,unknown>}|null)?.payload;
+      const backendSha=payload?.artifact_sha256;
+      if(typeof backendSha!=='string'||backendSha!==localSha)throw Error('FILE_ARTIFACT_SHA_MISMATCH');
+      return toolResult({
+        ...(out as unknown as Record<string,unknown>),
+        file_transport:{file_id:fetched.file_id,size_bytes:fetched.bytes.byteLength,sha256:localSha,mime_type:fetched.mime_type,file_name:fetched.file_name}
+      });
+    }catch(error){
+      const code=error instanceof Error?error.message:'FILE_ARTIFACT_ADMISSION_FAILED';
       const challenge=evidenceAdmissionChallenge(code,resourceMetadataV2Url);
       return {...toolError(code),...(challenge?{_meta:challenge}:{})};
     }
