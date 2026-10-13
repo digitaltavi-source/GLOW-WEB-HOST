@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
 import {generateKeyPair,exportJWK,SignJWT} from 'jose';
 import {createJwtVerifier} from '../src/oauth.js';
-import {evidenceAdmissionActor,evidenceAdmissionStatus,evidenceAdmissionChallenge,createEvidenceAdmissionExecutor,AdmissionHttpSchema} from '../src/evidence-admission.js';
+import {createArtifactAdmissionPreflight,evidenceAdmissionActor,evidenceAdmissionStatus,evidenceAdmissionChallenge,createEvidenceAdmissionExecutor,AdmissionHttpSchema} from '../src/evidence-admission.js';
 import {phaseAcceptanceActor} from '../src/phase-acceptance.js';
 import type {WebRequestType,WebResponseType} from '../src/contracts.js';
 const auth={scopes:['web.run','web.evidence.admit'],expiresAt:Math.floor(Date.now()/1000)+300,extra:{authentication:'JWT_VERIFIED',sub:'owner',iss:'https://issuer.test/',operator_evidence_admission_granted:true}};
@@ -32,6 +32,14 @@ test('identity, RBAC and expiry are independently mandatory',()=>{
   assert.ok(challenge.includes('error="'+error+'"'));assert.match(challenge,/error_description="[^"]+"/);assert.match(challenge,/resource_metadata="https:\/\/glow.test\/metadata"/);assert.match(challenge,/scope="web.run web.evidence.admit"/);
  }
  assert.equal(evidenceAdmissionChallenge('EVIDENCE_ADMISSION_RBAC_REQUIRED','https://glow.test/metadata'),null);
+});
+test('file artifact preflight validates authority and exact current work before transport',async()=>{
+ let reads=0;
+ const preflight=createArtifactAdmissionPreflight(async()=>{reads++;return response({phase:'H2',state_version:2,preproduction_capability_plan:plan});});
+ const binding={mission_id:args.mission_id,expected_state_version:2,phase_work_id:plan.phase_work_id,work_contract_revision:2};
+ const ok=await preflight(auth,binding);assert.equal(ok.status,'accepted');assert.equal(reads,1);
+ await assert.rejects(()=>preflight(auth,{...binding,expected_state_version:3}),/STATE_CONFLICT/);assert.equal(reads,2);
+ const before=reads;await assert.rejects(()=>preflight({...auth,scopes:['web.run']},binding),/SCOPE_REQUIRED/);assert.equal(reads,before);
 });
 test('artifact uses authenticated owner and server-owned scoped actor only',async()=>{
  const f=fixture();await f.execute(auth,{action:'register_artifact',args});
