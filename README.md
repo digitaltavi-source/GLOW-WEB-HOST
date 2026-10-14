@@ -1,61 +1,39 @@
 # GLOW Web Host
 
-Status: `CANDIDATE / DEV_FALSIFICATION_PASS / NOT FULLY FIELD VERIFIED`
+Canonical purpose: one remote MCP/OAuth host adapter for the protected GLOW Web Factory.
 
-GLOW-WEB-HOST is the **public experience, trust surface and AI gateway** for the protected GLOW Web Factory.
+## Active boundary
 
-```text
-PUBLIC USER / CLIENT / PARTNER / REVIEWER
-  -> GLOW Web public experience
-  -> Trust / capability / quality surfaces
-  -> mission workspace and declassified result surfaces
-  -> ChatGPT / Claude / Gemini / compatible AI host when reasoning is needed
-  -> OAuth + MCP (/mcp-v2)
-  -> protected Factory boundary
-  -> private GLOW-WEB-FACTORY
+- Canonical MCP endpoint: `/mcp-v2`
+- Authentication: OAuth in DEMO/PRODUCTION
+- Factory state/authority remains in the protected Factory backend.
+- This repository does not own Process semantics, Capability authority, Canon, qualification, or release authority.
+- ChatGPT app registration is external to this repository; the app scans this MCP endpoint for tools.
+
+## Required critical tools
+
+The MCP surface must include, among the governed Factory tools:
+
+- `glow_get_factory_status`
+- `glow_get_factory_work`
+- `glow_evidence_admission_preflight`
+- `glow_register_factory_artifact`
+- `glow_register_factory_artifact_file`
+- `glow_register_factory_evidence`
+- `glow_prepare_phase_acceptance`
+- `glow_next_factory_accept_phase`
+
+`glow_register_factory_artifact_file` must retain `_meta["openai/fileParams"] = ["file"]`.
+
+## Build and verification
+
+```bash
+npm ci
+npm test
 ```
 
-## Public Host responsibilities
+CI is required before promotion. A source-level guard also checks that the critical file-backed tool and OpenAI file parameter metadata remain present.
 
-GLOW-WEB-HOST owns only the public boundary:
-- customer-facing showcase and mission workspace;
-- declassified status/result surfaces;
-- public Trust Center and professional capability/quality explanation;
-- AI handoff capsule;
-- MCP/OAuth transport;
-- public schemas, health/readiness and deployment metadata;
-- explicit declassification before information reaches a public surface.
+## Release rule
 
-It does **not** own Factory Control, Process semantics, KIT/Capability implementation, private evidence, qualification authority, private runtime state or proprietary production methods.
-
-## Three public modes
-
-1. **EXPERIENCE** — help a customer understand GLOW and start a website mission.
-2. **OPERATE** — provide the bounded workspace, AI handoff, OAuth and MCP transport needed to work with the protected Factory.
-3. **TRUST** — let recruiters, partners, enterprise customers and technical reviewers evaluate architecture discipline, capability coverage, security boundaries, quality controls, release discipline and selected declassified evidence without exposing protected Factory IP.
-
-See `PUBLIC_EXPERIENCE_CONTRACT.md`, `PUBLIC_TRUST_CENTER_CONTRACT.md` and `SECURITY_BOUNDARY.md`.
-
-## Security boundary
-
-`PUBLIC HOST != PROTECTED FACTORY`
-
-`WEB WORKSPACE != FACTORY AUTHORITY`
-
-`PUBLIC PROOF != PRIVATE IMPLEMENTATION`
-
-`MODEL_SESSION_PRIVATE != PUBLIC_DECLASSIFIED`
-
-Protected Factory internals, proprietary methods, KIT/Capability implementation, private evidence, credentials, private prompts and private runtime state must not be copied into this repository.
-
-## Repository and release discipline
-
-- `main` is the canonical public Host release source.
-- `sandbox` is the public Host engineering/test branch.
-- runtime/component promotion must bind an exact reviewed commit SHA; a branch name alone is not release evidence.
-- the private Factory may assemble an exact Host commit, but long-lived production identity should converge on an accepted `main` Host commit after verification.
-- documentation-only sandbox work does not by itself rebind the deployed Factory assembly.
-
-Canonical deployment target: `digitaltavi-source/GLOW-WEB-HOST@main`.
-
-Claim boundary: `PUBLIC_UI_EXISTS != FACTORY_INTEGRATED != HOSTINGER_VERIFIED != AI_HOST_REPRODUCED != FIELD_VERIFIED`.
+A branch name is not release evidence. Deploy only an exact reviewed commit SHA. Keep one canonical ChatGPT app connection to this endpoint; experimental personal/cleanroom wrappers are not part of the supported integration path.
