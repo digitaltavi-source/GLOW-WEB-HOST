@@ -1,0 +1,83 @@
+{
+  "schema": "GLOW_WEB_HOST_CONNECTOR_OWNERSHIP_V1",
+  "state": "SANDBOX_CANDIDATE_NOT_RELEASED",
+  "repository": "digitaltavi-source/GLOW-WEB-HOST",
+  "branch_policy": {
+    "release": "main",
+    "engineering": "sandbox",
+    "other_branches": "HISTORICAL_OR_ACTIVE_PR_HOLD_UNTIL_LINEAGE_REVIEW",
+    "no_channel_branches": true
+  },
+  "channels": {
+    "chatgpt_mcp": {
+      "public_endpoint": "/mcp-v2",
+      "docs": [
+        "adapters/chatgpt/README.md",
+        "PUBLIC_AI_HOST_INTEGRATION_GUIDE.md"
+      ],
+      "role": "AUTHENTICATED_TOOL_TRANSPORT_NOT_FACTORY_AUTHORITY"
+    },
+    "direct_website": {
+      "public_endpoints": [
+        "/",
+        "/app",
+        "/workspace"
+      ],
+      "docs": [
+        "adapters/web/README.md",
+        "PUBLIC_EXPERIENCE_CONTRACT.md"
+      ],
+      "ui": [
+        "public/index.html",
+        "public/workspace.html",
+        "public/workspace.css",
+        "public/workspace.js"
+      ],
+      "role": "CUSTOMER_SAFE_UI_AND_DRAFT_NOT_PRIVATE_EXECUTION"
+    },
+    "shared_trust": {
+      "files": [
+        "src/oauth.ts",
+        "src/backend.ts",
+        "src/mcp-app.ts",
+        "src/evidence-admission.ts",
+        "src/phase-acceptance.ts",
+        "src/file-input.ts",
+        "src/connection-diagnostics.ts",
+        "src/contracts.ts"
+      ],
+      "role": "COMMON_OAUTH_GATEWAY_AND_DECLASSIFICATION_REQUIRES_BOTH_LANES_REGRESSION"
+    },
+    "staging": {
+      "files": [
+        "scripts/verify-private-package.mjs",
+        "staging/README.md",
+        "HOSTINGER_PUBLIC_NODE_DEPLOYMENT_PROFILE_v0.1.0.json"
+      ],
+      "role": "PUBLIC_HOST_STAGING_NO_PRIVATE_SOURCE_IN_GIT"
+    }
+  },
+  "shared_source_frozen_git_blobs": {
+    "src/oauth.ts": "f1a5f8a74109023ea3ca4affb8d1755519f106e7",
+    "src/backend.ts": "a06b8dcf30f01131f0b8638882ccc44a20e72966",
+    "src/mcp-app.ts": "df3afd516205c803e901cd8f279d49e5e121c651",
+    "src/evidence-admission.ts": "3904c51b774597d15c399479af2afa14fb948855",
+    "src/phase-acceptance.ts": "0fd8e7eec61e83a8c04c4779c617556154541846",
+    "src/file-input.ts": "569934bf7e136a70a686c61dcfa0803b6dceb4bd",
+    "src/connection-diagnostics.ts": "100ff578cddc6a29e8fccd8bda63f02e0beccef6",
+    "src/contracts.ts": "27ff77980b43e08f5146a05500e39f6ea801741e"
+  },
+  "boundary": {
+    "public_repo_excludes": [
+      "protected runtime implementation",
+      "project-state database",
+      "private evidence and grading",
+      "secrets or bearer tokens"
+    ],
+    "web_page_internal_stage_labels": "FORBIDDEN",
+    "private_package_provenance": "EXTERNAL_REQUIRED_NOT_PROVEN_BY_PUBLIC_MANIFEST",
+    "web_direct_submission": "NOT_IMPLEMENTED"
+  },
+  "change_rule": "CHANGES_TO_SHARED_SOURCE_REQUIRE_NEW_EXPLICIT_REVIEW_REBASELINE_AND_TWO_LANE_REGRESSION_NOT_SILENT_HASH_UPDATE",
+  "release_gate": "PIN_EXACT_PUBLIC_SHA_AND_PRIVATE_COMPONENT_HASH_VERIFY_AUTH_DECLASSIFICATION_BROWSER_CI_BEFORE_FOUNDER_RELEASE"
+}

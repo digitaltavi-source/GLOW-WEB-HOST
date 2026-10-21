@@ -1,33 +1,27 @@
-# GLOW Web Public Experience Contract
-Status: CANDIDATE / DEV_FALSIFICATION_REQUIRED
+# GLOW Web — Public Experience Contract
 
-## Role
-GLOW-WEB-HOST is the public experience, workspace and AI gateway for the protected GLOW Web Factory.
+**State:** `SANDBOX_CANDIDATE / NOT_RELEASED`
+**Scope:** customer-facing experience and safe connection to the protected service.
 
-Owns:
-- public landing/showcase;
-- mission intake draft UI;
-- public mission/result display;
-- AI-provider handoff UI;
-- MCP/OAuth transport;
-- public schemas and declassification;
-- health/readiness surfaces.
+GLOW-WEB-HOST owns public showcase pages, website-intake drafts, customer-safe workspace previews, authentication/transport and declassified results. The protected Factory remains the single authority for project processing, decisions, specialist resources, quality evidence and approval. A UI cannot grant approval or invent progress.
 
-Does not own Factory Control, Process semantics, KIT internals, Capability internals, private evidence, qualification authority or protected runtime state.
+## Source routes (not evidence of deployment)
 
-## Interaction law
-STRUCTURED_PUBLIC_ACTION -> WEB UI
-CONVERSATIONAL_REASONING -> AI HOST
-PUBLIC RESULT -> WEB RESULT CENTER
-PRIVATE FACTORY STATE -> NEVER RENDERED DIRECTLY
+- `/` — public showcase and project introduction
+- `/app` — backward-compatible alias of the public showcase (**not** the actual workspace)
+- `/workspace` — candidate customer workspace, in Host `sandbox` only until separately released
+- `/api/public/profile` — public Host profile; not private mission state
+- `/healthz` — host process health
+- `/readyz` — protected service connectivity/readiness when available
+- `/mcp-v2` — authenticated ChatGPT/MCP integration route; **not** a website submission API
 
-## Public routes
-/ = showcase
-/app = workspace
-/api/public/profile = declassified runtime profile
-/healthz = public process health
-/readyz = protected Factory readiness
-/mcp-v2 = canonical AI-host protocol route
+**Current direct-website limitation:** the workspace builds a customer-authorized copyable draft. It does not create a project directly in the protected service, perform stage transitions, or present verified project progress. Connection readiness never means a specific project has been accepted or released.
 
-## Claim boundary
-UI_EXISTS != FACTORY_INTEGRATED != HOSTINGER_VERIFIED != AI_HOST_REPRODUCED
+## Change and disclosure requirements
+
+- `adapters/chatgpt/` and `adapters/web/` are two source ownership lanes, not new Git branches.
+- Shared OAuth, gateway and declassification modules require regression in **both** channels.
+- User-facing progress must use authorized, ordinary customer language and may not reveal restricted internal stages, capability routing, or evaluation material.
+- Private implementation and credentials do not belong in public Git. Release needs exact source identity, current tests, Founder authority and separately evidenced review.
+
+`PAGE_EXISTS != SERVICE_INTEGRATED != RELEASED != FIELD_VERIFIED`

@@ -81,6 +81,15 @@ See `SECURITY_BOUNDARY.md` and `PUBLIC_EXPORT_MANIFEST.json` for the enforceable
 
 A Factory assembly may pin an exact immutable Host SHA. Branch names do not replace exact component identity.
 
+## Auditable connector ownership
+
+See `adapters/CONNECTOR_OWNERSHIP.json` for the active candidate mapping of the two public channels, their shared trust layer, immutable source hashes and staging ownership. `tests/connector-ownership.test.ts` checks the mapping through the standard `npm test` suite.
+
+- Keep the authenticated ChatGPT/MCP lane isolated from `public/` browser UI changes.
+- `/app` is a showcase compatibility alias; the unreleased customer workspace is `/workspace`.
+- Do not relocate root export, operator or deployment contracts until exact dependent references and release regression have been checked. A path move is not a cosmetic cleanup.
+- No new permanent Git branch for either public connector. Historical promotion/repair branches are reviewed separately; active PR branches are not automatically disposable.
+
 ## Hygiene rule
 
 Do not introduce one-off logs, private handoffs, Factory evidence dumps, temporary patches or duplicate preservation trees at repository root. Keep this repo public-product oriented and move experimental material to `sandbox`-only bounded locations when required.
