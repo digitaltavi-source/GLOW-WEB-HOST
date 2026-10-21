@@ -42,3 +42,21 @@
 **Four paths:** NORMAL exact package check pass; FAILURE missing/mismatched bytes test; ADVERSARIAL symlink/traversal/credential/duplicate/checkout-root test; RECOVERY does not apply to a non-mutating verifier; live package deployment rollback NOT_RUN. No independent audit claim. No user data or model-session-private payload copied.
 
 **Disposition:** `DEV_REGRESSION_8_PASS / MCP_ROUTE_STATIC_FENCE / FULL_HOST_REGRESSION_BLOCKED / NO_RELEASE`. Next: obtain exact complete Host sandbox checkout/dependency environment and execute whole Node suite + safe website/MCP fixture route tests, then qualified browser visual QA before any main/live change.
+
+## 2026-10-21 — Branch hygiene and connector ownership audit
+
+**Authority:** Founder requested investigation and professional organization, not deletion or production promotion. BUILDER SELF_REVIEW / ENGINEERING R&D / NOT INDEPENDENT AUDIT.
+
+**Current source:** Host main `d63cbdf017d5e47cb50b77f0c85fe2198bffdbb3`, Host sandbox prior `7f2c023a5768bdeb936584cb8aa5d339692372c7`; Factory main `dc10bb41384880cb6677648936bf44c3014bd222`. Factory sandbox has changed independently, so do not treat historical sandbox SHA as immutable. No changes to Factory, Host main, Hostinger or plugin.
+
+**Direct branch and PR inspection:** Host holds 5 branches: main/sandbox plus `canonical-host-clean-v1` (PR#5 merged 2026-10-14), `promotion/file-backed-artifact-admission-20261013` (PR#4 merged 2026-10-13), and `repair/mcp-oauth-cleanroom-20261011` (PR#2 OPEN, cannot delete). Factory holds 6 branches: main/backup/sandbox plus `promotion/file-backed-host-rebind-20261013` (PR#28 merged), `promotion/file-backed-host-seal-20261013` (PR#29 merged), and `repair/oauth-host-identity-20261011` (PR#25 OPEN, cannot delete). All 6 extra branch heads **diverge** from current main, so `MERGED_PR != SAFE_BRANCH_DELETE`; 4 merged PR lines require exact unmerged-commit/value checks before Founder-approved cleanup. Both open repair PRs have nontrivial unresolved work. Host GitHub rulesets list empty; Factory ruleset read returned HTTP403 plan restriction. Neither branch governance nor historical merge records constitute technical write protection.
+
+**Host code/layout findings:** Shared MCP/OAuth/backend/acceptance files inspected at exact current Git blobs. Host sandbox server adds only three `/workspace` static routes relative to current Host main; removing that addition yields identical `src/server.ts` bytes. Existing `/mcp-v2` route remains singular. Stale public experience contract described `/app` as workspace though code maps `/app` to showcase. Existing public operator guide included restricted internal stage vocabulary and low-level payload instructions; not necessary in a public guide.
+
+**Actual narrow changes — Host sandbox commit `247a910973ad490c47aa1df7dfb25fa7e6ff759a`:** added `adapters/CONNECTOR_OWNERSHIP.json` declaring separate website and ChatGPT lanes, shared trust file owner with frozen Git blobs, staging owner and no added permanent branches. Corrected `PUBLIC_EXPERIENCE_CONTRACT.md` to reflect `/app` showcase alias and `/workspace` unreleased draft. Replaced public `OPERATOR_GATEWAY.md` with a declassified security outline (historical Git still retains previous details), updated `REPOSITORY_LAYOUT.md`, authored `tests/connector-ownership.test.ts` to check source identities and independent routes. NO operational MCP, auth, Factory or provider changes.
+
+**Verification:** GH commit and file readback only; new TypeScript suite is **NOT_RUN**. C07 independent testing, live end-to-end plugin, package builds, UI screenshot, release/branch cleanup all NOT_RUN. No green claim from static artifact production.
+
+**Four paths:** normal two lanes/stable source owner; failure stale route/profile and unqualified test; adversarial stage leakage/branch deletion with open PR/shared auth drift; recovery preserve PR heads and exact SHA until approved equivalent/replay. Real executable four-path integration NOT_RUN.
+
+**Disposition:** `MANDATORY_FIX / REPOSITORY_BOUNDARY_CONTROL_CANDIDATE / NO_BRANCH_DELETION / NO_LIVE_CHANGE`. Next gate: execute full Host test suite and source disclosure/regression checks at exact sandbox SHA, then separately verify all branch unique commits/consumers and safely dispose of obsolete refs only with Founder authorization.
