@@ -1,0 +1,191 @@
+{
+  "schema": "GLOW_WEB_TWO_CHANNEL_RND_CASES_V1",
+  "classification": "PUBLIC_SAFE_PROPOSED_CASES_ONLY",
+  "source_repo": "digitaltavi-source/GLOW-WEB-HOST",
+  "source_head": "affba9689139e8e41edca9d4c9ae05b79313eb12",
+  "coverage": {
+    "NORMAL": 6,
+    "FAILURE": 5,
+    "ADVERSARIAL": 7,
+    "RECOVERY": 4
+  },
+  "run_status": "ALL_NOT_RUN",
+  "cases": [
+    {
+      "id": "N01",
+      "path": "NORMAL",
+      "scenario": "website route and Vietnamese UTF-8 loads without network mutation",
+      "expected": "GET /workspace 200; accessible UI; no project created",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "N02",
+      "path": "NORMAL",
+      "scenario": "existing MCP authenticated tool discovery",
+      "expected": "tool inventory/authorization same as frozen good baseline",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "N03",
+      "path": "NORMAL",
+      "scenario": "web OIDC login & owner session",
+      "expected": "verified subject, server cookie, no token in JS",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "N04",
+      "path": "NORMAL",
+      "scenario": "customer declassified project status",
+      "expected": "only allowed fields, owner-verified",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "N05",
+      "path": "NORMAL",
+      "scenario": "review-before-submit and accepted receipt",
+      "expected": "canonical server-issued ID, no false completion",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "N06",
+      "path": "NORMAL",
+      "scenario": "same project both channels",
+      "expected": "identity link authorization; same authoritative state",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "F01",
+      "path": "FAILURE",
+      "scenario": "protected service unavailable",
+      "expected": "503/degraded, no invented progress/approval",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "F02",
+      "path": "FAILURE",
+      "scenario": "unauthenticated browser",
+      "expected": "401, no request to protected service",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "F03",
+      "path": "FAILURE",
+      "scenario": "insufficient scope or project ownership",
+      "expected": "403/404 as policy, zero sensitive disclosure",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "F04",
+      "path": "FAILURE",
+      "scenario": "HTTP timeout after possible write",
+      "expected": "reconcile request-id before retry; no duplicate",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "F05",
+      "path": "FAILURE",
+      "scenario": "longer than Hostinger HTTP budget",
+      "expected": "bounded async receipt, no held-open >120s request",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "A01",
+      "path": "ADVERSARIAL",
+      "scenario": "CSRF from foreign origin",
+      "expected": "server refuses state change",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "A02",
+      "path": "ADVERSARIAL",
+      "scenario": "JWT issuer/audience substitution",
+      "expected": "reject before protected call",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "A03",
+      "path": "ADVERSARIAL",
+      "scenario": "identity text spoofing/cross-tenant project",
+      "expected": "never trust supplied subject, reject",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "A04",
+      "path": "ADVERSARIAL",
+      "scenario": "same idempotency key different payload",
+      "expected": "reject conflict, no overwrite",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "A05",
+      "path": "ADVERSARIAL",
+      "scenario": "duplicate concurrent click",
+      "expected": "single accepted effect",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "A06",
+      "path": "ADVERSARIAL",
+      "scenario": "unexpected protected DTO fields",
+      "expected": "fail-closed declassification",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "A07",
+      "path": "ADVERSARIAL",
+      "scenario": "MCP write tool called via web without role binding",
+      "expected": "reject; no public generic tool passthrough",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "R01",
+      "path": "RECOVERY",
+      "scenario": "session expires and user returns",
+      "expected": "re-auth without cross-account mix",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "R02",
+      "path": "RECOVERY",
+      "scenario": "backend outage then restart",
+      "expected": "status resumes from protected state, no fake reset",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "R03",
+      "path": "RECOVERY",
+      "scenario": "rollback Host web candidate",
+      "expected": "MCP stays on frozen baseline; no state loss",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    },
+    {
+      "id": "R04",
+      "path": "RECOVERY",
+      "scenario": "stale client status after update",
+      "expected": "refresh authoritative state, invalidate local snapshot",
+      "evidence": "NOT_RUN",
+      "verdict": "NOT_EVALUATED"
+    }
+  ]
+}
