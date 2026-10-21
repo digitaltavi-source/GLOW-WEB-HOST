@@ -35,6 +35,25 @@ test('real OAuth MCP preparation: step-up before backend, reject scope-only priv
   assert.deepEqual(listed.result.tools.find((tool:{name:string})=>tool.name==='glow_prepare_phase_acceptance')._meta.securitySchemes,
     [{type:'oauth2',scopes:['web.run','web.accept']}]);
   // Missing scope must be an MCP error result so the client can start OAuth step-up.
+  const acceptanceTool=listed.result.tools.find((tool:{name:string})=>tool.name==='glow_phase_acceptance_preflight');
+  assert.ok(acceptanceTool,'payload-free acceptance preflight must be discoverable');
+  assert.equal(acceptanceTool.annotations.readOnlyHint,true);
+  assert.deepEqual(acceptanceTool._meta.securitySchemes,[{type:'oauth2',scopes:['web.run','web.accept']}]);
+  const acceptanceMissing=await rpc(narrow,'tools/call',{name:'glow_phase_acceptance_preflight',arguments:{}});
+  assert.equal(acceptanceMissing.result.isError,true);
+  assert.equal(acceptanceMissing.result.structuredContent.code,'OPERATOR_ACCEPTANCE_SCOPE_REQUIRED');
+  assert.match(acceptanceMissing.result._meta['mcp/www_authenticate'][0],/scope="web.run web.accept"/);
+  assert.equal(backendCalls,0);
+  const acceptanceDenied=await rpc(await sign('web.run web.accept',[]),'tools/call',{name:'glow_phase_acceptance_preflight',arguments:{}});
+  assert.equal(acceptanceDenied.result.structuredContent.eligible,false);
+  assert.equal(acceptanceDenied.result.structuredContent.code,'OPERATOR_RBAC_PERMISSION_REQUIRED');
+  assert.equal(acceptanceDenied.result._meta?.['mcp/www_authenticate'],undefined);
+  assert.equal(backendCalls,0);
+  const acceptanceReady=await rpc(await sign('web.run web.accept',['web.accept']),'tools/call',{name:'glow_phase_acceptance_preflight',arguments:{}});
+  assert.equal(acceptanceReady.result.structuredContent.eligible,true);
+  assert.notEqual(acceptanceReady.result.isError,true);
+  assert.equal(acceptanceReady.result._meta?.['mcp/www_authenticate'],undefined);
+  assert.equal(backendCalls,0);
   const admissionMissing=await rpc(narrow,'tools/call',{name:'glow_evidence_admission_preflight',arguments:{}});
   assert.equal(admissionMissing.result.isError,true);
   assert.equal(admissionMissing.result.structuredContent.code,'EVIDENCE_ADMISSION_SCOPE_REQUIRED');
@@ -62,6 +81,10 @@ test('real OAuth MCP preparation: step-up before backend, reject scope-only priv
    const routes=await rpc(narrow,'tools/list',{});
    const names=routes.result.tools.map((tool:{name:string})=>tool.name);
    assert.ok(names.includes('glow_register_factory_artifact'));
+   assert.ok(names.includes('glow_register_factory_artifact_file'));
+   const fileTool=routes.result.tools.find((tool:{name:string})=>tool.name==='glow_register_factory_artifact_file');
+   assert.deepEqual(fileTool?._meta?.['openai/fileParams'],['file']);
+   assert.ok(fileTool?.inputSchema?.properties?.file);
    assert.ok(!names.includes('glow_recover_blocked_factory_stage'));
    assert.ok(!names.includes('glow_approve_factory_stage'));
   }finally{await handler.close();}
