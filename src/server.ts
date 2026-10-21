@@ -551,6 +551,16 @@ app.get("/",(_req,res) => {
 app.get("/app",(_req,res) => {
   res.type("html").sendFile(path.join(publicDir,"index.html"));
 });
+app.get("/workspace",(_req,res) => {
+  res.type("html").sendFile(path.join(publicDir,"workspace.html"));
+});
+app.get("/workspace.css",(_req,res) => {
+  res.type("text/css; charset=utf-8").sendFile(path.join(publicDir,"workspace.css"));
+});
+app.get("/workspace.js",(_req,res) => {
+  res.type("application/javascript; charset=utf-8").sendFile(path.join(publicDir,"workspace.js"));
+});
+
 
 app.get("/app.css",(_req,res) => {
   res.type("text/css").sendFile(path.join(publicDir,"app.css"));
