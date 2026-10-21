@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync,mkdirSync,writeFileSync,rmSync,symlinkSync} from 'node:fs';
+import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync,symlinkSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
@@ -22,3 +22,12 @@ caseRun('symlink fails',f=>{rmSync(f.file);symlinkSync(f.manifest,f.file)},'SYML
 caseRun('credential path fails',f=>{f.value.files[0].path='adapter/token.json';f.save()},'FORBIDDEN_FILE');
 caseRun('unbound branch name fails',f=>{f.value.component_commit='sandbox';f.save()},'IDENTITY_INVALID');
 caseRun('duplicate entry fails',f=>{f.value.files.push({...f.value.files[0]});f.save()},'DUPLICATE_FILE');
+test('reject checkout root itself as a private package (not only subfolders)',()=>{
+ const f=setup();
+ try {
+  const source=readFileSync(new URL('../scripts/verify-private-package.mjs',import.meta.url));
+  f.value.files=[{path:'scripts/verify-private-package.mjs',size:source.length,sha256:createHash('sha256').update(source).digest('hex')}];
+  f.save();
+  assert.throws(()=>verifyPrivatePackage({packageRoot:process.cwd(),manifestPath:f.manifest}),/ROOT_INSIDE_PUBLIC_REPOSITORY/);
+ }finally{f.close()}
+});

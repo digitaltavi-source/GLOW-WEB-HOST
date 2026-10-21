@@ -3,14 +3,15 @@ import {resolve,relative,isAbsolute,sep} from 'node:path';
 import {createHash} from 'node:crypto';
 const digest=b=>createHash('sha256').update(b).digest('hex');
 const within=(root,p)=>{const r=relative(root,p);return r!==''&&r!=='..'&&!r.startsWith('..'+sep)&&!isAbsolute(r)};
+const insideOrEqual=(root,p)=>root===p||within(root,p);
 function fail(code){throw Error('PRIVATE_PACKAGE_'+code)}
 export function verifyPrivatePackage({packageRoot,manifestPath}){
  if(!packageRoot||!manifestPath)fail('LOCATION_REQUIRED');
  const root=resolve(packageRoot),manifest=resolve(manifestPath);
  if(!existsSync(root)||!lstatSync(root).isDirectory()||lstatSync(root).isSymbolicLink())fail('ROOT_INVALID');
- if(within(process.cwd(),root))fail('ROOT_INSIDE_PUBLIC_REPOSITORY');
+ if(insideOrEqual(realpathSync(process.cwd()),realpathSync(root)))fail('ROOT_INSIDE_PUBLIC_REPOSITORY');
  if(!existsSync(manifest)||lstatSync(manifest).isSymbolicLink())fail('MANIFEST_INVALID');
- if(within(process.cwd(),manifest))fail('MANIFEST_INSIDE_PUBLIC_REPOSITORY');
+ if(insideOrEqual(realpathSync(process.cwd()),realpathSync(manifest)))fail('MANIFEST_INSIDE_PUBLIC_REPOSITORY');
  let m;try{m=JSON.parse(readFileSync(manifest,'utf8'))}catch{fail('MANIFEST_JSON_INVALID')}
  if(!m||typeof m!=='object'||Array.isArray(m)||Object.keys(m).sort().join(',')!=='component_commit,component_id,files,schema')fail('MANIFEST_SHAPE_INVALID');
  if(m.schema!=='GLOW_PRIVATE_PACKAGE_DELIVERY_V1'||m.component_id!=='GLOW_WEB_FACTORY_PRIVATE_RUNTIME'||!(/^[a-f0-9]{40}$/.test(m.component_commit)))fail('IDENTITY_INVALID');
