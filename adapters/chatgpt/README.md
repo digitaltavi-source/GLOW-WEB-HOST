@@ -1,59 +1,15 @@
-# ChatGPT Host Profile
+# GLOW Web — ChatGPT connection
 
-Status: `CANDIDATE / NOT YET LIVE`
+**Owner:** GLOW-WEB-HOST public transport layer
+**Public connection:** `/mcp-v2` (authenticated API/MCP)
 
-This directory defines the ChatGPT-facing MCP profile for GLOW Web.
+The ChatGPT connector securely forwards permitted requests and returns only the data class authorized for that specific request. Signing in does not automatically grant permission to review or approve a project.
 
-## Operating model
+- Authentication, session isolation, scope checks and bounded transport belong to this Host adapter.
+- The protected service remains responsible for project processing, decisions, specialist work, evidence and approval.
+- Public responses show only safe, understandable information; restricted work packages are never a public page, sample payload or log.
+- If the protected service is unavailable, the connector reports an accurate limited/unavailable state. It never fabricates progress or completion.
 
-```text
-USER
-  -> ChatGPT reasoning
-  -> GLOW MCP tools
-  -> Protected Gateway
-  -> Factory Control
-  -> KIT A/H1 -> KIT B/H2 -> KIT C/H3
-       <-> Capability System
-```
+This document intentionally does not reproduce private processing stages, internal identifiers, specialist routing, evaluation criteria or proprietary methods.
 
-ChatGPT is the reasoning/intelligence host. The protected backend does not need a second LLM API on the primary path.
-
-## Tool loop
-
-1. `glow_start_web_mission`
-2. `glow_get_factory_work`
-3. ChatGPT performs only the bounded returned job
-4. `glow_submit_factory_work`
-5. Repeat 2-4 until an exact approval gate is returned
-6. `glow_approve_factory_stage`
-7. Continue through H1/H2/H3
-8. `glow_get_delivery`
-
-## Exposure classes
-
-- `MODEL_SESSION_PRIVATE`: work packages needed by ChatGPT reasoning; not public delivery.
-- `PUBLIC_DECLASSIFIED`: status, approval preview and final delivery safe for user-facing presentation.
-
-## Adapter responsibilities
-
-- authenticated MCP/tool transport;
-- translate user/ChatGPT calls into the host request contract;
-- preserve work tokens and mission IDs exactly;
-- enforce expected exposure class per tool;
-- return bounded failure/degraded states.
-
-## Non-responsibilities
-
-This adapter must not:
-- own Factory flow;
-- reconstruct Kit or Capability semantics;
-- approve on behalf of the user;
-- mutate Canon/qualification/release state;
-- expose private release identities or restricted evidence as public output;
-- simulate protected backend success locally.
-
-## First validation target
-
-A live ChatGPT end-to-end vertical slice using the previously failed real Web mission after the protected service is deployed and connected.
-
-`HOST BUILD PASS != CHATGPT HOST COMPATIBILITY VERIFIED != REAL SOW PASS`.
+**Change boundary:** edits to the ChatGPT connection must not modify the website UI channel. Shared authentication and transport contracts require regression for both channels. Deployment requires an exact reviewed commit and separate authorization.

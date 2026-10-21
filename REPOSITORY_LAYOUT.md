@@ -70,10 +70,14 @@ until an evidence-backed migration explicitly updates all consumers and regressi
 
 See `SECURITY_BOUNDARY.md` and `PUBLIC_EXPORT_MANIFEST.json` for the enforceable boundary.
 
-## Branch discipline
+## Branch and channel discipline
 
-- `main` — canonical public release line.
-- `sandbox` — public Host candidate/development line.
+- `main` — single public release source for the shared web listener; no automatic direct edits.
+- `sandbox` — existing Host-only development, integration, testing and documentation branch.
+- `adapters/chatgpt/` plus MCP/OAuth-bound `src/` modules — ChatGPT connection ownership lane.
+- `adapters/web/` plus public UI and declassified web API modules — direct website connection ownership lane.
+- Shared identity, security and backend connectors require two-lane regression; neither lane may duplicate protected project semantics.
+- **No extra permanent Git branch is created just to represent an adapter lane:** the deployed Node process needs both routes from the same reviewed commit. Temporary branches need explicit purpose, exact base, change scope and disposal plan.
 
 A Factory assembly may pin an exact immutable Host SHA. Branch names do not replace exact component identity.
 
