@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1420">
+<meta name="description" content="GLOW Web — không gian bắt đầu dự án website, kiểm tra kết nối và tiếp tục công việc an toàn.">
+<title>Không gian dự án · GLOW Web</title>
+<link rel="stylesheet" href="/workspace.css">
+<script defer src="/workspace.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Chuyển tới nội dung chính</a>
+<div class="shell">
+<header class="top">
+<a class="brand" href="/" aria-label="GLOW Web - về trang chủ"><span class="monogram" aria-hidden="true">G</span><span>GLOW <b>WEB</b><small>Không gian dự án</small></span></a>
+<nav aria-label="Điều hướng chính"><a href="/">Trang chủ</a><a href="#bat-dau">Bắt đầu</a><a href="#ket-noi">Kết nối</a></nav>
+<span class="edition">WORKSPACE · PREVIEW</span>
+</header>
+<main id="main">
+<section class="intro">
+<div><p class="eyebrow">BẮT ĐẦU MỘT TRẢI NGHIỆM SỐ</p><h1>Ý tưởng của bạn.<br><span>Chúng tôi giúp hiện thực hóa.</span></h1>
+<p class="lede">Một nơi để chuẩn bị yêu cầu website và hiểu rõ các bước tiếp theo. Dự án chỉ được tạo khi hệ thống xác nhận đã tiếp nhận — biểu mẫu này chưa tự tạo dự án trong nhà máy.</p></div>
+<div class="hero-side"><span class="ring" aria-hidden="true"><i>G</i></span><p>Rõ mục tiêu.<br>Đúng định hướng.<br>Kiểm chứng chất lượng.</p></div>
+</section>
+<div class="layout">
+<section class="panel intake" id="bat-dau" aria-labelledby="form-title">
+<div class="panel-top"><p class="eyebrow">01 · YÊU CẦU CỦA BẠN</p><span class="step-tag">Bản nháp trên trình duyệt</span></div>
+<h2 id="form-title">Kể cho GLOW về website bạn muốn làm</h2>
+<p class="muted">Thông tin chỉ nằm trên trang này cho đến khi bạn chủ động sao chép và chuyển sang kênh đã kết nối. Không nhập mật khẩu hoặc thông tin bí mật.</p>
+<form id="brief" novalidate>
+<fieldset><legend>Website dành cho</legend><div class="options" role="group" aria-label="Loại website">
+<label><input type="radio" name="type" value="Cá nhân" required><span>Cá nhân<br><small>Portfolio · Hồ sơ</small></span></label>
+<label><input type="radio" name="type" value="Thương hiệu"><span>Thương hiệu<br><small>Giới thiệu · Dịch vụ</small></span></label>
+<label><input type="radio" name="type" value="Sản phẩm"><span>Sản phẩm<br><small>Giải pháp · Dự án</small></span></label>
+</div></fieldset>
+<div class="field"><label for="goal">Điều quan trọng nhất website cần đạt được <span aria-hidden="true">*</span></label><textarea id="goal" name="goal" required minlength="15" maxlength="700" placeholder="Ví dụ: Giúp khách hàng hiểu rõ dịch vụ và gửi yêu cầu tư vấn thuận tiện."></textarea><div class="smallline"><span>Viết bằng ngôn ngữ của bạn</span><output id="remaining" for="goal">0 / 700</output></div></div>
+<div class="fields"><div class="field"><label for="brand">Tên cá nhân / thương hiệu</label><input id="brand" name="brand" autocomplete="organization" maxlength="120" placeholder="Có thể bổ sung sau"></div><div class="field"><label for="language">Ngôn ngữ website</label><select id="language" name="language"><option value="Tiếng Việt">Tiếng Việt</option><option value="Song ngữ Việt–Anh">Song ngữ Việt–Anh</option><option value="English">English</option></select></div></div>
+<div class="actions"><button class="primary" type="submit">Chuẩn bị yêu cầu <span aria-hidden="true">↗</span></button><a class="secondary" href="/#register">Xem hình thức khác</a></div>
+</form>
+<div id="result" class="result" hidden tabindex="-1"><p class="eyebrow">BẢN NHÁP ĐÃ CHUẨN BỊ</p><h3>Yêu cầu của bạn đã được tổng hợp</h3><p>Chưa có dự án nào được tạo trên hệ thống. Hãy sao chép nội dung để tiếp tục trong ChatGPT đã kết nối GLOW WEBSITE.</p><pre id="capsule"></pre><div class="actions"><button type="button" id="copy" class="primary">Sao chép yêu cầu</button><a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer" class="secondary">Mở ChatGPT <span aria-hidden="true">↗</span></a></div></div>
+<p id="feedback" role="status" aria-live="polite"></p>
+</section>
+<aside class="side">
+<section class="panel service" id="ket-noi" aria-labelledby="status-title"><p class="eyebrow">02 · TÌNH TRẠNG KẾT NỐI</p><h2 id="status-title">Kết nối dịch vụ</h2>
+<div class="connection"><span class="dot" id="dot-host" aria-hidden="true"></span><div><strong>Website GLOW</strong><p id="host-status">Đang kiểm tra…</p></div></div>
+<div class="connection"><span class="dot" id="dot-service" aria-hidden="true"></span><div><strong>Dịch vụ xử lý</strong><p id="service-status">Đang kiểm tra…</p></div></div>
+<button id="refresh" class="secondary refresh" type="button">Kiểm tra lại kết nối</button>
+<p class="smallnote">Kết nối thành công không có nghĩa dự án đã được tạo, đánh giá hay phê duyệt.</p></section>
+<section class="panel guide"><p class="eyebrow">HÀNH TRÌNH ĐỀ XUẤT</p><h2>Điều gì sẽ diễn ra?</h2><ol><li>Chia sẻ mục tiêu</li><li>Khám phá định hướng phù hợp</li><li>Xem phương án thiết kế</li><li>Phát triển và kiểm tra</li><li>Bạn xem xét và quyết định</li></ol><p class="smallnote">Đây là thông tin giới thiệu, không phải trạng thái tiến độ của một dự án thực tế.</p></section>
+</aside></div>
+</main>
+<footer><p>GLOW WEB · Trải nghiệm số có trách nhiệm</p><p>Thông tin xử lý chỉ được công bố theo quyền truy cập được cấp.</p></footer>
+</div>
+</body></html>

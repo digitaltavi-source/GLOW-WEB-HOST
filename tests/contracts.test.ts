@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { WebRequest } from "../src/contracts.js";
+import { WebRequest, WebResponse } from "../src/contracts.js";
 
 const operations = [
   "create_web_mission",
@@ -37,5 +37,30 @@ test("public contract rejects unknown Factory-control mutation operation", () =>
     role: "client",
     locale: "vi-VN",
     input: {}
+  }));
+});
+
+test("recovery guidance remains advisory and separate from public evidence", () => {
+  const recovery = {
+    type: "GDEE_RECOVERY_GUIDANCE_V1",
+    category: "AUTHORITY_REQUIRED",
+    recovery_route: "ESCALATE_TO_OPERATOR",
+    mutation_authorized: false,
+    automatic_retry_allowed: false,
+    human_approval_required: true,
+    remediation_steps: ["Request review from the owning operator before further mutation."]
+  };
+  const response = {
+    request_id: "synthetic",
+    status: "failed",
+    exposure: "PUBLIC_DECLASSIFIED",
+    result: null,
+    public_evidence: [],
+    errors: [{ code: "OPERATOR_AUTHORITY_REQUIRED", message: "OPERATOR_AUTHORITY_REQUIRED", retryable: false, recovery }]
+  };
+  assert.deepEqual(WebResponse.parse(response).public_evidence, []);
+  assert.throws(() => WebResponse.parse({
+    ...response,
+    errors: [{ ...response.errors[0], recovery: { ...recovery, mutation_authorized: true } }]
   }));
 });

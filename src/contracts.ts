@@ -8,10 +8,21 @@ export const WebRequest = z.object({
   locale: z.string().min(2).max(32).default("vi-VN")
 }).strict();
 
+export const RecoveryGuidance = z.object({
+  type: z.literal("GDEE_RECOVERY_GUIDANCE_V1"),
+  category: z.string().min(1).max(64),
+  recovery_route: z.string().min(1).max(64),
+  mutation_authorized: z.literal(false),
+  automatic_retry_allowed: z.literal(false),
+  human_approval_required: z.boolean(),
+  remediation_steps: z.array(z.string().min(1).max(500)).min(1).max(8)
+}).strict();
+
 export const PublicError = z.object({
   code: z.string().min(1).max(128),
   message: z.string().min(1).max(1000),
-  retryable: z.boolean()
+  retryable: z.boolean(),
+  recovery: RecoveryGuidance.optional()
 }).strict();
 
 export const WebResponse = z.object({

@@ -37,9 +37,9 @@ async function getWork(){
  const responseBody=packet.result?.structuredContent;
  if(packet.error||packet.result?.isError||!responseBody||responseBody.status==='failed')throw Error(responseBody?.errors?.[0]?.code||'Không đọc được binding của mission.');
  const work=responseBody.result?.payload,plan=work?.preproduction_capability_plan;
- if(work?.phase!=='H2'||!plan)throw Error('Mission chưa có work H2 để đăng ký bằng chứng.');
+ if(work?.phase!=='H2'||!plan)throw Error('Dự án chưa đến bước tiếp nhận tài liệu hoặc bạn không có quyền.');
  binding={mission_id:mission,expected_state_version:work.state_version,phase_work_id:plan.phase_work_id,work_contract_revision:plan.work_contract_revision};
- el('binding').textContent='H2 · version '+work.state_version+' · đúng tài khoản sở hữu mission';
+ el('binding').textContent='Dự án đã xác minh · phiên bản '+work.state_version+' · đúng tài khoản sở hữu mission';
  el('upload-button').disabled=false;el('evidence-button').disabled=false;
 }
 async function admit(action,args){
@@ -72,6 +72,6 @@ el('evidence-file').addEventListener('change',()=>{reviewDocument=null;el('revie
 });});
 el('evidence').addEventListener('submit',event=>{event.preventDefault();run(async()=>{
  if(!reviewDocument||!el('reviewed').checked)throw Error('Đọc hồ sơ và xác nhận đã xem bằng chứng.');
- await admit('register_evidence',reviewDocument);status('Đã nhận GE từ backend. Tiếp tục capability submission; H2 vẫn cần khách hàng duyệt riêng.');
+ await admit('register_evidence',reviewDocument);status('Đã nhận GE từ backend. Tiếp tục capability submission; Chủ dự án vẫn cần xem và duyệt kết quả riêng.');
 });});
 run(async()=>{config=await json(await fetch('/api/operator/config',{cache:'no-store'}));if(!config.enabled)throw Error('Kênh quản trị chưa sẵn sàng trên deployment này.');if(!config.login_configured){status('Giao diện đã có; cần cấu hình ứng dụng đăng nhập quản trị trước khi sử dụng.',true);return;}status('Đăng nhập để đăng ký bằng chứng dự án.');await callback();});
