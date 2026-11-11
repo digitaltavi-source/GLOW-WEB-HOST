@@ -19,7 +19,14 @@
     "host-export/GLOW-WEB-HOST/adapters/**",
     "host-export/GLOW-WEB-HOST/public/**",
     "host-export/GLOW-WEB-HOST/scripts/**",
-    "host-export/GLOW-WEB-HOST/PUBLIC_EXPERIENCE_CONTRACT.md"
+    "host-export/GLOW-WEB-HOST/PUBLIC_EXPERIENCE_CONTRACT.md",
+    "host-export/GLOW-WEB-HOST/package-lock.json",
+    "host-export/GLOW-WEB-HOST/SECURITY_BOUNDARY.md",
+    "host-export/GLOW-WEB-HOST/PUBLIC_TRUST_CENTER_CONTRACT.md",
+    "host-export/GLOW-WEB-HOST/REPOSITORY_LAYOUT.md",
+    "host-export/GLOW-WEB-HOST/HOST_EXPORT_PARITY_MANIFEST.json",
+    "host-export/GLOW-WEB-HOST/staging/**",
+    "host-export/GLOW-WEB-HOST/.github/workflows/validate-public-host.yml"
   ],
   "explicit_denylist": [
     "factory/**",
@@ -44,5 +51,8 @@
     "Public export does not change Canon or Factory authority."
   ],
   "deployment_composition": "PUBLIC_REPO + EXACT_PRIVATE_PACKAGE -> ONE_HOSTINGER_NODE_PROCESS -> ONE_PUBLIC_LISTENER -> IN_PROCESS_PROTECTED_RUNTIME",
-  "claim_limit": "Export contract only. Does not prove public repo creation, deployment, AI-host compatibility, or field verification."
+  "claim_limit": "Export contract only. Does not prove public repo creation, deployment, AI-host compatibility, or field verification.",
+  "canonical_owner_repository": "digitaltavi-source/GLOW-WEB-HOST",
+  "factory_mirror_path": "host-export/GLOW-WEB-HOST",
+  "parity_lock_contract": "HOST_EXPORT_PARITY_MANIFEST.json"
 }

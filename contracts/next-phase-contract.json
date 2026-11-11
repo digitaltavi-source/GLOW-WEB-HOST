@@ -35,10 +35,59 @@
         "capability_coverage": "array"
       },
       "optional": {
+        "packet_id": "string",
         "authority_receipt": "object",
         "design_contract": "object",
         "generative_media_material": "boolean",
         "media_plan": "object"
+      },
+      "field_contracts": {
+        "capability_coverage": {
+          "type": "array",
+          "description": "Exhaustive coverage of all 14 baseline capabilities. For material visual H2, all 14 mandatory capabilities must have status ACTIVATED_WITH_EVIDENCE.",
+          "items": {
+            "type": "object",
+            "required": ["capability_id", "status"],
+            "properties": {
+              "capability_id": {
+                "type": "string",
+                "description": "One of the 14 baseline semantic capabilities in NEXT_PROCESS_CAPABILITY_BINDINGS.json"
+              },
+              "status": {
+                "type": "string",
+                "enum": ["ACTIVATED_WITH_EVIDENCE", "NOT_MATERIAL_WITH_REASON"]
+              },
+              "reason": {
+                "type": "string",
+                "description": "Required when status is NOT_MATERIAL_WITH_REASON. Must be a non-empty string."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "capability_contribution_receipts": {
+          "type": "array",
+          "description": "List of canonical preproduction capability receipt IDs (prefixed with NPCR-). Exactly one receipt per activated capability.",
+          "items": {
+            "type": "string",
+            "pattern": "^NPCR-[a-f0-9]{32}$"
+          }
+        },
+        "capability_result_reconciliation": {
+          "type": "array",
+          "description": "List of reconciliation objects verifying that each receipt corresponds to the exact capability and result digest.",
+          "items": {
+            "type": "object",
+            "required": ["capability_id", "receipt_id", "result_sha256"],
+            "properties": {
+              "capability_id": {"type": "string"},
+              "receipt_id": {"type": "string"},
+              "result_sha256": {"type": "string"},
+              "result_contract_status": {"type": "string"},
+              "evidence_ref": {"type": "string"}
+            }
+          }
+        }
       }
     },
     "H3": {
@@ -61,6 +110,9 @@
         "claim_limit": "string"
       },
       "optional": {
+        "decision_owner": "string",
+        "h2_packet_sha256": "string",
+        "authority_receipt": "object",
         "packet_hash": "string"
       }
     }

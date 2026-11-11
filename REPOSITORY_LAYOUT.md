@@ -77,7 +77,7 @@ See `SECURITY_BOUNDARY.md` and `PUBLIC_EXPORT_MANIFEST.json` for the enforceable
 - `adapters/chatgpt/` plus MCP/OAuth-bound `src/` modules — ChatGPT connection ownership lane.
 - `adapters/web/` plus public UI and declassified web API modules — direct website connection ownership lane.
 - Shared identity, security and backend connectors require two-lane regression; neither lane may duplicate protected project semantics.
-- **No extra permanent Git branch is created just to represent an adapter lane:** the deployed Node process needs both routes from the same reviewed commit. Temporary branches need explicit purpose, exact base, change scope and disposal plan.
+- **Zero extra Git branches:** `main` and `sandbox` are the ONLY permitted branches in `GLOW-WEB-HOST`. All edits and tests happen on `sandbox` first; `promotion/*`, `repair/*`, `security/*` and ad-hoc work branches are forbidden.
 
 A Factory assembly may pin an exact immutable Host SHA. Branch names do not replace exact component identity.
 
@@ -88,7 +88,7 @@ See `adapters/CONNECTOR_OWNERSHIP.json` for the active candidate mapping of the 
 - Keep the authenticated ChatGPT/MCP lane isolated from `public/` browser UI changes.
 - `/app` is a showcase compatibility alias; the unreleased customer workspace is `/workspace`.
 - Do not relocate root export, operator or deployment contracts until exact dependent references and release regression have been checked. A path move is not a cosmetic cleanup.
-- No new permanent Git branch for either public connector. Historical promotion/repair branches are reviewed separately; active PR branches are not automatically disposable.
+- Zero extra branches: historical promotion/repair branches have been audited, immutably preserved in bounded `sandbox` archives, and deleted.
 
 ## Hygiene rule
 

@@ -1,0 +1,54 @@
+{
+  "schema": "GLOW_WEB_HOST_BRANCH_PRESERVATION_MANIFEST_V1",
+  "recorded_at_utc": "2026-11-11T07:05:00Z",
+  "repository": "digitaltavi-source/GLOW-WEB-HOST",
+  "branch_policy_enforced": [
+    "main",
+    "sandbox"
+  ],
+  "branches_processed": [
+    {
+      "branch": "canonical-host-clean-v1",
+      "tip_sha": "755ee0b2e8886cfb018276cc0bede27dc0ec17b9",
+      "tree_sha": "14b003e3dd22d61114924bded3dfe8ea73b656c3",
+      "pr_number": 5,
+      "pr_state": "MERGED",
+      "disposition": "DELETED_MERGED_RESIDUAL_IDENTICAL_TREE_TO_MAIN",
+      "preservation_proof": "Tree 14b003e3dd2246a64c22e36717213e4fc26a0c26 is 100% identical to main@d63cbdf017d5e47cb50b77f0c85fe2198bffdbb3"
+    },
+    {
+      "branch": "promotion/file-backed-artifact-admission-20261013",
+      "tip_sha": "4f5e51335afb18520d07e3312c8f2a89e6697aaa",
+      "pr_number": 4,
+      "pr_state": "MERGED",
+      "disposition": "DELETED_MERGED_RESIDUAL_ANCESTOR_TREE_IN_MAIN",
+      "preservation_proof": "Squash-merged into main@3e7ccc386327acbd15499407f9e10c5ef65cf010 with identical tree 14728ad19e22f0a1df2a39e8c587091df2213eb9",
+      "tree_sha": "14728ad19e22d309d6d9440fa4dfdc6206ede4aa"
+    },
+    {
+      "branch": "repair/mcp-oauth-cleanroom-20261011",
+      "tip_sha": "7f3a9f5aadcc51c49b2476dfdaefda1fc2c343a1",
+      "pr_number": 2,
+      "pr_state": "CLOSED_AFTER_SELECTIVE_PORT_TO_SANDBOX",
+      "ported_files": [
+        "src/evidence-admission.ts (8 MiB decoded-byte ceiling + superRefine merged with ArtifactBindingSchema/createArtifactAdmissionPreflight)",
+        "tests/artifact-size-contract.test.ts"
+      ],
+      "superseded_files_preserved_here": [
+        {
+          "original_path": ".env.example",
+          "original_blob_sha": "f5ed29ff24f6823217720cb7305947bc5f2ee2ef",
+          "archived_at": "REPORT/preservation/branch-normalization-2026-11-11/pr2_retired_env.example",
+          "reason": "Auth0 DCR notes superseded by Native GLOW OAuth 2.1 + Standalone/Shared-Gateway .env.example"
+        },
+        {
+          "original_path": "AUTH0_MCP_RECOVERY.md",
+          "original_blob_sha": "ade862756455264c7d6df94f26b3fd9639c25fb0",
+          "archived_at": "REPORT/preservation/branch-normalization-2026-11-11/pr2_retired_AUTH0_MCP_RECOVERY.md",
+          "reason": "Auth0 third-party IdP runbook superseded by Native GLOW Identity OAuth 2.1 architecture"
+        }
+      ],
+      "tree_sha": "98c579b12b35374dcccd1e88ee5c0ca2c1c05376"
+    }
+  ]
+}

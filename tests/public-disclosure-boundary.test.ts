@@ -14,7 +14,7 @@ test('public channel guidance never describes private process or specialist impl
 
 test('operator visible labels never expose internal step names',()=>{
   const html=read('public/operator.html');
-  assert.doesNotMatch(html,/\bH[123]\b|KIT[_ -]?[ABC]|CAP\.WEB\./iu);
+  assert.doesNotMatch(html,/(?<!<\/?)\bH[123]\b(?!>)|KIT[_ -]?[ABC]|CAP\.WEB\./iu);
   const source=read('public/operator.js');
   assert.doesNotMatch(source,/Mission chưa có work H2|H2 · version|H2 vẫn cần khách hàng duyệt riêng/u);
 });

@@ -19,12 +19,14 @@ import { classifyWorkResponse } from "./work-response.js";
 import { buildProtectedResourceMetadata } from "./resource-metadata.js";
 import { createGlowMcpExpressApp } from "./mcp-app.js";
 import { NextFactoryControlInputSchema } from "./next-factory-schema.js";
+import { resolveHostDomainTopology } from "./domain-topology.js";
 import {PHASE_ACCEPTANCE_SCOPE,PHASE_ACCEPTANCE_MISSION_PATTERN,toolOAuthMetadata,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,phaseAcceptanceAuthorityStatus,validateAcceptanceBytes} from './phase-acceptance.js';
 
 const HOST_ADAPTER_REVISION = "0.3.10-file-artifact-input-candidate";
 const HOST_CONTRACT_ID = "GWF_NEXT_FACTORY_ACTIVE_DEMO_CANDIDATE_V2";
 const config = loadConfig();
-const configuredMcpServerUrl = new URL(process.env.GLOW_PUBLIC_MCP_URL ?? `http://127.0.0.1:${config.port}/mcp`);
+export const domainTopology = resolveHostDomainTopology(process.env, config.port);
+const configuredMcpServerUrl = new URL(process.env.GLOW_PUBLIC_MCP_URL ?? (domainTopology.basePath ? domainTopology.mcpResourceUrl : `http://127.0.0.1:${config.port}/mcp`));
 const configuredAuthMode = (process.env.GLOW_AUTH_MODE?.trim() || "static_bearer").toLowerCase();
 if (!["static_bearer","oauth","hybrid"].includes(configuredAuthMode)) {
   throw new Error("CONFIG_AUTH_MODE_INVALID");
@@ -538,36 +540,36 @@ app.get("/.well-known/oauth-authorization-server", (_req,res) => {
   res.status(404).json({
     error:"EXTERNAL_AUTHORIZATION_SERVER",
     authorization_server:oauthConfig.issuer.replace(/\/$/,""),
-    discovery_via:"/.well-known/oauth-protected-resource/mcp-v2"
+    discovery_via:resourceMetadataPath
   });
 });
 
 const publicDir=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"../public");
 
 app.get("/",(_req,res) => {
-  res.type("html").sendFile(path.join(publicDir,"index.html"));
+  res.type("html").sendFile("index.html", { root: publicDir });
 });
 
 app.get("/app",(_req,res) => {
-  res.type("html").sendFile(path.join(publicDir,"index.html"));
+  res.type("html").sendFile("index.html", { root: publicDir });
 });
 app.get("/workspace",(_req,res) => {
-  res.type("html").sendFile(path.join(publicDir,"workspace.html"));
+  res.type("html").sendFile("workspace.html", { root: publicDir });
 });
 app.get("/workspace.css",(_req,res) => {
-  res.type("text/css; charset=utf-8").sendFile(path.join(publicDir,"workspace.css"));
+  res.type("text/css; charset=utf-8").sendFile("workspace.css", { root: publicDir });
 });
 app.get("/workspace.js",(_req,res) => {
-  res.type("application/javascript; charset=utf-8").sendFile(path.join(publicDir,"workspace.js"));
+  res.type("application/javascript; charset=utf-8").sendFile("workspace.js", { root: publicDir });
 });
 
 
 app.get("/app.css",(_req,res) => {
-  res.type("text/css").sendFile(path.join(publicDir,"app.css"));
+  res.type("text/css").sendFile("app.css", { root: publicDir });
 });
 
 app.get("/app.js",(_req,res) => {
-  res.type("application/javascript").sendFile(path.join(publicDir,"app.js"));
+  res.type("application/javascript").sendFile("app.js", { root: publicDir });
 });
 
 
@@ -608,6 +610,71 @@ app.get("/readyz", async (_req,res) => {
 });
 
 app.all("/mcp-v2",authV2,(req,res)=>void node(req,res,req.body));
+
+if (domainTopology.basePath) {
+  const bp = domainTopology.basePath;
+  app.get(bp, (_req, res) => {
+    res.type("html").sendFile("index.html", { root: publicDir });
+  });
+  app.get(`${bp}/app`, (_req, res) => {
+    res.type("html").sendFile("index.html", { root: publicDir });
+  });
+  app.get(`${bp}/workspace`, (_req, res) => {
+    res.type("html").sendFile("workspace.html", { root: publicDir });
+  });
+  app.get(`${bp}/workspace.css`, (_req, res) => {
+    res.type("text/css; charset=utf-8").sendFile("workspace.css", { root: publicDir });
+  });
+  app.get(`${bp}/workspace.js`, (_req, res) => {
+    res.type("application/javascript; charset=utf-8").sendFile("workspace.js", { root: publicDir });
+  });
+  app.get(`${bp}/app.css`, (_req, res) => {
+    res.type("text/css").sendFile("app.css", { root: publicDir });
+  });
+  app.get(`${bp}/app.js`, (_req, res) => {
+    res.type("application/javascript").sendFile("app.js", { root: publicDir });
+  });
+  app.get(`${bp}/api/public/profile`, (_req, res) => {
+    res.json({
+      product: "GLOW Web",
+      version: HOST_ADAPTER_REVISION,
+      contract_id: HOST_CONTRACT_ID,
+      status_label: "Public Experience candidate",
+      surfaces: ["WEB_WORKSPACE", "MCP_OAUTH", "PUBLIC_RESULTS"],
+      canonical_ai_resource: "/mcp-v2",
+      mounted_ai_resource: domainTopology.mountedRoutes.mcpPath,
+      deployment_topology: domainTopology.topologyMode,
+      base_path: bp,
+      private_factory_exposed: false,
+      claim_limit: "CANDIDATE_NOT_HOSTINGER_VERIFIED"
+    });
+  });
+  app.get(`${bp}/healthz`, (_req, res) => {
+    res.json({ ok: true, product: "GLOW Web", version: HOST_ADAPTER_REVISION, contract_id: HOST_CONTRACT_ID, mode: "CHATGPT_WORK_LOOP", deployment_topology: domainTopology.topologyMode, base_path: bp });
+  });
+  app.get(`${bp}/readyz`, async (_req, res) => {
+    if (gatewayProfile !== "DEVELOPMENT" && (authMode !== "oauth" || !config.combinedRuntimeModule)) {
+      res.status(503).json({ ok: false, product: "GLOW Web", code: "CANONICAL_OAUTH_RUNTIME_NOT_CONFIGURED" });
+      return;
+    }
+    const readiness = await checkProtectedReadiness(config);
+    res.status(readiness.ok ? 200 : 503).json({
+      ok: readiness.ok,
+      product: "GLOW Web",
+      version: HOST_ADAPTER_REVISION,
+      contract_id: HOST_CONTRACT_ID,
+      public_host: "running",
+      protected_factory: readiness.ok ? "reachable_authenticated" : "unavailable",
+      code: readiness.code,
+      deployment_topology: domainTopology.topologyMode,
+      base_path: bp,
+      evidence_admission_transport: "CANONICAL_OAUTH_MCP_IN_PROCESS",
+      authority: "DEDICATED_SCOPE_AND_RBAC_CHECKED_PER_REQUEST",
+      quality_acceptance: false
+    });
+  });
+  app.all(`${bp}/mcp-v2`, authV2, (req, res) => void node(req, res, req.body));
+}
 
 // Hostinger imports its entrypoint; startup cannot depend on argv/main identity.
 // Only the explicitly isolated test fixture suppresses the network listener.
