@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, lstatSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -22,10 +22,13 @@ export function collectCanonicalHostBlobs(rootDir) {
       if (rel === SELF_MANIFEST || IGNORED_PREFIXES.some(p => rel === p.slice(0, -1) || rel.startsWith(p))) {
         continue;
       }
-      const st = statSync(full);
+      const st = lstatSync(full);
+      if (st.isSymbolicLink() || (!st.isDirectory() && !st.isFile())) {
+        throw new Error(`PARITY_SYMLINK_FORBIDDEN:${rel}`);
+      }
       if (st.isDirectory()) {
         walk(full);
-      } else if (st.isFile()) {
+      } else {
         out[rel] = gitBlobSha1(readFileSync(full));
       }
     }
@@ -38,6 +41,10 @@ export function verifyHostExportParity(rootDir) {
   const manifestPath = path.join(rootDir, SELF_MANIFEST);
   if (!existsSync(manifestPath)) {
     throw new Error("HOST_EXPORT_PARITY_MANIFEST_MISSING");
+  }
+  const manifestSt = lstatSync(manifestPath);
+  if (manifestSt.isSymbolicLink() || !manifestSt.isFile()) {
+    throw new Error(`PARITY_SYMLINK_FORBIDDEN:${SELF_MANIFEST}`);
   }
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   if (manifest.schema !== "GLOW_WEB_HOST_EXPORT_PARITY_V1" || typeof manifest.files !== "object" || !manifest.files) {

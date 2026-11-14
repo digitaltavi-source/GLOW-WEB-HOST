@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync,existsSync} from 'node:fs';
-import {resolve} from 'node:path';
+import {readFileSync,existsSync,mkdtempSync,mkdirSync,writeFileSync,symlinkSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join,resolve} from 'node:path';
+import {pathToFileURL} from 'node:url';
 import {createHash} from 'node:crypto';
 
 const get=(p:string)=>readFileSync(resolve(process.cwd(),p));
@@ -47,4 +49,24 @@ test('published public contract describes current routing without invented readi
 test('workflow checks release+engineering branches only',()=>{
  const wf=source('.github/workflows/validate-public-host.yml');
  assert.match(wf,/branches:\s*\[main, sandbox\]/);
+});
+
+test('verify-host-export-parity rejects symlinked files and symlinked manifests via lstatSync',async()=>{
+ const parityMod=await import(pathToFileURL(resolve(process.cwd(),'scripts/verify-host-export-parity.mjs')).href) as {
+  collectCanonicalHostBlobs:(root:string)=>Record<string,string>;
+  verifyHostExportParity:(root:string)=>{status:string;verified_file_count:number};
+ };
+ const tmp=mkdtempSync(join(tmpdir(),'glow-parity-symlink-'));
+ try{
+  mkdirSync(join(tmp,'src'),{recursive:true});
+  const realFile=join(tmp,'src','real.ts');
+  writeFileSync(realFile,'export const ok=1;\n');
+  const blobs=parityMod.collectCanonicalHostBlobs(tmp);
+  writeFileSync(join(tmp,'HOST_EXPORT_PARITY_MANIFEST.json'),JSON.stringify({schema:'GLOW_WEB_HOST_EXPORT_PARITY_V1',files:blobs}));
+  assert.equal(parityMod.verifyHostExportParity(tmp).status,'PASS');
+  symlinkSync(realFile,join(tmp,'src','sneaky-link.ts'));
+  assert.throws(()=>parityMod.verifyHostExportParity(tmp),/PARITY_SYMLINK_FORBIDDEN:src\/sneaky-link\.ts/);
+ }finally{
+  rmSync(tmp,{recursive:true,force:true});
+ }
 });

@@ -26,7 +26,7 @@ const HOST_ADAPTER_REVISION = "0.3.10-file-artifact-input-candidate";
 const HOST_CONTRACT_ID = "GWF_NEXT_FACTORY_ACTIVE_DEMO_CANDIDATE_V2";
 const config = loadConfig();
 export const domainTopology = resolveHostDomainTopology(process.env, config.port);
-const configuredMcpServerUrl = new URL(process.env.GLOW_PUBLIC_MCP_URL ?? (domainTopology.basePath ? domainTopology.mcpResourceUrl : `http://127.0.0.1:${config.port}/mcp`));
+const configuredMcpServerUrl = new URL(process.env.GLOW_PUBLIC_MCP_URL?.trim() || domainTopology.mcpResourceUrl);
 const configuredAuthMode = (process.env.GLOW_AUTH_MODE?.trim() || "static_bearer").toLowerCase();
 if (!["static_bearer","oauth","hybrid"].includes(configuredAuthMode)) {
   throw new Error("CONFIG_AUTH_MODE_INVALID");

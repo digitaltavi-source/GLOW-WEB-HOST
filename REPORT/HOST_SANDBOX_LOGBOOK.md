@@ -74,3 +74,16 @@
 - Consolidated canonical public contracts (`contracts/next-phase-contract.json`, `src/contracts.ts`, `tests/contracts.test.ts`) into `GLOW-WEB-HOST` so `GLOW-WEB-FACTORY` requires zero private `v2_overlay_files` divergence, locked by `HOST_EXPORT_PARITY_MANIFEST.json` and `scripts/verify-host-export-parity.mjs`.
 - Added `src/domain-topology.ts` and `tests/domain-topology.test.ts` supporting both `STANDALONE_DOMAIN` and `SHARED_ECOSYSTEM_GATEWAY` (`/web/*` mount + unified SSO callback + RFC 8707 factory-scoped `resource` isolation + preview origin isolation) while preserving standalone `/mcp-v2` and `/workspace`.
 - Upgraded `@modelcontextprotocol/server@2.4.0`, `@modelcontextprotocol/express@2.0.2`, `@modelcontextprotocol/node@2.1.2` and lockfile dependencies (`0` npm audit vulnerabilities); fixed Express `sendFile({ root: publicDir })` dot-directory handling and HTML heading-tag regex in `tests/public-disclosure-boundary.test.ts`.
+
+## 2026-11-14 — Night Watch Entry208 SSRF/DNS-pinning, standalone MCP origin fallback & parity symlink hardening
+
+**Authority:** Governed Night Watch Builder (`glow-foundry-engineer`, `sandbox` only; `main` untouched, `0` new files, `0` remote pushes).
+
+**Source baseline:** `GLOW-WEB-HOST@sandbox` `24581807c64f11153e69c08b5dcb4cc059df9f78` (`123` passing tests, `87` parity-tracked files).
+
+**Bounded remediations (`GWF-AUD-207-02`, `GWF-AUD-207-06`, `GWF-AUD-207-10`):**
+- `GWF-AUD-207-02` (`src/file-input.ts`, `tests/file-input.test.ts`, `adapters/CONNECTOR_OWNERSHIP.json`): blocked HTTP redirects (`redirect: 'error'` and `300 <= status < 400` / `redirected` rejection), normalized hostnames (lowercase + trailing-dot stripping + `.localhost`/`.local`/`.internal` block), added binary IPv4 (`uint32`) and IPv6 (`128-bit bigint` incl. recursive `::ffff:0:0/96`) non-global CIDR blocking, and enforced pre-connect `dns.promises.lookup(host, { all: true, verbatim: true })` validation of every A/AAAA record with `https.request` socket pinning (`opts.all`-safe custom `lookup`, `servername`, timeout, and `8 MiB` stream ceiling).
+- `GWF-AUD-207-06` (`src/server.ts`, `tests/domain-topology.test.ts`): fixed `STANDALONE_DOMAIN` `configuredMcpServerUrl` fallback so `GLOW_PUBLIC_ORIGIN` with empty `basePath` resolves `domainTopology.mcpResourceUrl` (`${publicOrigin}/mcp-v2`) instead of `http://127.0.0.1:${port}/mcp`.
+- `GWF-AUD-207-10` (`scripts/verify-host-export-parity.mjs`, `tests/connector-ownership.test.ts`): switched directory walk and manifest check from `statSync` to `lstatSync`, rejecting symlinks and non-regular entries with `PARITY_SYMLINK_FORBIDDEN`.
+
+**Verification & claim ceiling:** `npm test` -> `126/126` pass (`0` failures), `HOST_EXPORT_PARITY=PASS` (`87` files). Claim ceiling: `SANDBOX_REPRODUCED` (local developer verification; not independent audit or live deployment).

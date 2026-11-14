@@ -145,3 +145,29 @@ test("Shared single-domain gateway HTTP mount serves /web/* while preserving sta
     }
   );
 });
+
+test("STANDALONE_DOMAIN server fallback binds GLOW_PUBLIC_ORIGIN /mcp-v2 when GLOW_PUBLIC_MCP_URL is omitted and basePath is empty", async () => {
+  await hostFixture(
+    {
+      GLOW_DEPLOYMENT_TOPOLOGY: "STANDALONE_DOMAIN",
+      GLOW_PUBLIC_ORIGIN: "https://web.glow.example",
+      GLOW_PUBLIC_MCP_URL: "",
+      GLOW_ALLOWED_HOSTS: "127.0.0.1,localhost,web.glow.example",
+      GLOW_AUTH_MODE: "oauth",
+      GLOW_OAUTH_ISSUER: "https://glow.example",
+      GLOW_OAUTH_AUDIENCE: "https://web.glow.example/mcp-v2",
+      GLOW_OAUTH_JWKS_URL: "https://glow.example/.well-known/jwks.json",
+      GLOW_OAUTH_REQUIRED_SCOPES: "web.run"
+    },
+    async ({ app, handler }) => {
+      try {
+        const metaRes = await fetchHttpHandler(app, "https://web.glow.example/.well-known/oauth-protected-resource/mcp-v2");
+        assert.equal(metaRes.status, 200);
+        const meta = (await metaRes.json()) as Record<string, unknown>;
+        assert.equal(meta.resource, "https://web.glow.example/mcp-v2");
+      } finally {
+        await handler.close();
+      }
+    }
+  );
+});
