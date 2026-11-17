@@ -41,16 +41,26 @@ test('authorized file ADVERSARIAL rejects non-https, credentials, local hostname
   'https://0x7f000001/a',
   'https://169.254.169.254/latest/meta-data',
   'https://172.16.2.3/a',
+  'https://192.0.0.1/a',
+  'https://192.0.2.1/a',
   'https://192.168.1.3/a',
   'https://198.18.0.1/a',
+  'https://198.51.100.1/a',
+  'https://203.0.113.1/a',
   'https://224.0.0.1/a',
   'https://240.0.0.1/a',
   'https://[::]/a',
   'https://[::1]/a',
+  'https://[::127.0.0.1]/a',
   'https://[::ffff:127.0.0.1]/a',
   'https://[::ffff:169.254.169.254]/a',
   'https://[64:ff9b::1]/a',
+  'https://[64:ff9b:1::1]/a',
   'https://[100::1]/a',
+  'https://[2001::1]/a',
+  'https://[2001:db8::1]/a',
+  'https://[2002:7f00:0001::1]/a',
+  'https://[2002:a9fe:a9fe::1]/a',
   'https://[fc00::1]/a',
   'https://[fd12:3456::1]/a',
   'https://[fe80::1]/a',
@@ -86,9 +96,12 @@ test('authorized file DNS-rebinding defense rejects mixed public+private DNS ans
 
  let capturedHost='';
  let capturedServername:string|undefined;
+ let capturedAgent:unknown=undefined;
  let allLookupOut:unknown=null;
  let singleLookupOut:unknown=null;
  const mockHttpsRequest=((options:Record<string,unknown>,onResponse:(res:IncomingMessage)=>void)=>{
+  assert.equal(options.agent,false);
+  capturedAgent=options.agent;
   capturedHost=String(options.hostname);
   capturedServername=options.servername as string|undefined;
   const lookup=options.lookup as (h:string,o:unknown,cb:(...a:unknown[])=>void)=>void;
@@ -117,6 +130,7 @@ test('authorized file DNS-rebinding defense rejects mixed public+private DNS ans
   }
  );
  assert.equal(pinnedOut.bytes.toString(),'pinned-bytes');
+ assert.equal(capturedAgent,false);
  assert.equal(capturedHost,'files.example.test');
  assert.equal(capturedServername,'files.example.test');
  assert.deepEqual(allLookupOut,[{address:'93.184.216.34',family:4}]);

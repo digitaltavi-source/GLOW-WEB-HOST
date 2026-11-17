@@ -87,3 +87,16 @@
 - `GWF-AUD-207-10` (`scripts/verify-host-export-parity.mjs`, `tests/connector-ownership.test.ts`): switched directory walk and manifest check from `statSync` to `lstatSync`, rejecting symlinks and non-regular entries with `PARITY_SYMLINK_FORBIDDEN`.
 
 **Verification & claim ceiling:** `npm test` -> `126/126` pass (`0` failures), `HOST_EXPORT_PARITY=PASS` (`87` files). Claim ceiling: `SANDBOX_REPRODUCED` (local developer verification; not independent audit or live deployment).
+
+## 2026-11-17 — Entry209 special/transition CIDR SSRF closure & unpooled `https.request` socket pinning (`GWF-AUD-208-06`)
+
+**Authority:** Founder-authorized `Entry209` remediation (`sandbox` only; `main` untouched, `0` extra branches).
+
+**Source baseline:** `GLOW-WEB-HOST@sandbox` `fa92c9967bf56f5247343c37053846c76fd5dcf8` (`126` passing tests, `87` parity-tracked files).
+
+**Bounded remediation (`GWF-AUD-208-06`):**
+- `src/file-input.ts`: extended `BLOCKED_IPV4_CIDRS` with `192.0.0.0/24` (`[0xc0000000, 24]`), `192.0.2.0/24` (`[0xc0000200, 24]`), `198.51.100.0/24` (`[0xc6336400, 24]`), and `203.0.113.0/24` (`[0xcb007100, 24]`); extended `BLOCKED_IPV6_CIDRS` with `64:ff9b:1::/48` (RFC 8215 local-use NAT64), `2001::/23` (Teredo + IETF protocol assignments), `2001:db8::/32` (documentation), and `2002::/16` (6to4 embedded loopback/link-local transition); passed `agent: false` to `httpsRequestImpl({...})` in `pinnedHttpsGetBytes` so pooled `https.globalAgent` sockets cannot bypass per-request pinned DNS `lookup`.
+- `tests/file-input.test.ts`: added adversarial rejection coverage for `192.0.0.1`, `192.0.2.1`, `198.51.100.1`, `203.0.113.1`, `[::127.0.0.1]`, `[64:ff9b:1::1]`, `[2001::1]`, `[2001:db8::1]`, `[2002:7f00:0001::1]`, and `[2002:a9fe:a9fe::1]`, plus assertion that `options.agent === false` on pinned HTTPS requests.
+- `adapters/CONNECTOR_OWNERSHIP.json` & `HOST_EXPORT_PARITY_MANIFEST.json`: re-locked `src/file-input.ts` (`f84cd3b520eccd6760f883674831e7fa87b498cd`), `tests/file-input.test.ts`, and `adapters/CONNECTOR_OWNERSHIP.json` across all `87` canonical parity-tracked files.
+
+**Verification & claim ceiling:** `npm test` -> `126/126` pass (`0` failures), `node scripts/verify-host-export-parity.mjs` -> `HOST_EXPORT_PARITY=PASS` (`87` files). Claim ceiling: `SANDBOX_REPRODUCED` (local developer verification; not independent audit or live deployment).

@@ -64,7 +64,7 @@
     "src/mcp-app.ts": "df3afd516205c803e901cd8f279d49e5e121c651",
     "src/evidence-admission.ts": "6793226728a9802292bd8ea62f8efcb723229e7c",
     "src/phase-acceptance.ts": "0fd8e7eec61e83a8c04c4779c617556154541846",
-    "src/file-input.ts": "bbd4afff24977c6de947ae57277b8b84af643cbb",
+    "src/file-input.ts": "f84cd3b520eccd6760f883674831e7fa87b498cd",
     "src/connection-diagnostics.ts": "100ff578cddc6a29e8fccd8bda63f02e0beccef6",
     "src/contracts.ts": "6068146468e5be09c59cf11254861a47c3029255",
     "src/domain-topology.ts": "e91de60f5b85c28f9362077cec29ec2733fa167e"

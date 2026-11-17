@@ -43,8 +43,12 @@ const BLOCKED_IPV4_CIDRS: ReadonlyArray<readonly [number, number]> = [
   [0x7f000000, 8],  // 127.0.0.0/8
   [0xa9fe0000, 16], // 169.254.0.0/16
   [0xac100000, 12], // 172.16.0.0/12
+  [0xc0000000, 24], // 192.0.0.0/24
+  [0xc0000200, 24], // 192.0.2.0/24
   [0xc0a80000, 16], // 192.168.0.0/16
   [0xc6120000, 15], // 198.18.0.0/15
+  [0xc6336400, 24], // 198.51.100.0/24
+  [0xcb007100, 24], // 203.0.113.0/24
   [0xe0000000, 4],  // 224.0.0.0/4
   [0xf0000000, 4]   // 240.0.0.0/4
 ];
@@ -95,14 +99,18 @@ function inIpv6Cidr(ip: bigint, base: bigint, prefixLen: number): boolean {
 }
 
 const BLOCKED_IPV6_CIDRS: ReadonlyArray<readonly [bigint, number]> = [
-  [0n, 128],                                     // ::/128
-  [1n, 128],                                     // ::1/128
-  [0n, 96],                                      // ::/96 (IPv4-compatible)
-  [(0x0064n << 112n) | (0xff9bn << 96n), 96],    // 64:ff9b::/96
-  [0x0100n << 112n, 64],                         // 100::/64
-  [0xfc00n << 112n, 7],                          // fc00::/7
-  [0xfe80n << 112n, 10],                         // fe80::/10
-  [0xff00n << 112n, 8]                           // ff00::/8
+  [0n, 128],                                                       // ::/128
+  [1n, 128],                                                       // ::1/128
+  [0n, 96],                                                        // ::/96 (IPv4-compatible)
+  [(0x0064n << 112n) | (0xff9bn << 96n), 96],                      // 64:ff9b::/96
+  [(0x0064n << 112n) | (0xff9bn << 96n) | (0x0001n << 80n), 48],   // 64:ff9b:1::/48
+  [0x0100n << 112n, 64],                                           // 100::/64
+  [0x2001n << 112n, 23],                                           // 2001::/23 (Teredo + IETF protocol assignments)
+  [(0x2001n << 112n) | (0x0db8n << 96n), 32],                      // 2001:db8::/32 (documentation)
+  [0x2002n << 112n, 16],                                           // 2002::/16 (6to4)
+  [0xfc00n << 112n, 7],                                            // fc00::/7
+  [0xfe80n << 112n, 10],                                           // fe80::/10
+  [0xff00n << 112n, 8]                                             // ff00::/8
 ];
 
 export function isGlobalIpAddress(rawIp: string): boolean {
@@ -251,6 +259,7 @@ function pinnedHttpsGetBytes(params: {
         servername: net.isIP(hostname) ? undefined : hostname,
         family: pinnedFamily,
         timeout: timeoutMs,
+        agent: false,
         lookup: customLookup as unknown as https.RequestOptions['lookup']
       },
       (res: IncomingMessage) => {
