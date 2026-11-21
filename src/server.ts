@@ -545,6 +545,12 @@ app.get("/.well-known/oauth-authorization-server", (_req,res) => {
 });
 
 const publicDir=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"../public");
+const FLAGSHIP_IMAGE_ASSETS = [
+  "hero-ocean-jade.webp",
+  "reel-01-botanical.webp",
+  "reel-02-coastal-villa.webp",
+  "reel-03-liquid-prism.webp",
+] as const;
 
 app.get("/",(_req,res) => {
   res.type("html").sendFile("index.html", { root: publicDir });
@@ -571,6 +577,14 @@ app.get("/app.css",(_req,res) => {
 app.get("/app.js",(_req,res) => {
   res.type("application/javascript").sendFile("app.js", { root: publicDir });
 });
+
+for (const file of FLAGSHIP_IMAGE_ASSETS) {
+  app.get("/assets/" + file, (_req, res) => {
+    res.type("image/webp");
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    res.sendFile(`assets/${file}`, { root: publicDir });
+  });
+}
 
 
 app.get("/api/public/profile",(_req,res) => {
@@ -634,6 +648,13 @@ if (domainTopology.basePath) {
   app.get(`${bp}/app.js`, (_req, res) => {
     res.type("application/javascript").sendFile("app.js", { root: publicDir });
   });
+  for (const file of FLAGSHIP_IMAGE_ASSETS) {
+    app.get(`${bp}/assets/${file}`, (_req, res) => {
+      res.type("image/webp");
+      res.setHeader("Cache-Control", "public, max-age=86400");
+      res.sendFile(`assets/${file}`, { root: publicDir });
+    });
+  }
   app.get(`${bp}/api/public/profile`, (_req, res) => {
     res.json({
       product: "GLOW Web",
