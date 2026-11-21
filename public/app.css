@@ -376,20 +376,21 @@ button:disabled {
 }
 
 /* ==========================================================================
-   Right-Edge Minimalist Cinema Chapter Rail (Desktop >= 1120px)
+   Right-Edge Architectural Micro-Rail (Desktop > 1380px · Zero-Overlap)
    ========================================================================== */
 .chapter-rail {
   position: fixed;
-  right: 22px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 65;
+  width: 40px;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 14px;
-  padding: 14px 10px;
-  border-radius: 20px;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 6px;
+  border-radius: 999px;
   background: rgba(7, 26, 36, 0.24);
   border: 1px solid rgba(255, 255, 255, 0.14);
   backdrop-filter: blur(14px);
@@ -404,11 +405,15 @@ button:disabled {
 }
 
 .rail-item {
-  display: inline-flex;
+  position: relative;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 4px;
+  width: 28px;
+  padding: 3px 0;
   text-decoration: none;
-  padding: 2px 2px;
   color: rgba(244, 250, 248, 0.62);
   transition: color 0.22s ease;
 }
@@ -418,36 +423,53 @@ button:disabled {
 }
 
 .rail-label {
+  position: absolute;
+  right: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%) translateX(6px);
+  white-space: nowrap;
+  padding: 5px 10px;
+  border-radius: 999px;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 650;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   opacity: 0;
-  transform: translateX(6px);
-  transition: opacity 0.22s ease, transform 0.22s var(--ease-cinema);
   pointer-events: none;
+  background: rgba(7, 26, 36, 0.86);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 20px -8px rgba(3, 14, 20, 0.45);
+  transition: opacity 0.2s ease, transform 0.2s var(--ease-cinema);
+}
+
+.chapter-rail[data-rail-tone="light"] .rail-label {
+  background: rgba(244, 250, 248, 0.94);
+  color: var(--jade-deep);
+  border-color: rgba(176, 202, 194, 0.72);
+  box-shadow: 0 8px 20px -10px rgba(7, 30, 43, 0.2);
 }
 
 .rail-code {
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
 .rail-tick {
-  width: 12px;
-  height: 1.5px;
+  width: 10px;
+  height: 2px;
   border-radius: 99px;
   background: currentColor;
   transition: width 0.28s var(--ease-cinema), background-color 0.24s ease, box-shadow 0.24s ease;
 }
 
 .rail-item:hover .rail-label,
-.rail-item:focus-visible .rail-label,
-.rail-item.is-active .rail-label {
+.rail-item:focus-visible .rail-label {
   opacity: 1;
-  transform: translateX(0);
+  transform: translateY(-50%) translateX(0);
 }
 
 .rail-item:hover,
@@ -461,7 +483,7 @@ button:disabled {
 }
 
 .rail-item.is-active .rail-tick {
-  width: 22px;
+  width: 18px;
   background: var(--jade-luminous);
   box-shadow: 0 0 10px rgba(110, 231, 183, 0.72);
 }
@@ -1982,7 +2004,7 @@ body[data-runtime="unknown"] .status-dot {
 /* ==========================================================================
    Responsive Viewports (1920 -> 1440 -> 1024 -> 768 -> 390 · Zero Overflow)
    ========================================================================== */
-@media (max-width: 1120px) {
+@media (max-width: 1380px) {
   .chapter-rail {
     display: none;
   }
