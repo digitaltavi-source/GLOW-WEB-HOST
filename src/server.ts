@@ -552,6 +552,13 @@ const FLAGSHIP_IMAGE_ASSETS = [
   "reel-03-liquid-prism.webp",
 ] as const;
 
+const FLAGSHIP_VIDEO_ASSETS = [
+  "hero-ocean-jade.mp4",
+  "reel-01-botanical.mp4",
+  "reel-02-coastal-villa.mp4",
+  "reel-03-liquid-prism.mp4",
+] as const;
+
 app.get("/",(_req,res) => {
   res.type("html").sendFile("index.html", { root: publicDir });
 });
@@ -581,6 +588,14 @@ app.get("/app.js",(_req,res) => {
 for (const file of FLAGSHIP_IMAGE_ASSETS) {
   app.get("/assets/" + file, (_req, res) => {
     res.type("image/webp");
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    res.sendFile(`assets/${file}`, { root: publicDir });
+  });
+}
+
+for (const file of FLAGSHIP_VIDEO_ASSETS) {
+  app.get("/assets/" + file, (_req, res) => {
+    res.type("video/mp4");
     res.setHeader("Cache-Control", "public, max-age=86400");
     res.sendFile(`assets/${file}`, { root: publicDir });
   });
@@ -651,6 +666,13 @@ if (domainTopology.basePath) {
   for (const file of FLAGSHIP_IMAGE_ASSETS) {
     app.get(`${bp}/assets/${file}`, (_req, res) => {
       res.type("image/webp");
+      res.setHeader("Cache-Control", "public, max-age=86400");
+      res.sendFile(`assets/${file}`, { root: publicDir });
+    });
+  }
+  for (const file of FLAGSHIP_VIDEO_ASSETS) {
+    app.get(`${bp}/assets/${file}`, (_req, res) => {
+      res.type("video/mp4");
       res.setHeader("Cache-Control", "public, max-age=86400");
       res.sendFile(`assets/${file}`, { root: publicDir });
     });

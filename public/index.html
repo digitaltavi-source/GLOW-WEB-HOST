@@ -3,378 +3,331 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="GLOW Web — Xưởng chế tác website điện ảnh tinh giản. Khởi tạo trải nghiệm số độc bản, sắc nét đa màn hình và kết nối liền mạch với ChatGPT &amp; Google Gemini.">
-<meta name="theme-color" content="#030C12">
-<title>GLOW Web — Đại Hải Sinh Lộc · Chế Tác Website Điện Ảnh Độc Bản</title>
+<meta name="description" content="GLOW Web — Kiến trúc điện ảnh cho thương hiệu. Khởi tạo website độc bản, ánh sáng tinh khiết và kết nối liền mạch với ChatGPT &amp; Google Gemini.">
+<meta name="theme-color" content="#F4F8F7">
+<title>GLOW Web — Ánh Sáng Đại Hải · Kiến Trúc Điện Ảnh Cho Thương Hiệu</title>
+<link rel="preload" as="image" href="/assets/hero-ocean-jade.webp" fetchpriority="high">
 <link rel="stylesheet" href="/app.css">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Chuyển tới nội dung chính</a>
-<div class="cursor-glow" aria-hidden="true"></div>
 <div id="progress" aria-hidden="true"></div>
 
 <header class="site-header" id="site-header">
   <div class="header-inner">
     <a class="brand" href="#top" aria-label="GLOW Web — Trang chủ">
-      <svg class="brand-emblem" viewBox="0 0 36 36" width="32" height="32" fill="none" aria-hidden="true">
+      <svg class="brand-emblem" viewBox="0 0 36 36" width="30" height="30" fill="none" aria-hidden="true">
         <defs>
-          <linearGradient id="glow-ring-grad" x1="4" y1="4" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#F2F7FA"/>
-            <stop offset="52%" stop-color="#C8DAE6"/>
-            <stop offset="100%" stop-color="#4ED6A5"/>
-          </linearGradient>
-          <linearGradient id="glow-jade-grad" x1="12" y1="10" x2="24" y2="28" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stop-color="#A7F3D0"/>
-            <stop offset="55%" stop-color="#4ED6A5"/>
+          <linearGradient id="glow-prism-ring" x1="4" y1="4" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="currentColor" stop-opacity="0.92"/>
             <stop offset="100%" stop-color="#1FA87A"/>
           </linearGradient>
+          <linearGradient id="glow-prism-core" x1="12" y1="9" x2="24" y2="27" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#1FA87A"/>
+            <stop offset="100%" stop-color="#147A5B"/>
+          </linearGradient>
         </defs>
-        <circle cx="18" cy="18" r="15.2" stroke="url(#glow-ring-grad)" stroke-width="1.35"/>
-        <path d="M18 9.2L23.2 18L18 26.8L12.8 18L18 9.2Z" stroke="url(#glow-jade-grad)" stroke-width="1.25" fill="rgba(78,214,165,0.12)"/>
-        <path d="M9.6 22.4C12.8 20.6 15.6 21.4 18 22.4C20.4 23.4 23.2 24.2 26.4 22.4" stroke="#A7F3D0" stroke-width="1.1" stroke-linecap="round" opacity="0.88"/>
+        <circle cx="18" cy="18" r="15" stroke="url(#glow-prism-ring)" stroke-width="1.35"/>
+        <path d="M18 8.8L23.4 18L18 27.2L12.6 18L18 8.8Z" stroke="url(#glow-prism-core)" stroke-width="1.3" fill="rgba(31,168,122,0.14)"/>
+        <path d="M10.4 22.4C13.2 21 15.8 21.6 18 22.4C20.2 23.2 22.8 23.8 25.6 22.4" stroke="#1FA87A" stroke-width="1.1" stroke-linecap="round"/>
       </svg>
       <span class="brand-wordmark">GLOW</span>
     </a>
 
     <nav class="nav-links" aria-label="Điều hướng chính">
-      <a href="#showcase">Triển lãm</a>
-      <a href="#journey">Hành trình</a>
-      <a href="#tiers">Gói dịch vụ</a>
+      <a href="#works">Tác phẩm</a>
+      <a href="#craft">Nghệ thuật</a>
+      <a href="#register">Khởi tạo</a>
     </nav>
 
     <div class="header-actions">
-      <a class="pill pill-ghost" href="/auth/login?next=%2Fworkspace">Đăng nhập Google</a>
+      <a class="pill pill-header-ghost" href="/auth/login?next=%2Fworkspace">Đăng nhập Google</a>
       <a class="pill pill-jade" href="/workspace">Vào Xưởng <span aria-hidden="true">↗</span></a>
     </div>
   </div>
 </header>
 
 <main id="main-content">
+  <!-- ACT 0: Full-Bleed 100vh Living Cinema Video Hero -->
   <section class="hero" id="top" aria-labelledby="hero-heading">
-    <div class="hero-stage" aria-hidden="true">
-      <img
-        class="hero-media"
-        src="/assets/hero-ocean-jade.webp"
-        alt=""
-        width="1600"
-        height="900"
-        fetchpriority="high"
-        decoding="async"
+    <div class="hero-stage">
+      <video
+        class="hero-video"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        poster="/assets/hero-ocean-jade.webp"
+        width="1920"
+        height="1080"
+        data-cinema-video="hero"
+        aria-label="Ánh sáng đại hải và bình minh ngọc bích — khung hình mở đầu GLOW Web"
       >
-      <canvas id="hero-water-canvas" class="stage-canvas"></canvas>
-      <div class="hero-vignette"></div>
+        <source src="/assets/hero-ocean-jade.mp4" type="video/mp4">
+      </video>
+      <div class="hero-scrim" aria-hidden="true"></div>
     </div>
 
     <div class="hero-shell">
-      <div class="hero-editorial reveal">
-        <p class="eyebrow">GLOW WEB STUDIO · ĐẠI HẢI SINH LỘC</p>
-        <h1 id="hero-heading">
-          Biến bản sắc thành<br>
-          <em>một không gian điện ảnh</em><br>
-          độc bản trên internet.
-        </h1>
-        <p class="hero-lede">
-          Tĩnh lặng như đại dương sâu, tinh xảo tựa đường cắt bạch kim, và sống động từ từng nhịp tương tác. Chế tác riêng cho thương hiệu, nhà sáng lập và sản phẩm tầm vóc.
-        </p>
+      <div class="hero-copy reveal">
+        <p class="hero-eyebrow">GLOW WEB · ÁNH SÁNG ĐẠI HẢI</p>
+        <h1 id="hero-heading">Kiến trúc điện ảnh<br>cho thương hiệu.</h1>
+        <p class="hero-sub">Nơi bản sắc trở thành không gian sống động — tĩnh tại, tinh khiết và độc bản.</p>
+        <div class="hero-actions">
+          <a class="pill pill-jade pill-lg" href="#register">Khởi tạo website <span aria-hidden="true">→</span></a>
+          <a class="pill pill-glass-light pill-lg" href="/auth/login?next=%2Fworkspace">Đăng nhập Google</a>
+        </div>
       </div>
 
-      <div class="hero-dock reveal" aria-label="Bắt đầu nhanh và trạng thái hệ thống">
-        <div class="dock-actions">
-          <a class="pill pill-jade pill-lg" href="#intake">Khởi tạo dự án <span aria-hidden="true">→</span></a>
-          <a class="pill pill-platinum pill-lg" href="/auth/login?next=%2Fworkspace">Đăng nhập Google</a>
-        </div>
-        <div class="dock-status" role="status" aria-live="polite">
-          <span class="status-pill">
-            <i class="status-dot" aria-hidden="true"></i>
-            <b id="runtime-status">Đang kết nối</b>
-          </span>
-          <span class="status-sep" aria-hidden="true"></span>
-          <span class="status-ready" id="ready-state">Đang kiểm tra vùng xử lý…</span>
-        </div>
-      </div>
+      <button
+        type="button"
+        class="video-control-pill hero-playback-btn"
+        data-toggle-video="hero"
+        aria-pressed="false"
+        aria-label="Tạm dừng hoặc phát video mở đầu"
+      >
+        <span class="control-dot" aria-hidden="true"></span>
+        <span class="control-label">Tạm dừng</span>
+      </button>
     </div>
   </section>
 
-  <section class="pillars section-pad" aria-label="Ba trụ cột chế tác">
-    <div class="container">
-      <div class="pillar-grid">
-        <article class="pillar-card reveal">
-          <span class="pillar-index">01</span>
-          <h2>Ngôn ngữ Điện ảnh Riêng biệt</h2>
-          <p>Ánh sáng, bố cục và nhịp điệu hình ảnh được đạo diễn theo câu chuyện thật — không sao chép khuôn mẫu đại trà.</p>
-        </article>
-        <article class="pillar-card reveal">
-          <span class="pillar-index">02</span>
-          <h2>Kiến trúc Tinh giản Tựa Apple</h2>
-          <p>Khoảng thở chuẩn mực, đường viền bạch kim sắc mảnh và chữ tiếng Việt hiển thị thanh thoát trên mọi kích thước màn hình.</p>
-        </article>
-        <article class="pillar-card reveal">
-          <span class="pillar-index">03</span>
-          <h2>Chuẩn mực Bàn giao Độc bản</h2>
-          <p>Mọi chi tiết từ tốc độ tải, khả năng truy cập đến tương tác đều được kiểm chứng trước khi bạn mở cánh cửa ra mắt.</p>
-        </article>
-      </div>
+  <!-- Luminous Platinum Editorial Manifesto -->
+  <section class="manifesto" id="manifesto" aria-labelledby="manifesto-heading">
+    <div class="container container-narrow reveal">
+      <p class="eyebrow">TRIẾT LÝ KHÔNG GIAN</p>
+      <h2 id="manifesto-heading" class="manifesto-quote">
+        Một website tầm vóc không phô diễn kỹ thuật.<br>
+        <span>Nó hiện lên như một tác phẩm điện ảnh</span> — còn mọi tinh xảo ở lại phía sau.
+      </h2>
+      <p class="manifesto-note">Chế tác riêng cho thương hiệu, nhà sáng lập và những không gian số xứng tầm.</p>
     </div>
   </section>
 
-  <section class="showcase section-pad" id="showcase" aria-labelledby="showcase-heading">
-    <div class="container">
-      <div class="section-header reveal">
-        <div>
-          <p class="eyebrow">TRIỂN LÃM CHẾ TÁC · 03 KHÔNG GIAN</p>
-          <h2 id="showcase-heading">Ba thế giới thị giác.<br><span>Một tinh thần tĩnh tại và sắc bén.</span></h2>
-        </div>
-        <p class="section-desc">Chạm hoặc di chuột vào từng khung để mở rộng toàn cảnh chuyển động trực tiếp trên ảnh gốc.</p>
-      </div>
+  <!-- ACT 1, 2, 3: 3 Spacious Cinema Exhibition Chapters -->
+  <div id="works" aria-label="Ba chương triển lãm điện ảnh">
+    <!-- Chapter 01: Botanical Sanctuary (8 cols cinema video + 4 cols editorial on #F4F8F7) -->
+    <section class="chapter chapter-ivory" id="chapter-01" aria-labelledby="chapter-01-heading">
+      <div class="container">
+        <div class="chapter-grid">
+          <figure class="chapter-media reveal">
+            <div class="cinema-card">
+              <video
+                class="chapter-video"
+                autoplay
+                muted
+                loop
+                playsinline
+                preload="metadata"
+                poster="/assets/reel-01-botanical.webp"
+                width="1920"
+                height="1080"
+                data-cinema-video="reel01"
+                aria-label="Botanical Sanctuary — không gian gợn nước bạch kim và hơi sương ngọc bích"
+              >
+                <source src="/assets/reel-01-botanical.mp4" type="video/mp4">
+              </video>
+              <button
+                type="button"
+                class="video-control-pill media-corner-btn"
+                data-toggle-video="reel01"
+                aria-pressed="false"
+                aria-label="Tạm dừng hoặc phát phim Botanical Sanctuary"
+              >
+                <span class="control-label">Tạm dừng</span>
+              </button>
+            </div>
+          </figure>
 
-      <div class="monolith-accordion" role="region" aria-label="Bộ sưu tập 3 không gian điện ảnh">
-        <article
-          class="monolith-panel"
-          data-reel="reel01"
-          data-src="/assets/reel-01-botanical.webp"
-          data-title="01 · Botanical Sanctuary"
-          data-subtitle="Gợn nước bạch kim &amp; hơi sương ngọc bích cho thương hiệu chế tác thủ công và wellness."
-          tabindex="0"
-          role="button"
-          aria-expanded="false"
+          <div class="chapter-editorial reveal">
+            <p class="chapter-index">01 · BOTANICAL SANCTUARY</p>
+            <h2 id="chapter-01-heading">Lặng sóng<br>sinh hương.</h2>
+            <p class="chapter-desc">Nhịp nước tĩnh và hơi sương ngọc bích dành cho thương hiệu chế tác thủ công, nghỉ dưỡng và nghệ thuật sống.</p>
+            <button
+              type="button"
+              class="editorial-link"
+              data-open-cinema="reel01"
+              data-src="/assets/reel-01-botanical.mp4"
+              data-poster="/assets/reel-01-botanical.webp"
+              data-title="01 · Botanical Sanctuary"
+              data-subtitle="Nhịp nước tĩnh và hơi sương ngọc bích cho thương hiệu chế tác và nghỉ dưỡng."
+            >
+              Xem toàn màn hình <span aria-hidden="true">↗</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chapter 02: Coastal Glass Pavilion (reversed 4 cols copy + 8 cols video on #EBF3F0) -->
+    <section class="chapter chapter-celadon" id="chapter-02" aria-labelledby="chapter-02-heading">
+      <div class="container">
+        <div class="chapter-grid chapter-grid-reversed">
+          <div class="chapter-editorial reveal">
+            <p class="chapter-index">02 · COASTAL GLASS PAVILION</p>
+            <h2 id="chapter-02-heading">Kiến trúc chạm<br>chân trời.</h2>
+            <p class="chapter-desc">Ánh sáng hoàng hôn xanh và mặt hồ vô cực phản chiếu không gian dành cho studio kiến trúc và bất động sản tầm vóc.</p>
+            <button
+              type="button"
+              class="editorial-link"
+              data-open-cinema="reel02"
+              data-src="/assets/reel-02-coastal-villa.mp4"
+              data-poster="/assets/reel-02-coastal-villa.webp"
+              data-title="02 · Coastal Glass Pavilion"
+              data-subtitle="Biệt thự kính ven biển và mặt hồ vô cực trong sắc xanh đại hải."
+            >
+              Xem toàn màn hình <span aria-hidden="true">↗</span>
+            </button>
+          </div>
+
+          <figure class="chapter-media reveal">
+            <div class="cinema-card">
+              <video
+                class="chapter-video"
+                autoplay
+                muted
+                loop
+                playsinline
+                preload="metadata"
+                poster="/assets/reel-02-coastal-villa.webp"
+                width="1920"
+                height="1080"
+                data-cinema-video="reel02"
+                aria-label="Coastal Glass Pavilion — biệt thự kính tối giản bên bờ biển và mặt nước vô cực"
+              >
+                <source src="/assets/reel-02-coastal-villa.mp4" type="video/mp4">
+              </video>
+              <button
+                type="button"
+                class="video-control-pill media-corner-btn"
+                data-toggle-video="reel02"
+                aria-pressed="false"
+                aria-label="Tạm dừng hoặc phát phim Coastal Glass Pavilion"
+              >
+                <span class="control-label">Tạm dừng</span>
+              </button>
+            </div>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chapter 03: Liquid Platinum Emerald — Full-Bleed Edge-to-Edge IMAX Centerpiece -->
+    <section class="chapter-imax" id="chapter-03" aria-labelledby="chapter-03-heading">
+      <div class="imax-stage">
+        <video
+          class="imax-video"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="metadata"
+          poster="/assets/reel-03-liquid-prism.webp"
+          width="1920"
+          height="1080"
+          data-cinema-video="reel03"
+          aria-label="Liquid Platinum Emerald — tác phẩm điêu khắc dòng chảy vô cực bạch kim và ngọc lục bảo"
         >
-          <div class="monolith-media">
-            <img src="/assets/reel-01-botanical.webp" alt="Botanical Sanctuary — lọ thủy tinh ngọc bích và viên đá bạch kim trên mặt nước tĩnh" width="1280" height="720" loading="lazy" decoding="async">
-            <canvas id="reel01-canvas" class="stage-canvas" aria-hidden="true"></canvas>
-            <div class="monolith-scrim"></div>
-          </div>
-          <div class="monolith-content">
-            <span class="monolith-tag">01 · BOTANICAL SANCTUARY</span>
-            <h3>Lặng sóng sinh hương</h3>
-            <p>Không gian cảm quan dành cho thương hiệu chế tác tinh dầu, nghỉ dưỡng và nghệ thuật sống.</p>
-            <button type="button" class="pill pill-glass cinema-trigger" data-open-cinema="reel01">Xem toàn khung điện ảnh <span aria-hidden="true">↗</span></button>
-          </div>
-        </article>
+          <source src="/assets/reel-03-liquid-prism.mp4" type="video/mp4">
+        </video>
 
-        <article
-          class="monolith-panel"
-          data-reel="reel02"
-          data-src="/assets/reel-02-coastal-villa.webp"
-          data-title="02 · Coastal Glass Pavilion"
-          data-subtitle="Mặt hồ vô cực phản chiếu ánh kính kiến trúc giữa rừng thông và đại dương trầm mặc."
-          tabindex="0"
-          role="button"
-          aria-expanded="false"
-        >
-          <div class="monolith-media">
-            <img src="/assets/reel-02-coastal-villa.webp" alt="Coastal Glass Pavilion — biệt thự kính tối giản bên bờ biển và mặt nước vô cực" width="1280" height="720" loading="lazy" decoding="async">
-            <canvas id="reel02-canvas" class="stage-canvas" aria-hidden="true"></canvas>
-            <div class="monolith-scrim"></div>
+        <div class="imax-dock">
+          <div class="imax-pill">
+            <div class="imax-caption">
+              <span class="imax-eyebrow">03 · LIQUID PLATINUM EMERALD</span>
+              <h2 id="chapter-03-heading">Dòng chảy Vô cực · Kim sinh Thủy sinh Mộc</h2>
+            </div>
+            <div class="imax-controls">
+              <button
+                type="button"
+                class="pill pill-platinum-soft"
+                data-toggle-video="reel03"
+                aria-pressed="false"
+                aria-label="Tạm dừng hoặc phát phim Dòng chảy Vô cực"
+              >
+                <span class="control-label">Tạm dừng</span>
+              </button>
+              <button
+                type="button"
+                class="pill pill-jade"
+                data-open-cinema="reel03"
+                data-src="/assets/reel-03-liquid-prism.mp4"
+                data-poster="/assets/reel-03-liquid-prism.webp"
+                data-title="03 · Liquid Platinum Emerald"
+                data-subtitle="Dòng chảy Vô cực · Kim sinh Thủy sinh Mộc."
+              >
+                Toàn màn hình <span aria-hidden="true">↗</span>
+              </button>
+            </div>
           </div>
-          <div class="monolith-content">
-            <span class="monolith-tag">02 · COASTAL GLASS PAVILION</span>
-            <h3>Kiến trúc chạm chân trời</h3>
-            <p>Thể hiện chiều sâu không gian cho studio kiến trúc, bất động sản hạng sang và thương hiệu thiết kế.</p>
-            <button type="button" class="pill pill-glass cinema-trigger" data-open-cinema="reel02">Xem toàn khung điện ảnh <span aria-hidden="true">↗</span></button>
-          </div>
-        </article>
-
-        <article
-          class="monolith-panel is-active"
-          data-reel="reel03"
-          data-src="/assets/reel-03-liquid-prism.webp"
-          data-title="03 · Liquid Platinum Emerald"
-          data-subtitle="Dòng chảy vô cực bạch kim – ngọc lục bảo đồng bộ tọa độ qua 3 trụ pha lê thẳng đứng."
-          tabindex="0"
-          role="button"
-          aria-expanded="true"
-        >
-          <div class="monolith-media">
-            <img src="/assets/reel-03-liquid-prism.webp" alt="Liquid Platinum Emerald — tác phẩm điêu khắc dòng chảy bạch kim và ba trụ pha lê ngọc lục bảo" width="1280" height="720" loading="lazy" decoding="async">
-            <canvas id="reel03-infinity-canvas" class="stage-canvas" aria-hidden="true"></canvas>
-            <div class="monolith-scrim"></div>
-          </div>
-          <div class="monolith-content">
-            <span class="monolith-tag">03 · LIQUID PLATINUM EMERALD · TÂM ĐIỂM</span>
-            <h3>Dòng chảy vô cực</h3>
-            <p>Chuyển động dòng chất lỏng bạch kim và ánh xạ 3 trụ ngọc lục bảo tuần hoàn mượt mà 60fps ngay trên bề mặt tác phẩm.</p>
-            <button type="button" class="pill pill-jade cinema-trigger" data-open-cinema="reel03">Xem toàn khung điện ảnh <span aria-hidden="true">↗</span></button>
-          </div>
-        </article>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 
-  <section class="journey section-pad" id="journey" aria-labelledby="journey-heading">
+  <!-- ACT 4: 4 Invisible Studio Steps on Luminous Platinum Canvas -->
+  <section class="craft" id="craft" aria-labelledby="craft-heading">
     <div class="container">
-      <div class="section-header reveal">
-        <div>
-          <p class="eyebrow">HÀNH TRÌNH CHẾ TÁC · 04 NHỊP CHẢY</p>
-          <h2 id="journey-heading">Từ một câu ý tưởng.<br><span>Thành trải nghiệm sống động.</span></h2>
-        </div>
-        <p class="section-desc">Bốn giai đoạn mạch lạc, mỗi bước đều rõ kết quả bàn giao để bạn nắm trọn quyền quyết định.</p>
+      <div class="craft-head reveal">
+        <p class="eyebrow">NGHỆ THUẬT CHẾ TÁC · 04 NHỊP CHẢY</p>
+        <h2 id="craft-heading">Tinh giản ở bề mặt.<br><span>Vững chắc ở chiều sâu.</span></h2>
       </div>
 
-      <div class="river-shell" id="river-shell">
-        <div class="river-track" aria-hidden="true">
-          <div class="river-fill" id="river-fill"></div>
-        </div>
-        <div class="river-grid">
-          <button type="button" class="river-stage is-lit reveal" data-river-step="1" aria-pressed="true">
-            <span class="river-node" aria-hidden="true"></span>
-            <span class="stage-num">01</span>
-            <h3>Khởi Ý</h3>
-            <p>Làm rõ khách hàng mục tiêu, giá trị cốt lõi và thông điệp bạn muốn người xem ghi nhớ ngay giây đầu tiên.</p>
-          </button>
-          <button type="button" class="river-stage reveal" data-river-step="2" aria-pressed="false">
-            <span class="river-node" aria-hidden="true"></span>
-            <span class="stage-num">02</span>
-            <h3>Định Hình</h3>
-            <p>Xây dựng thế giới màu sắc, ánh sáng, kiểu chữ, nhịp chuyển động và bố cục thị giác mang bản sắc riêng.</p>
-          </button>
-          <button type="button" class="river-stage reveal" data-river-step="3" aria-pressed="false">
-            <span class="river-node" aria-hidden="true"></span>
-            <span class="stage-num">03</span>
-            <h3>Chế Tác</h3>
-            <p>Hiện thực hóa toàn bộ giao diện đa màn hình, tối ưu hình ảnh sắc gọn và tinh chỉnh từng micro-interaction.</p>
-          </button>
-          <button type="button" class="river-stage reveal" data-river-step="4" aria-pressed="false">
-            <span class="river-node" aria-hidden="true"></span>
-            <span class="stage-num">04</span>
-            <h3>Nghiệm Thu</h3>
-            <p>Kiểm tra hiển thị, tốc độ, độ tương phản và sự trơn tru trước khi bạn chính thức phê duyệt xuất bản.</p>
-          </button>
-        </div>
-      </div>
+      <ol class="craft-strip">
+        <li class="craft-step reveal">
+          <span class="step-num">01</span>
+          <h3>Khởi nguồn cảm hứng</h3>
+          <p>Lắng nghe bản sắc và điều bạn muốn người xem nhớ ngay khoảnh khắc đầu tiên.</p>
+        </li>
+        <li class="craft-step reveal">
+          <span class="step-num">02</span>
+          <h3>Định hình điện ảnh</h3>
+          <p>Thiết lập ánh sáng, bố cục, kiểu chữ và nhịp chuyển động mang dấu ấn riêng.</p>
+        </li>
+        <li class="craft-step reveal">
+          <span class="step-num">03</span>
+          <h3>Chế tác tinh xảo</h3>
+          <p>Hoàn thiện từng điểm ảnh, tương thích đa màn hình và giữ tốc độ mở mượt mà.</p>
+        </li>
+        <li class="craft-step reveal">
+          <span class="step-num">04</span>
+          <h3>Bàn giao &amp; Kết nối AI</h3>
+          <p>Sẵn sàng đồng hành cùng ChatGPT &amp; Google Gemini dưới toàn quyền duyệt của bạn.</p>
+        </li>
+      </ol>
     </div>
   </section>
 
-  <section class="standards section-pad" id="standards" aria-labelledby="standards-heading">
-    <div class="container">
-      <div class="section-header reveal">
-        <div>
-          <p class="eyebrow">CHUẨN MỰC ĐẢM BẢO · 06 CAM KẾT KỸ THUẬT</p>
-          <h2 id="standards-heading">Đẹp trên mắt nhìn.<br><span>Vững trên nền kỹ thuật.</span></h2>
-        </div>
-        <p class="section-desc">Sáu tiêu chuẩn thực chất đi cùng mọi sản phẩm rời khỏi Xưởng GLOW Web.</p>
-      </div>
-
-      <div class="bento-grid">
-        <article class="bento-card reveal">
-          <span class="bento-code">01 · TỐC ĐỘ</span>
-          <h3>Tải tức thì, tự chủ hoàn toàn</h3>
-          <p>Ảnh WebP nén sắc nét, không lệ thuộc thư viện hay font ngoài, giữ khung hình mở ra êm ái ngay cả trên mạng di động.</p>
-        </article>
-        <article class="bento-card reveal">
-          <span class="bento-code">02 · ĐA MÀN HÌNH</span>
-          <h3>Sắc nét từ 390px đến 1920px</h3>
-          <p>Bố cục thích ứng mượt từ điện thoại cầm tay, máy tính bảng đến màn hình điện ảnh góc rộng không vỡ nhịp.</p>
-        </article>
-        <article class="bento-card reveal">
-          <span class="bento-code">03 · CHUYỂN ĐỘNG</span>
-          <h3>Mượt mà và tôn trọng đôi mắt</h3>
-          <p>Hiệu ứng canvas tự tạm nghỉ khi ra khỏi khung nhìn và tự tắt chuyển động khi thiết bị bật chế độ giảm chuyển động.</p>
-        </article>
-        <article class="bento-card reveal">
-          <span class="bento-code">04 · BẢO MẬT</span>
-          <h3>Tách biệt lớp trình diễn &amp; vùng riêng tư</h3>
-          <p>Trang công khai không lưu bí mật hay dữ liệu nội bộ; quyền thao tác chỉ mở sau khi xác thực rõ ràng.</p>
-        </article>
-        <article class="bento-card reveal">
-          <span class="bento-code">05 · CỘNG TÁC AI</span>
-          <h3>Kết nối liền mạch ChatGPT &amp; Google Gemini</h3>
-          <p>Sẵn sàng làm việc trực tiếp cùng trợ lý AI quen thuộc của bạn qua kết nối chuẩn mở, giữ nguyên mạch dự án.</p>
-        </article>
-        <article class="bento-card reveal">
-          <span class="bento-code">06 · NGHIỆM THU</span>
-          <h3>Minh bạch trạng thái, bạn giữ quyền duyệt</h3>
-          <p>Mọi bước kiểm tra hiển thị trung thực trạng thái thực tế — không bao giờ tự ý phát hành khi chưa có xác nhận của bạn.</p>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="tiers section-pad" id="tiers" aria-labelledby="tiers-heading">
-    <div class="container">
-      <div class="section-header reveal">
-        <div>
-          <p class="eyebrow">GÓI DỊCH VỤ · 04 CẤP ĐỘ</p>
-          <h2 id="tiers-heading">Bắt đầu gọn nhẹ.<br><span>Mở rộng theo tầm vóc thương hiệu.</span></h2>
-        </div>
-        <p class="section-desc">Chọn nhịp đồng hành phù hợp. Mọi gói đều đăng nhập trực tiếp bằng tài khoản Google vào Xưởng Studio.</p>
-      </div>
-
-      <div class="tier-grid">
-        <article class="tier-card reveal">
-          <span class="tier-badge">KHỞI ĐẦU</span>
-          <h3>Free</h3>
-          <p class="tier-lead">Trải nghiệm không gian khởi ý và chuẩn bị hồ sơ dự án ban đầu.</p>
-          <ul class="tier-list">
-            <li>Không gian tạo bản nháp dự án</li>
-            <li>Đóng gói hồ sơ kết nối AI tức thì</li>
-            <li>Kiểm tra kết nối trực tuyến theo thời gian thực</li>
-          </ul>
-          <a class="pill pill-platinum tier-cta" href="/auth/login?next=%2Fworkspace">Bắt đầu miễn phí</a>
-        </article>
-
-        <article class="tier-card reveal">
-          <span class="tier-badge">CÁ NHÂN &amp; STUDIO</span>
-          <h3>Starter</h3>
-          <p class="tier-lead">Dành cho chuyên gia, nhà sáng tạo và portfolio cá nhân cần dấu ấn tinh gọn.</p>
-          <ul class="tier-list">
-            <li>Định hướng thẩm mỹ riêng theo câu chuyện cá nhân</li>
-            <li>Hiển thị tối ưu di động &amp; máy tính bảng</li>
-            <li>Kiểm duyệt chất lượng trước bàn giao</li>
-          </ul>
-          <a class="pill pill-platinum tier-cta" href="/auth/login?next=%2Fworkspace">Đăng nhập để chọn</a>
-        </article>
-
-        <article class="tier-card tier-featured reveal">
-          <span class="tier-badge tier-badge-jade">ĐƯỢC CHỌN NHIỀU</span>
-          <h3>Pro</h3>
-          <p class="tier-lead">Trải nghiệm điện ảnh toàn diện cho thương hiệu tăng trưởng và sản phẩm chủ lực.</p>
-          <ul class="tier-list">
-            <li>Nghệ thuật hình ảnh &amp; chuyển động tương tác độc bản</li>
-            <li>Đồng bộ cộng tác qua ChatGPT &amp; Google Gemini</li>
-            <li>Đa ngôn ngữ Việt / Anh sắc nét từng dấu thanh</li>
-          </ul>
-          <a class="pill pill-jade tier-cta" href="/auth/login?next=%2Fworkspace">Mở Xưởng với Pro <span aria-hidden="true">↗</span></a>
-        </article>
-
-        <article class="tier-card reveal">
-          <span class="tier-badge">ĐỘC BẢN CAO CẤP</span>
-          <h3>Premium</h3>
-          <p class="tier-lead">Chế tác cờ đầu theo tiêu chuẩn triển lãm cho tập đoàn và thương hiệu tiên phong.</p>
-          <ul class="tier-list">
-            <li>Hệ thống thị giác &amp; tương tác 60fps may đo riêng</li>
-            <li>Cố vấn kiến trúc trải nghiệm và nghiệm thu đa lớp</li>
-            <li>Ưu tiên đồng hành cùng đội ngũ xưởng</li>
-          </ul>
-          <a class="pill pill-platinum tier-cta" href="/auth/login?next=%2Fworkspace">Trao đổi trong Xưởng</a>
-        </article>
-      </div>
-
-      <p class="demo-disclosure reveal">
-        <strong>Lưu ý bản trình diễn (DEMO_BOUNDED):</strong> Khung gói dịch vụ trên là cấu trúc tham khảo trong môi trường trình diễn công khai, chưa mở thanh toán thương mại trực tuyến và không thay thế hợp đồng dịch vụ riêng biệt.
-      </p>
-    </div>
-  </section>
-
-  <section class="atelier section-pad" id="intake" aria-labelledby="atelier-heading">
+  <!-- ACT 5: Effortless Studio Gateway (#register + #intake-form + AI Plugin Entry) -->
+  <section class="gateway" id="intake" aria-labelledby="gateway-heading">
     <span id="register" class="anchor-offset" aria-hidden="true"></span>
     <div class="container">
-      <div class="atelier-layout">
-        <div class="atelier-intro reveal">
-          <p class="eyebrow">KHỞI TẠO DỰ ÁN · 04 BƯỚC NGẮN</p>
-          <h2 id="atelier-heading">Kể cho GLOW nghe<br><span>bạn muốn tạo nên điều gì.</span></h2>
-          <p>Không cần biết lập trình. Chỉ bốn bước tinh gọn để tạo hồ sơ khởi đầu chuẩn xác, sẵn sàng mang sang Xưởng Studio hoặc trợ lý AI của bạn.</p>
-          <div class="atelier-links">
-            <a class="pill pill-platinum" href="/workspace">Mở Xưởng Studio</a>
-            <a class="pill pill-ghost" href="/auth/login?next=%2Fworkspace">Đăng nhập Google</a>
+      <div class="gateway-grid">
+        <div class="gateway-intro reveal">
+          <p class="eyebrow">KHỞI TẠO KHÔNG GIAN · XƯỞNG STUDIO</p>
+          <h2 id="gateway-heading">Bắt đầu theo cách<br><span>tự nhiên nhất với bạn.</span></h2>
+          <p class="gateway-desc">Khởi tạo hồ sơ trực tiếp trong 4 bước ngắn ngay tại đây, hoặc đăng nhập Google để đấu nối nhanh cùng ChatGPT &amp; Google Gemini trong Xưởng Studio.</p>
+
+          <div class="ai-entry-card">
+            <span class="ai-entry-label">ĐẤU NỐI NHANH TRỢ LÝ AI</span>
+            <p>Kết nối ChatGPT hoặc Google Gemini thẳng vào Xưởng Studio bằng một chạm đăng nhập Google.</p>
+            <div class="gateway-links">
+              <a class="pill pill-jade" href="/auth/login?next=%2Fworkspace">Đăng nhập Google <span aria-hidden="true">↗</span></a>
+              <a class="pill pill-platinum-outline" href="/workspace">Mở Xưởng Studio</a>
+            </div>
           </div>
         </div>
 
         <div class="wizard reveal" id="wizard">
-          <div class="wizard-progress" aria-label="Tiến độ 4 bước khởi tạo">
-            <span class="active">01</span>
-            <span>02</span>
-            <span>03</span>
-            <span>04</span>
+          <div class="wizard-top">
+            <span class="wizard-eyebrow">TẠO WEBSITE TRỰC TIẾP · 04 BƯỚC</span>
+            <div class="wizard-progress" aria-label="Tiến độ 4 bước khởi tạo">
+              <span class="active">01</span>
+              <span>02</span>
+              <span>03</span>
+              <span>04</span>
+            </div>
           </div>
 
           <form id="intake-form" novalidate>
@@ -399,7 +352,7 @@
 
             <section class="wizard-step" data-step="2">
               <label for="goal">Một câu thôi: website phải giúp bạn đạt điều gì?</label>
-              <textarea id="goal" maxlength="700" placeholder="Ví dụ: Giúp đối tác hiểu ngay đẳng cấp sản phẩm của tôi và chủ động đặt lịch trao đổi." required></textarea>
+              <textarea id="goal" maxlength="700" placeholder="Ví dụ: Giúp đối tác cảm nhận ngay đẳng cấp thương hiệu và chủ động đặt lịch trao đổi." required></textarea>
             </section>
 
             <section class="wizard-step" data-step="3">
@@ -428,12 +381,12 @@
               </div>
               <div class="privacy-note">
                 <span aria-hidden="true">✓</span>
-                <p>Hồ sơ chỉ được tạo ngay trên trình duyệt của bạn. Không gửi dữ liệu riêng tư hay tự động khởi chạy khi chưa có xác nhận.</p>
+                <p>Hồ sơ chỉ được đóng gói ngay trên trình duyệt của bạn. Không gửi dữ liệu riêng tư hay tự động khởi chạy khi chưa có xác nhận.</p>
               </div>
             </section>
 
             <div class="wizard-actions">
-              <button class="pill pill-ghost" type="button" id="back" disabled>Quay lại</button>
+              <button class="pill pill-platinum-outline" type="button" id="back" disabled>Quay lại</button>
               <button class="pill pill-jade" type="button" id="next">Tiếp tục <span aria-hidden="true">→</span></button>
               <button class="pill pill-jade hidden" type="submit" id="launch">Tạo hồ sơ &amp; Mở ChatGPT <span aria-hidden="true">↗</span></button>
             </div>
@@ -443,11 +396,11 @@
             <div class="capsule-head">
               <small>HỒ SƠ KHỞI TẠO SẴN SÀNG</small>
               <h3>Yêu cầu dự án đã được đóng gói.</h3>
-              <p>Nội dung đã được sao chép. Bạn có thể dán vào ChatGPT hoặc đăng nhập Xưởng Studio để tiếp tục.</p>
+              <p>Nội dung đã được sao chép. Dán vào ChatGPT hoặc mở Xưởng Studio để bắt đầu chế tác.</p>
             </div>
             <pre id="capsule-preview"></pre>
             <div class="capsule-actions">
-              <button class="pill pill-platinum" type="button" id="copy-capsule">Copy lại capsule</button>
+              <button class="pill pill-platinum-outline" type="button" id="copy-capsule">Copy lại capsule</button>
               <a class="pill pill-jade" href="/auth/login?next=%2Fworkspace">Vào Xưởng Studio <span aria-hidden="true">↗</span></a>
             </div>
           </div>
@@ -460,19 +413,29 @@
 <footer class="site-footer">
   <div class="container footer-inner">
     <div class="footer-brand">
-      <svg class="brand-emblem" viewBox="0 0 36 36" width="26" height="26" fill="none" aria-hidden="true">
-        <circle cx="18" cy="18" r="15.2" stroke="#C8DAE6" stroke-width="1.3"/>
-        <path d="M18 9.2L23.2 18L18 26.8L12.8 18L18 9.2Z" stroke="#4ED6A5" stroke-width="1.2"/>
+      <svg class="brand-emblem" viewBox="0 0 36 36" width="24" height="24" fill="none" aria-hidden="true">
+        <circle cx="18" cy="18" r="15" stroke="#081E2B" stroke-opacity="0.35" stroke-width="1.3"/>
+        <path d="M18 9L23.2 18L18 27L12.8 18L18 9Z" stroke="#147A5B" stroke-width="1.3"/>
       </svg>
       <div>
         <span class="brand-wordmark">GLOW</span>
         <p class="footer-note">Trải nghiệm công khai · Chế độ trình diễn có giới hạn (DEMO_BOUNDED)</p>
       </div>
     </div>
+
+    <div class="footer-status" role="status" aria-live="polite">
+      <span class="status-pill">
+        <i class="status-dot" aria-hidden="true"></i>
+        <b id="runtime-status">Đang kết nối</b>
+      </span>
+      <span class="status-sep" aria-hidden="true">·</span>
+      <span class="status-ready" id="ready-state">Đang kiểm tra trạng thái…</span>
+    </div>
+
     <nav class="footer-links" aria-label="Liên kết cuối trang">
       <a href="/workspace">Xưởng Studio</a>
       <a href="/auth/login?next=%2Fworkspace">Đăng nhập Google</a>
-      <a href="#intake">Khởi tạo dự án</a>
+      <a href="/privacy">Quyền riêng tư</a>
     </nav>
   </div>
 </footer>
@@ -483,13 +446,24 @@
     <div class="cinema-bar">
       <div>
         <h3 id="cinema-title">03 · Liquid Platinum Emerald</h3>
-        <p id="cinema-subtitle">Chuyển động dòng chảy vô cực 60fps.</p>
+        <p id="cinema-subtitle">Dòng chảy Vô cực · Kim sinh Thủy sinh Mộc.</p>
       </div>
-      <button type="button" class="pill pill-platinum" id="cinema-close" aria-label="Đóng khung toàn màn hình">Đóng ✕</button>
+      <button type="button" class="pill pill-glass-light" id="cinema-close" aria-label="Đóng khung toàn màn hình">Đóng ✕</button>
     </div>
     <div class="cinema-frame">
-      <img id="cinema-stage-img" src="/assets/reel-03-liquid-prism.webp" alt="" width="1280" height="720">
-      <canvas id="cinema-stage-canvas" class="stage-canvas" aria-hidden="true"></canvas>
+      <video
+        id="cinema-stage-video"
+        autoplay
+        muted
+        loop
+        playsinline
+        controls
+        poster="/assets/reel-03-liquid-prism.webp"
+        width="1920"
+        height="1080"
+      >
+        <source id="cinema-stage-source" src="/assets/reel-03-liquid-prism.mp4" type="video/mp4">
+      </video>
     </div>
   </div>
 </div>
