@@ -143,16 +143,21 @@ async function refreshRuntime() {
         body: await r.json().catch(() => ({})),
       })),
     ]);
-    if (runtimeStatus) runtimeStatus.textContent = profile.status_label || "Public Experience online";
+    const rawLabel = typeof profile.status_label === "string" ? profile.status_label.trim() : "";
+    const localizedStatus =
+      !rawLabel || /^public experience/i.test(rawLabel)
+        ? "Không gian trải nghiệm trực tuyến"
+        : rawLabel;
+    if (runtimeStatus) runtimeStatus.textContent = localizedStatus;
     if (readyState) {
       readyState.textContent = ready.ok
-        ? "Protected runtime reachable"
-        : "Protected runtime in degraded mode";
+        ? "Hệ thống xưởng sẵn sàng"
+        : "Chế độ kết nối giới hạn";
     }
     document.body.dataset.runtime = ready.ok ? "ready" : "degraded";
   } catch {
-    if (runtimeStatus) runtimeStatus.textContent = "Public experience online";
-    if (readyState) readyState.textContent = "Runtime status unavailable";
+    if (runtimeStatus) runtimeStatus.textContent = "Không gian trải nghiệm trực tuyến";
+    if (readyState) readyState.textContent = "Chế độ kết nối giới hạn";
     document.body.dataset.runtime = "unknown";
   }
 }
@@ -166,7 +171,7 @@ function updateScrollTelemetry() {
   if (progress) progress.style.width = `${max > 0 ? (window.scrollY / max) * 100 : 0}%`;
 
   const hero = $("#top");
-  const threshold = hero ? Math.max(80, hero.offsetHeight - 96) : 80;
+  const threshold = hero ? Math.max(80, hero.offsetHeight - 180) : 80;
   siteHeader?.classList.toggle("is-scrolled", window.scrollY > threshold);
 }
 
