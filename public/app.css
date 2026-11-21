@@ -10,7 +10,7 @@
   --platinum-canvas: #F4F8F7;
   --platinum-mist: #EBF3F0;
   --platinum-pure: #FFFFFF;
-  --platinum-glass-light: rgba(244, 248, 247, 0.92);
+  --platinum-glass-light: rgba(244, 248, 247, 0.94);
   --platinum-border: #D6E5E0;
   --platinum-border-strong: #B6CEC7;
 
@@ -259,7 +259,7 @@ button:disabled {
   border: 1px solid rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(20px) saturate(145%);
   -webkit-backdrop-filter: blur(20px) saturate(145%);
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .site-header.is-scrolled {
@@ -296,11 +296,16 @@ button:disabled {
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
-  opacity: 0.88;
-  transition: opacity 0.25s ease, color 0.25s ease;
+  opacity: 0.9;
+  transition: opacity 0.18s ease;
 }
 
 .nav-links a:hover {
+  opacity: 1;
+}
+
+.site-header.is-scrolled .nav-links a {
+  color: var(--ocean-ink);
   opacity: 1;
 }
 
