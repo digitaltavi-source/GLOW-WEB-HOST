@@ -742,7 +742,7 @@ body:not([data-active-view="home"]) .chapter-rail {
   min-height: 100svh;
   width: 100%;
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   overflow: hidden;
   z-index: 2;
 }
@@ -762,6 +762,73 @@ body:not([data-active-view="home"]) .chapter-rail {
   object-position: center center;
   transform: translate3d(0, calc(var(--hero-p) * 42px), 0) scale(calc(1 + var(--hero-p) * 0.05));
   will-change: transform;
+}
+
+/* Multi-Depth Twinkling Night-Sky Starfield (Pure SVG/CSS · Zero Canvas · Sky Only) */
+.hero-starfield {
+  position: absolute;
+  inset: 0 0 42% 0;
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  overflow: hidden;
+  -webkit-mask-image:
+    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.92) 56%, rgba(0, 0, 0, 0.35) 82%, transparent 100%),
+    radial-gradient(ellipse 30% 62% at 64% 78%, transparent 0%, transparent 48%, #000 84%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.92) 56%, rgba(0, 0, 0, 0.35) 82%, transparent 100%),
+    radial-gradient(ellipse 30% 62% at 64% 78%, transparent 0%, transparent 48%, #000 84%);
+  mask-composite: intersect;
+}
+
+.hero-starfield-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.star-plane-far {
+  opacity: 0.78;
+}
+
+.star-plane-mid {
+  opacity: 0.9;
+}
+
+.star-plane-near {
+  transform: translate3d(0, calc(var(--hero-p) * -18px), 0);
+  will-change: transform;
+}
+
+.st-far-a { animation: star-breathe-far 6.7s ease-in-out var(--st-d, 0s) infinite; }
+.st-far-b { animation: star-breathe-far 8.3s ease-in-out var(--st-d, 0s) infinite; }
+.st-far-c { animation: star-breathe-far 10.9s ease-in-out var(--st-d, 0s) infinite; }
+
+.st-mid-a { animation: star-twinkle-mid 4.1s ease-in-out var(--st-d, 0s) infinite; }
+.st-mid-b { animation: star-twinkle-mid 5.3s ease-in-out var(--st-d, 0s) infinite; }
+.st-mid-c { animation: star-twinkle-mid 6.1s ease-in-out var(--st-d, 0s) infinite; }
+.st-mid-d { animation: star-twinkle-mid 7.3s ease-in-out var(--st-d, 0s) infinite; }
+
+.st-near-a { animation: star-glint-near 3.7s ease-in-out var(--st-d, 0s) infinite; }
+.st-near-b { animation: star-glint-near 4.9s ease-in-out var(--st-d, 0s) infinite; }
+.st-near-c { animation: star-glint-near 7.1s ease-in-out var(--st-d, 0s) infinite; }
+
+@keyframes star-breathe-far {
+  0%, 100% { opacity: 0.24; }
+  50% { opacity: 0.82; }
+}
+
+@keyframes star-twinkle-mid {
+  0%, 100% { opacity: 0.28; }
+  42% { opacity: 0.96; }
+  68% { opacity: 0.44; }
+}
+
+@keyframes star-glint-near {
+  0%, 100% { opacity: 0.48; }
+  45% { opacity: 1; }
+  70% { opacity: 0.62; }
 }
 
 /* Frame-Locked Anamorphic Silver-Jade Loop Flare (0.95s Seam Window · Zero Canvas) */
@@ -814,7 +881,7 @@ body:not([data-active-view="home"]) .chapter-rail {
   z-index: 2;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 56% 52% at 14% 86%, rgba(3, 14, 21, 0.7) 0%, rgba(3, 14, 21, 0.24) 55%, transparent 82%),
+    radial-gradient(ellipse 52% 48% at 20% 46%, rgba(3, 14, 21, 0.66) 0%, rgba(3, 14, 21, 0.24) 54%, transparent 82%),
     linear-gradient(180deg, rgba(3, 12, 18, 0.28) 0%, transparent 24%, transparent 74%, rgba(3, 11, 16, 0.42) 100%);
 }
 
@@ -822,21 +889,30 @@ body:not([data-active-view="home"]) .chapter-rail {
   position: relative;
   z-index: 3;
   width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 132px 40px 76px;
+  padding: 110px 40px 64px;
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 32px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 28px;
 }
 
 .hero-copy {
-  max-width: 630px;
+  max-width: 540px;
   color: var(--ink-pure);
   transform: translate3d(0, calc(var(--hero-p) * -32px), 0);
   opacity: calc(1 - var(--hero-p) * 0.78);
   will-change: transform, opacity;
+}
+
+@media (min-width: 1024px) {
+  .hero-copy {
+    max-width: min(490px, 42vw);
+  }
 }
 
 .hero-eyebrow {
@@ -850,9 +926,9 @@ body:not([data-active-view="home"]) .chapter-rail {
 
 .hero-copy h1 {
   margin: 0 0 18px;
-  font-size: clamp(2.75rem, 5.2vw, 4.65rem);
+  font-size: clamp(2.45rem, 3.95vw, 3.75rem);
   font-weight: 640;
-  line-height: 1.07;
+  line-height: 1.09;
   letter-spacing: -0.036em;
   color: #FFFFFF;
   text-shadow: 0 8px 34px rgba(3, 12, 18, 0.56);
@@ -860,8 +936,8 @@ body:not([data-active-view="home"]) .chapter-rail {
 
 .hero-sub {
   margin: 0 0 30px;
-  max-width: 490px;
-  font-size: clamp(1rem, 1.3vw, 1.14rem);
+  max-width: 470px;
+  font-size: clamp(0.98rem, 1.2vw, 1.1rem);
   line-height: 1.64;
   color: rgba(238, 249, 246, 0.94);
   text-shadow: 0 2px 18px rgba(3, 12, 18, 0.62);
@@ -878,6 +954,14 @@ body:not([data-active-view="home"]) .chapter-rail {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+@media (min-width: 860px) {
+  .hero-aside {
+    position: absolute;
+    right: 40px;
+    bottom: 34px;
+  }
 }
 
 .scroll-cue {
@@ -963,13 +1047,14 @@ body:not([data-active-view="home"]) .chapter-rail {
 .mist-bridge-12 {
   position: relative;
   z-index: 4;
-  margin-top: -48px;
-  margin-bottom: -78px;
-  min-height: 226px;
-  padding: 64px 0 68px;
+  margin-top: 0;
+  margin-bottom: 0;
+  min-height: 320px;
+  padding: 104px 0 108px;
   display: flex;
   align-items: center;
   overflow: hidden;
+  background: linear-gradient(180deg, #030A10 0%, #05131B 50%, #030A10 100%);
 }
 
 .mist-corridor {
@@ -1313,24 +1398,29 @@ body:not([data-active-view="home"]) .chapter-rail {
 }
 
 /* ==========================================================================
-   ACT 4 — Natural Wet Basalt/Slate Infinity-Pool Terrace Continuation
-   Continues Video 03 Pool Coping (#1b2a33) -> Moonlit Stone -> Ocean Midnight
+   ACT 4 — Real Photorealistic Wet-Basalt Poolside Stone Terrace Continuation
+   Continues Video 03 Pool Coping Seamlessly Over Real Wet Basalt Flagstones
    ========================================================================== */
 .sanctuary-world {
   position: relative;
   z-index: 4;
   margin-top: 0;
   padding-top: 44px;
-  min-height: 500px;
+  min-height: 540px;
   overflow: clip;
-  background: linear-gradient(
-    180deg,
-    #1B2A33 0%,
-    #14212A 18%,
-    #0D1820 46%,
-    #071117 78%,
-    #03080C 100%
-  );
+  background-color: #03080C;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(24, 38, 47, 0.22) 0%,
+      rgba(10, 20, 27, 0.18) 38%,
+      rgba(5, 12, 17, 0.68) 76%,
+      #03080C 100%
+    ),
+    url("/assets/basalt-terrace-deck.webp");
+  background-size: 100% 100%, cover;
+  background-position: center top, center top;
+  background-repeat: no-repeat, no-repeat;
 }
 
 /* 1px Wet Stone Coping Rim + Soft Lunar Water-Edge Specular Reflection Band */
@@ -1339,43 +1429,22 @@ body:not([data-active-view="home"]) .chapter-rail {
   top: 0;
   left: 0;
   right: 0;
-  height: 92px;
+  height: 76px;
   z-index: 1;
   pointer-events: none;
   border-top: 1px solid rgba(208, 236, 240, 0.22);
   background:
-    radial-gradient(ellipse 68% 48% at 50% 0%, rgba(196, 232, 238, 0.16) 0%, rgba(112, 168, 178, 0.06) 48%, transparent 82%),
-    linear-gradient(180deg, rgba(210, 238, 242, 0.08) 0%, rgba(27, 42, 51, 0.04) 24%, transparent 100%);
+    radial-gradient(ellipse 68% 44% at 50% 0%, rgba(196, 232, 238, 0.14) 0%, rgba(112, 168, 178, 0.04) 48%, transparent 82%),
+    linear-gradient(180deg, rgba(210, 238, 242, 0.06) 0%, transparent 100%);
 }
 
-/* Mineral Basalt Texture & Subtle Perspective Stone-Paver Joint Lines */
+/* Clean Architectural Stone Plane (Zero Fake CSS Grid — Real Basalt WebP Carries Surface) */
 .terrace-basalt-grid {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  overflow: hidden;
-  background-image:
-    repeating-linear-gradient(
-      90deg,
-      rgba(198, 228, 236, 0.055) 0 1px,
-      transparent 1px 220px
-    ),
-    repeating-linear-gradient(
-      180deg,
-      rgba(198, 228, 236, 0.055) 0 1px,
-      transparent 1px 112px
-    );
-  background-position: center top;
-  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.56) 44%, rgba(0, 0, 0, 0.18) 76%, transparent 100%);
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.56) 44%, rgba(0, 0, 0, 0.18) 76%, transparent 100%);
-}
-
-.basalt-grain-svg {
-  width: 100%;
-  height: 100%;
-  opacity: 0.42;
-  mix-blend-mode: soft-light;
+  background-image: none;
 }
 
 .mist-corridor-34 {
@@ -1383,24 +1452,25 @@ body:not([data-active-view="home"]) .chapter-rail {
   top: 0;
   left: 0;
   right: 0;
-  height: 220px;
+  height: 180px;
   z-index: 1;
-  opacity: 0.54;
+  opacity: 0.34;
   -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 35%, #000 65%, transparent 100%);
   mask-image: linear-gradient(180deg, transparent 0%, #000 35%, #000 65%, transparent 100%);
 }
 
-/* Full-Bleed Deep-Water Volumetric Atmosphere Strictly Masked to Alpha 0 at y = 0 */
+/* Subtle Nocturnal Volumetric Atmosphere Masked to Alpha 0 at y = 0 */
 .sanctuary-sculpture {
   position: absolute;
   inset: 0;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
+  opacity: 0.42;
   --sanctuary-mx: 50%;
   --sanctuary-my: 58%;
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.2) 12%, #000 32%, #000 100%);
-  mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.2) 12%, #000 32%, #000 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.16) 14%, #000 38%, #000 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.16) 14%, #000 38%, #000 100%);
 }
 
 /* Layer A: Ultra-Soft Deep-Water Volumetric Aurora Pools (blur 130px, Coprime Orbits) */
@@ -1549,6 +1619,18 @@ body:not([data-active-view="home"]) .chapter-rail {
   padding: 6px 0 18px;
 }
 
+.craft-rail-section .container {
+  position: relative;
+  background: radial-gradient(
+    ellipse 86% 76% at 50% 48%,
+    rgba(3, 10, 15, 0.52) 0%,
+    rgba(3, 10, 15, 0.24) 64%,
+    transparent 100%
+  );
+  border-radius: 22px;
+  padding-top: 12px;
+}
+
 .craft-bar-head {
   display: flex;
   flex-wrap: wrap;
@@ -1678,6 +1760,14 @@ body:not([data-active-view="home"]) .chapter-rail {
   max-width: 1100px;
   margin: 0 auto;
   text-align: center;
+  padding: 20px 18px 16px;
+  border-radius: 26px;
+  background: radial-gradient(
+    ellipse 78% 72% at 50% 50%,
+    rgba(3, 10, 15, 0.56) 0%,
+    rgba(3, 10, 15, 0.24) 62%,
+    transparent 100%
+  );
 }
 
 .gateway-centered h2 {
@@ -2705,31 +2795,97 @@ body:not([data-active-view="home"]) .chapter-rail {
 
 .template-card-media {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #061017;
+  border-bottom: 1px solid rgba(190, 232, 222, 0.14);
+}
+
+.template-browser-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(5, 14, 21, 0.94);
+  border-bottom: 1px solid rgba(190, 232, 222, 0.14);
+}
+
+.template-browser-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.template-browser-dots i {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(190, 232, 222, 0.34);
+}
+
+.template-browser-dots i:first-child {
+  background: rgba(248, 113, 113, 0.65);
+}
+
+.template-browser-dots i:nth-child(2) {
+  background: rgba(251, 191, 36, 0.65);
+}
+
+.template-browser-dots i:nth-child(3) {
+  background: rgba(52, 232, 180, 0.72);
+}
+
+.template-browser-url {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(190, 232, 222, 0.08);
+  border: 1px solid rgba(190, 232, 222, 0.12);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+  font-size: 10.5px;
+  color: rgba(215, 240, 234, 0.78);
+}
+
+.template-mini-viewport {
+  position: relative;
+  width: 100%;
   aspect-ratio: 16 / 10;
   overflow: hidden;
-  background: #040D13;
+  background: #08131B;
 }
 
-.template-card-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s var(--ease-cinema);
-}
-
-.template-card:hover .template-card-media img {
-  transform: scale(1.04);
+.template-mini-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1280px;
+  height: 800px;
+  border: 0;
+  transform-origin: top left;
+  transform: scale(var(--mini-scale, 0.295));
+  pointer-events: none;
+  background: #0B141B;
 }
 
 .template-card-badges {
   position: absolute;
-  left: 12px;
-  right: 12px;
-  top: 12px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  pointer-events: none;
 }
 
 .tpl-badge {
@@ -3170,6 +3326,7 @@ body:not([data-active-view="home"]) .chapter-rail {
 
 .template-preview-controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
 }
@@ -3190,6 +3347,7 @@ body:not([data-active-view="home"]) .chapter-rail {
   color: var(--ink-muted);
   font-size: 12px;
   font-weight: 620;
+  cursor: pointer;
 }
 
 .viewport-btn.is-active {
@@ -3199,7 +3357,7 @@ body:not([data-active-view="home"]) .chapter-rail {
 
 .template-preview-body {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(280px, 1fr);
+  grid-template-columns: minmax(0, 1.55fr) minmax(270px, 0.95fr);
   gap: 22px;
   align-items: start;
 }
@@ -3209,29 +3367,80 @@ body:not([data-active-view="home"]) .chapter-rail {
   justify-content: center;
   padding: 14px;
   border-radius: 18px;
-  background: rgba(3, 10, 15, 0.74);
+  background: rgba(3, 10, 15, 0.78);
   border: 1px solid rgba(190, 232, 222, 0.16);
 }
 
 .template-stage-frame {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  border-radius: 12px;
+  height: 560px;
+  border-radius: 14px;
   overflow: hidden;
-  background: #02080C;
-  aspect-ratio: 16 / 9;
-  transition: max-width 0.28s var(--ease-cinema), aspect-ratio 0.28s ease;
+  background: #061017;
+  border: 1px solid rgba(190, 232, 222, 0.18);
+  transition: max-width 0.28s var(--ease-cinema), height 0.28s ease, border-radius 0.28s ease;
 }
 
 .template-stage-wrap[data-viewport="mobile"] .template-stage-frame {
   max-width: 390px;
-  aspect-ratio: 9 / 14;
-  border: 1px solid rgba(190, 232, 222, 0.24);
+  height: 600px;
+  border-radius: 26px;
+  border: 2px solid rgba(190, 232, 222, 0.3);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
 }
 
-.template-stage-frame video {
+.preview-live-iframe {
+  flex: 1 1 auto;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  border: 0;
+  display: block;
+  background: #0B141B;
+}
+
+.preview-source-panel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.preview-source-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.preview-source-meta {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+  font-size: 11.5px;
+  color: var(--jade-luminous);
+}
+
+.preview-copy-btn {
+  padding: 6px 14px;
+  font-size: 12px;
+  min-height: 34px;
+}
+
+.preview-code-block {
+  margin: 0;
+  padding: 16px;
+  max-height: 500px;
+  overflow: auto;
+  border-radius: 12px;
+  background: #030A10;
+  border: 1px solid rgba(190, 232, 222, 0.16);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #D2F4EA;
+  white-space: pre;
+  tab-size: 2;
 }
 
 .template-preview-meta {
@@ -3434,10 +3643,10 @@ body:not([data-active-view="home"]) .chapter-rail {
   }
 
   .mist-bridge-12 {
-    margin-top: -46px;
-    margin-bottom: -54px;
-    min-height: 176px;
-    padding: 46px 0 50px;
+    margin-top: 0;
+    margin-bottom: 0;
+    min-height: 220px;
+    padding: 64px 0 68px;
   }
 
   .chapter-botanical {
@@ -3552,6 +3761,10 @@ body:not([data-active-view="home"]) .chapter-rail {
 
   .hero-seam-flare {
     display: none;
+  }
+
+  .hero-starfield * {
+    animation: none !important;
   }
 
   .reveal {

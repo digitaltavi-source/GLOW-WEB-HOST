@@ -85,17 +85,17 @@ const I18N = {
     "rail.02": "Chân trời",
     "rail.03": "Nghệ thuật",
     "rail.04": "Khởi tạo",
-    "hero.eyebrow": "GLOW WEB · ÁNH SÁNG ĐẠI HẢI",
-    "hero.line1": "Kiến trúc điện ảnh",
-    "hero.line2": "cho thương hiệu.",
-    "hero.sub": "Nơi bản sắc trở thành không gian sống động — tĩnh tại, tinh khiết và độc bản.",
+    "hero.eyebrow": "GLOW WEB · STUDIO KIẾN TẠO SỐ",
+    "hero.line1": "Không gian số",
+    "hero.line2": "xứng tầm thương hiệu.",
+    "hero.sub": "Từ ý tưởng đến website hoàn chỉnh chỉ trong một nhịp kết nối — kết hợp chuẩn mực thiết kế tinh tuyển cùng sức mạnh AI ngay trong không gian làm việc của bạn.",
     "hero.ctaStart": "Khởi tạo website",
     "hero.ctaGallery": "Khám phá 12+ mẫu",
     "hero.scrollCue": "Khám phá",
     "video.pause": "Tạm dừng",
     "video.play": "Phát phim",
     "video.fullscreen": "Toàn màn hình",
-    "manifesto.coord": "01 · TRIẾT LÝ KHÔNG GIAN · GLOW ATELIER",
+    "manifesto.coord": "01 · CHUẨN MỰC THIẾT KẾ",
     "ch1.eyebrow": "01 · BOTANICAL SANCTUARY",
     "ch1.line1": "Lặng sóng",
     "ch1.line2": "sinh hương.",
@@ -168,6 +168,12 @@ const I18N = {
     "resources.empty": "Chưa tìm thấy mẫu phù hợp với bộ lọc hiện tại. Hãy thử xóa từ khóa hoặc chọn sắc thái khác.",
     "preview.desktop": "Desktop",
     "preview.mobile": "Mobile",
+    "preview.liveTab": "Xem trực tiếp",
+    "preview.sourceTab": "Mã nguồn HTML & JSON",
+    "preview.copyHtml": "Sao chép HTML",
+    "preview.copiedHtml": "Đã sao chép HTML ✓",
+    "preview.loadingSource": "Đang tải mã nguồn sạch...",
+    "preview.sourceError": "Không thể tải mã nguồn lúc này. Vui lòng thử lại.",
     "preview.blocksHeading": "Cấu trúc khối bố cục JSON",
     "preview.briefHeading": "Kịch bản thương hiệu mẫu",
     "preview.highlightsHeading": "Điểm nổi bật",
@@ -278,17 +284,17 @@ const I18N = {
     "rail.02": "Horizon",
     "rail.03": "Craft",
     "rail.04": "Launch",
-    "hero.eyebrow": "GLOW WEB · OCEAN RADIANCE",
-    "hero.line1": "Cinematic architecture",
-    "hero.line2": "for signature brands.",
-    "hero.sub": "Where identity becomes a living digital space — serene, crystalline, and unmistakably yours.",
+    "hero.eyebrow": "GLOW WEB · DIGITAL ARCHITECTURE STUDIO",
+    "hero.line1": "Digital flagships",
+    "hero.line2": "built to endure.",
+    "hero.sub": "From vision to flagship website in one seamless workflow — pairing editorial craft with live AI execution inside your studio.",
     "hero.ctaStart": "Launch a website",
     "hero.ctaGallery": "Explore 12+ templates",
     "hero.scrollCue": "Explore",
     "video.pause": "Pause",
     "video.play": "Play film",
     "video.fullscreen": "Fullscreen",
-    "manifesto.coord": "01 · SPATIAL PHILOSOPHY · GLOW ATELIER",
+    "manifesto.coord": "01 · DESIGN STANDARD",
     "ch1.eyebrow": "01 · BOTANICAL SANCTUARY",
     "ch1.line1": "Still waters",
     "ch1.line2": "awaken form.",
@@ -361,6 +367,12 @@ const I18N = {
     "resources.empty": "No templates match your current filters. Clear your query or switch aesthetic moods.",
     "preview.desktop": "Desktop",
     "preview.mobile": "Mobile",
+    "preview.liveTab": "Live Preview",
+    "preview.sourceTab": "HTML & JSON Source",
+    "preview.copyHtml": "Copy HTML",
+    "preview.copiedHtml": "HTML Copied ✓",
+    "preview.loadingSource": "Loading cleanroom source...",
+    "preview.sourceError": "Unable to load source payload right now. Please retry.",
     "preview.blocksHeading": "Structured JSON Section Blocks",
     "preview.briefHeading": "Sample Brand Brief",
     "preview.highlightsHeading": "Key Highlights",
@@ -457,18 +469,17 @@ const I18N = {
 
 const MANIFESTO_WORDS = {
   vi: [
-    ["Một", false], ["website", false], ["tầm", false], ["vóc", false], ["không", false],
-    ["phô", false], ["diễn", false], ["kỹ", false], ["thuật", false], ["—", false],
-    ["nó", true], ["hiện", true], ["lên", true], ["như", true], ["tác", true],
-    ["phẩm", true], ["điện", true], ["ảnh,", true], ["còn", false], ["mọi", false],
-    ["tinh", false], ["xảo", false], ["ở", false], ["lại", false], ["phía", false], ["sau.", false],
+    ["Ấn", false], ["tượng", false], ["đầu", false], ["tiên", false], ["quyết", false],
+    ["định", false], ["vị", false], ["thế", false], ["—", false], ["mỗi", false],
+    ["điểm", false], ["chạm", false], ["đều", false], ["được", true], ["kiến", true],
+    ["tạo", true], ["để", true], ["thuyết", true], ["phục", true], ["và", false],
+    ["giữ", false], ["chân", false], ["khách", false], ["hàng.", false],
   ],
   en: [
-    ["A", false], ["landmark", false], ["website", false], ["never", false], ["boasts", false],
-    ["about", false], ["code", false], ["—", false], ["it", true], ["unfolds", true],
-    ["like", true], ["pure", true], ["cinema,", true], ["while", false], ["every", false],
-    ["precision", false], ["detail", false], ["stays", false], ["effortlessly", false], ["behind", false],
-    ["the", false], ["curtain.", false],
+    ["First", false], ["impressions", false], ["define", false], ["authority", false], ["—", false],
+    ["every", false], ["detail", false], ["is", false], ["engineered", true], ["to", true],
+    ["command", true], ["trust", true], ["and", false], ["convert", false], ["with", false],
+    ["quiet", false], ["precision.", false],
   ],
 };
 
@@ -694,6 +705,7 @@ function applyLanguage(lang, persist = true) {
   renderTemplateGallery();
   if (activePreviewTemplate) {
     populateTemplatePreviewModal(activePreviewTemplate);
+    syncTemplatePreviewStage(activePreviewTemplate);
   }
   syncAllVideoButtonsText();
   updateDocumentTitle();
@@ -765,6 +777,9 @@ function setActiveView(route, { pushHistory = true, scrollTop = true } = {}) {
     stopHeroFlareLoop();
     if (safeRoute === "resources" || safeRoute === "solutions") {
       void ensureTemplatesLoaded();
+      if (safeRoute === "resources") {
+        requestAnimationFrame(() => observeMiniViewports($("#template-gallery-grid")));
+      }
     }
   }
 
@@ -1031,6 +1046,31 @@ function getFilteredTemplates() {
   });
 }
 
+let miniIframeResizeObserver = null;
+
+function syncMiniIframeScale(viewportEl) {
+  if (!viewportEl) return;
+  const width = viewportEl.clientWidth;
+  if (width > 0) {
+    viewportEl.style.setProperty("--mini-scale", (width / 1280).toFixed(4));
+  }
+}
+
+function observeMiniViewports(gridEl) {
+  if (!gridEl) return;
+  const viewports = $$(".template-mini-viewport", gridEl);
+  for (const vp of viewports) syncMiniIframeScale(vp);
+  if (typeof ResizeObserver === "function") {
+    if (miniIframeResizeObserver) miniIframeResizeObserver.disconnect();
+    miniIframeResizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        syncMiniIframeScale(entry.target);
+      }
+    });
+    for (const vp of viewports) miniIframeResizeObserver.observe(vp);
+  }
+}
+
 function renderTemplateGallery() {
   const grid = $("#template-gallery-grid");
   const countEl = $("#resources-count");
@@ -1062,12 +1102,35 @@ function renderTemplateGallery() {
 
     const media = document.createElement("div");
     media.className = "template-card-media";
-    const img = document.createElement("img");
-    img.src = withBasePath(tpl.preview_image);
-    img.alt = loc.title;
-    img.loading = "lazy";
-    img.width = 640;
-    img.height = 400;
+
+    const chrome = document.createElement("div");
+    chrome.className = "template-browser-bar";
+    chrome.setAttribute("aria-hidden", "true");
+    const dots = document.createElement("span");
+    dots.className = "template-browser-dots";
+    dots.append(
+      document.createElement("i"),
+      document.createElement("i"),
+      document.createElement("i")
+    );
+    const urlPill = document.createElement("span");
+    urlPill.className = "template-browser-url";
+    urlPill.textContent = `glow.web/${tpl.id}`;
+    chrome.append(dots, urlPill);
+
+    const miniViewport = document.createElement("div");
+    miniViewport.className = "template-mini-viewport";
+
+    const miniFrame = document.createElement("iframe");
+    miniFrame.className = "template-mini-iframe";
+    miniFrame.src = withBasePath(
+      `/api/templates/${encodeURIComponent(tpl.id)}/render?lang=${encodeURIComponent(currentLang)}`
+    );
+    miniFrame.setAttribute("sandbox", "");
+    miniFrame.setAttribute("loading", "lazy");
+    miniFrame.setAttribute("tabindex", "-1");
+    miniFrame.setAttribute("aria-hidden", "true");
+    miniFrame.title = loc.title;
 
     const badges = document.createElement("div");
     badges.className = "template-card-badges";
@@ -1078,7 +1141,9 @@ function renderTemplateGallery() {
     licBadge.className = "tpl-badge tpl-badge-cleanroom";
     licBadge.textContent = "GLOW Cleanroom";
     badges.append(indBadge, licBadge);
-    media.append(img, badges);
+
+    miniViewport.append(miniFrame, badges);
+    media.append(chrome, miniViewport);
 
     const body = document.createElement("div");
     body.className = "template-card-body";
@@ -1130,6 +1195,7 @@ function renderTemplateGallery() {
   }
 
   grid.replaceChildren(frag);
+  requestAnimationFrame(() => observeMiniViewports(grid));
 }
 
 $("#resource-search")?.addEventListener("input", (e) => {
@@ -1138,14 +1204,23 @@ $("#resource-search")?.addEventListener("input", (e) => {
 });
 
 /* -------------------------------------------------------------------------- */
-/* 4. Rich Template Preview Modal (Desktop/Mobile Toggle · Real MP4 Preview)  */
+/* 4. Rich Template Preview Modal (Live Website Iframe + HTML & JSON Source)  */
 /* -------------------------------------------------------------------------- */
 const templatePreviewModal = $("#template-preview-modal");
 const closeTemplatePreviewBtn = $("#close-template-preview");
 const templateStageWrap = $("#template-stage-wrap");
-const templatePreviewVideo = $("#template-preview-video");
-const templatePreviewSource = $("#template-preview-source");
+const previewLivePanel = $("#preview-live-panel");
+const previewLiveIframe = $("#preview-live-iframe");
+const previewLiveUrl = $("#preview-live-url");
+const previewSourcePanel = $("#preview-source-panel");
+const previewSourceMeta = $("#preview-source-meta");
+const previewSourceCode = $("#preview-source-code");
+const previewViewportSwitch = $("#preview-viewport-switch");
+const copyTemplateHtmlBtn = $("#copy-template-html");
 let activePreviewTemplate = null;
+let activePreviewTab = "live";
+let activePreviewSourceHtml = "";
+let activePreviewSourceKey = "";
 let lastTemplatePreviewTrigger = null;
 
 function populateTemplatePreviewModal(tpl) {
@@ -1172,6 +1247,7 @@ function populateTemplatePreviewModal(tpl) {
     useLink.textContent = t("resources.useTemplate");
   }
   if (licEl) licEl.textContent = `${tpl.source_inspiration} · v${tpl.schema_version}`;
+  if (previewLiveUrl) previewLiveUrl.textContent = `glow.web/${tpl.id}?lang=${currentLang}`;
 
   if (blocksEl) {
     const frag = document.createDocumentFragment();
@@ -1207,25 +1283,97 @@ function setPreviewViewport(mode) {
   });
 }
 
+async function loadTemplateSourceIntoModal(tpl) {
+  if (!tpl || !previewSourceCode) return;
+  const cacheKey = `${tpl.id}:${currentLang}`;
+  if (activePreviewSourceKey === cacheKey && activePreviewSourceHtml) return;
+
+  previewSourceCode.textContent = t("preview.loadingSource");
+  if (previewSourceMeta) {
+    previewSourceMeta.textContent = `${tpl.id} · ${tpl.license}`;
+  }
+  try {
+    const res = await fetch(
+      withBasePath(
+        `/api/templates/${encodeURIComponent(tpl.id)}/source?lang=${encodeURIComponent(currentLang)}`
+      ),
+      { headers: { Accept: "application/json" } }
+    );
+    if (!res.ok) throw new Error(`HTTP_${res.status}`);
+    const payload = await res.json();
+    if (!payload || payload.ok !== true || typeof payload.html !== "string") {
+      throw new Error("INVALID_SOURCE_PAYLOAD");
+    }
+    if (!activePreviewTemplate || activePreviewTemplate.id !== tpl.id) return;
+    activePreviewSourceHtml = payload.html;
+    activePreviewSourceKey = cacheKey;
+    if (previewSourceMeta) {
+      const count = Array.isArray(payload.blocks) ? payload.blocks.length : 0;
+      previewSourceMeta.textContent = `${payload.id} · ${count} JSON blocks · ${payload.license}`;
+    }
+    const metaJson = JSON.stringify(
+      {
+        id: payload.id,
+        schema_version: payload.schema_version,
+        license: payload.license,
+        source_inspiration: payload.source_inspiration,
+        design_tokens: payload.design_tokens,
+        blocks: payload.blocks,
+      },
+      null,
+      2
+    );
+    previewSourceCode.textContent = `/* === TEMPLATE JSON METADATA === */\n${metaJson}\n\n<!-- === STANDALONE HTML + CSS === -->\n${payload.html}`;
+  } catch {
+    if (!activePreviewTemplate || activePreviewTemplate.id !== tpl.id) return;
+    previewSourceCode.textContent = t("preview.sourceError");
+  }
+}
+
+function setPreviewTab(tab) {
+  const safeTab = tab === "source" ? "source" : "live";
+  activePreviewTab = safeTab;
+  if (templateStageWrap) templateStageWrap.dataset.mode = safeTab;
+  $$("[data-preview-tab]").forEach((btn) => {
+    const isActive = btn.dataset.previewTab === safeTab;
+    btn.classList.toggle("is-active", isActive);
+    btn.setAttribute("aria-selected", String(isActive));
+  });
+  previewLivePanel?.classList.toggle("hidden", safeTab !== "live");
+  previewSourcePanel?.classList.toggle("hidden", safeTab !== "source");
+  previewViewportSwitch?.classList.toggle("hidden", safeTab !== "live");
+  if (safeTab === "source" && activePreviewTemplate) {
+    void loadTemplateSourceIntoModal(activePreviewTemplate);
+  }
+}
+
+function syncTemplatePreviewStage(tpl) {
+  if (!tpl) return;
+  const loc = tpl[currentLang] || tpl.vi;
+  if (previewLiveIframe) {
+    const renderUrl = withBasePath(
+      `/api/templates/${encodeURIComponent(tpl.id)}/render?lang=${encodeURIComponent(currentLang)}`
+    );
+    if (previewLiveIframe.getAttribute("src") !== renderUrl) {
+      previewLiveIframe.setAttribute("src", renderUrl);
+    }
+    previewLiveIframe.title = loc.title;
+  }
+  activePreviewSourceHtml = "";
+  activePreviewSourceKey = "";
+  if (activePreviewTab === "source") {
+    void loadTemplateSourceIntoModal(tpl);
+  }
+}
+
 function openTemplatePreviewModal(tpl, triggerEl) {
   if (!templatePreviewModal || !tpl) return;
   activePreviewTemplate = tpl;
   lastTemplatePreviewTrigger = triggerEl || null;
   populateTemplatePreviewModal(tpl);
   setPreviewViewport("desktop");
-
-  if (templatePreviewVideo && templatePreviewSource) {
-    const videoSrc = withBasePath(tpl.preview_video);
-    templatePreviewVideo.poster = withBasePath(tpl.preview_image);
-    if (templatePreviewSource.getAttribute("src") !== videoSrc) {
-      templatePreviewSource.setAttribute("src", videoSrc);
-      templatePreviewVideo.load();
-    }
-    if (!isReducedMotion) {
-      const p = templatePreviewVideo.play();
-      if (p && typeof p.catch === "function") p.catch(() => {});
-    }
-  }
+  setPreviewTab("live");
+  syncTemplatePreviewStage(tpl);
 
   templatePreviewModal.classList.remove("hidden");
   templatePreviewModal.setAttribute("aria-hidden", "false");
@@ -1238,8 +1386,12 @@ function closeTemplatePreviewModal() {
   templatePreviewModal.classList.add("hidden");
   templatePreviewModal.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
-  templatePreviewVideo?.pause();
+  if (previewLiveIframe) {
+    previewLiveIframe.setAttribute("src", "about:blank");
+  }
   activePreviewTemplate = null;
+  activePreviewSourceHtml = "";
+  activePreviewSourceKey = "";
   if (lastTemplatePreviewTrigger && typeof lastTemplatePreviewTrigger.focus === "function") {
     lastTemplatePreviewTrigger.focus();
   }
@@ -1248,6 +1400,37 @@ function closeTemplatePreviewModal() {
 
 $$("[data-preview-viewport]").forEach((btn) => {
   btn.addEventListener("click", () => setPreviewViewport(btn.dataset.previewViewport));
+});
+$$("[data-preview-tab]").forEach((btn) => {
+  btn.addEventListener("click", () => setPreviewTab(btn.dataset.previewTab));
+});
+copyTemplateHtmlBtn?.addEventListener("click", async () => {
+  if (!activePreviewTemplate) return;
+  if (!activePreviewSourceHtml) {
+    await loadTemplateSourceIntoModal(activePreviewTemplate);
+  }
+  if (!activePreviewSourceHtml) return;
+  try {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      await navigator.clipboard.writeText(activePreviewSourceHtml);
+    } else {
+      const ta = document.createElement("textarea");
+      ta.value = activePreviewSourceHtml;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+    copyTemplateHtmlBtn.textContent = t("preview.copiedHtml");
+    setTimeout(() => {
+      if (copyTemplateHtmlBtn) copyTemplateHtmlBtn.textContent = t("preview.copyHtml");
+    }, 2000);
+  } catch {
+    /* clipboard blocked */
+  }
 });
 closeTemplatePreviewBtn?.addEventListener("click", closeTemplatePreviewModal);
 $("[data-close-template-preview]")?.addEventListener("click", closeTemplatePreviewModal);

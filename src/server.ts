@@ -22,6 +22,7 @@ import { NextFactoryControlInputSchema } from "./next-factory-schema.js";
 import { resolveHostDomainTopology } from "./domain-topology.js";
 import {PHASE_ACCEPTANCE_SCOPE,PHASE_ACCEPTANCE_MISSION_PATTERN,toolOAuthMetadata,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,phaseAcceptanceAuthorityStatus,validateAcceptanceBytes} from './phase-acceptance.js';
 import { queryTemplates, getTemplateById } from "./template-registry.js";
+import { renderTemplateHtml, buildTemplateSourcePayload } from "./template-renderer.js";
 
 const HOST_ADAPTER_REVISION = "0.3.10-file-artifact-input-candidate";
 const HOST_CONTRACT_ID = "GWF_NEXT_FACTORY_ACTIVE_DEMO_CANDIDATE_V2";
@@ -551,6 +552,7 @@ const FLAGSHIP_IMAGE_ASSETS = [
   "reel-01-botanical.webp",
   "reel-02-coastal-villa.webp",
   "reel-03-liquid-prism.webp",
+  "basalt-terrace-deck.webp",
 ] as const;
 
 const FLAGSHIP_VIDEO_ASSETS = [
@@ -606,6 +608,53 @@ function registerPublicTemplateAndPlatformRoutes(prefix: string): void {
     }
     res.setHeader("Cache-Control", "public, max-age=300");
     res.json(result);
+  });
+
+  app.get(`${prefix}/api/templates/:id/render`, (req, res) => {
+    const rawId = Array.isArray(req.params.id) ? "" : String(req.params.id ?? "");
+    const result = getTemplateById(rawId);
+    if (!result.ok) {
+      res.status(result.status).json({
+        ok: false,
+        error: result.code,
+      });
+      return;
+    }
+    const langParam = firstQueryString(req.query.lang)?.trim().toLowerCase();
+    const lang = langParam === "en" ? "en" : "vi";
+    const html = renderTemplateHtml(result.template, {
+      lang,
+      brand: firstQueryString(req.query.brand),
+      brief: firstQueryString(req.query.brief),
+    });
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("X-Frame-Options", "SAMEORIGIN");
+    res.setHeader(
+      "Content-Security-Policy",
+      "default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'self'"
+    );
+    res.setHeader("Cache-Control", "public, max-age=300");
+    res.status(200).send(html);
+  });
+
+  app.get(`${prefix}/api/templates/:id/source`, (req, res) => {
+    const rawId = Array.isArray(req.params.id) ? "" : String(req.params.id ?? "");
+    const result = getTemplateById(rawId);
+    if (!result.ok) {
+      res.status(result.status).json({
+        ok: false,
+        error: result.code,
+      });
+      return;
+    }
+    const langParam = firstQueryString(req.query.lang)?.trim().toLowerCase();
+    const lang = langParam === "en" ? "en" : "vi";
+    const payload = buildTemplateSourcePayload(result.template, lang, {
+      brand: firstQueryString(req.query.brand),
+      brief: firstQueryString(req.query.brief),
+    });
+    res.setHeader("Cache-Control", "public, max-age=300");
+    res.json(payload);
   });
 }
 

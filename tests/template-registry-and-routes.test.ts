@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
@@ -42,7 +43,7 @@ const ALLOWED_LOCAL_VIDEOS = new Set([
 ]);
 
 const FORBIDDEN_INTERNAL_OR_LICENSE_RE =
-  /\bAGPL\b|\bH[123]\b|KIT[_ -]?[ABC]|CAP\.WEB\.|MODEL_SESSION_PRIVATE|Pyodide|SQLite|GLOW-WEB-FACTORY|Kim sinh Thủy sinh Mộc/iu;
+  /\bAGPL\b|(?<!<\/?)\bH[123]\b(?!>)|KIT[_ -]?[ABC]|CAP\.WEB\.|MODEL_SESSION_PRIVATE|Pyodide|SQLite|GLOW-WEB-FACTORY|Kim sinh Thủy sinh Mộc/u;
 
 test("NORMAL: cleanroom template registry validates 12 bilingual templates with VF-001 IDs, local assets, and zero AGPL or process leaks", () => {
   const srcText = readFileSync(resolve(process.cwd(), "src/template-registry.ts"), "utf8");
@@ -256,6 +257,159 @@ test("HTTP Four-Path (NORMAL / FAILURE / ADVERSARIAL / RECOVERY) for /api/templa
           const recoverItemBody = (await recoverItem.json()) as { ok: boolean; template: { id: string } };
           assert.equal(recoverItemBody.ok, true);
           assert.equal(recoverItemBody.template.id, "botanical-wellness-sanctuary");
+        }
+      } finally {
+        await handler.close();
+      }
+    }
+  );
+});
+
+const EXPECTED_RENDER_CSP =
+  "default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'self'";
+
+test("HTTP Four-Path (NORMAL / FAILURE / ADVERSARIAL / RECOVERY) for /api/templates/:id/render and /api/templates/:id/source on root and basePath", async () => {
+  const rendererSrc = readFileSync(resolve(process.cwd(), "src/template-renderer.ts"), "utf8");
+  assert.equal(rendererSrc.includes("\r"), false, "src/template-renderer.ts must be LF-only");
+  assert.doesNotMatch(
+    rendererSrc,
+    FORBIDDEN_INTERNAL_OR_LICENSE_RE,
+    "src/template-renderer.ts must not contain AGPL or private process leaks"
+  );
+
+  await hostFixture(
+    {
+      GLOW_DEPLOYMENT_TOPOLOGY: "SHARED_ECOSYSTEM_GATEWAY",
+      GLOW_PUBLIC_ORIGIN: "http://127.0.0.1:3100",
+      GLOW_BASE_PATH: "/web",
+      GLOW_PUBLIC_MCP_URL: "http://127.0.0.1:3100/web/mcp-v2",
+      GLOW_AUTH_MODE: "oauth",
+      GLOW_OAUTH_ISSUER: "https://glow.example",
+      GLOW_OAUTH_AUDIENCE: "http://127.0.0.1:3100/web/mcp-v2",
+      GLOW_OAUTH_JWKS_URL: "https://glow.example/.well-known/jwks.json",
+      GLOW_OAUTH_REQUIRED_SCOPES: "web.run",
+    },
+    async ({ app, handler }) => {
+      try {
+        for (const prefix of ["", "/web"]) {
+          // 1. NORMAL: all 12 templates render distinct industry HTML + structured JSON source
+          const renderedHashes = new Set<string>();
+          for (const id of EXPECTED_TEMPLATE_IDS) {
+            const renderRes = await fetchHttpHandler(
+              app,
+              `http://127.0.0.1:3100${prefix}/api/templates/${id}/render`
+            );
+            assert.equal(renderRes.status, 200, `${prefix}/api/templates/${id}/render must return 200`);
+            assert.match(renderRes.headers.get("content-type") || "", /text\/html/i);
+            assert.equal(renderRes.headers.get("x-frame-options"), "SAMEORIGIN");
+            assert.equal(renderRes.headers.get("content-security-policy"), EXPECTED_RENDER_CSP);
+            const html = await renderRes.text();
+            assert.ok(html.startsWith("<!DOCTYPE html>"), `${id} render must start with DOCTYPE`);
+            assert.ok(html.includes(`data-template-id="${id}"`), `${id} render missing data-template-id`);
+            assert.equal(html.includes("/assets/reel-"), false, `${id} render must not reuse video posters`);
+            assert.equal(html.includes("/assets/hero-"), false, `${id} render must not reuse hero posters`);
+            assert.doesNotMatch(html, /<script\b/i, `${id} render must stay script-free`);
+            assert.doesNotMatch(html, /https?:\/\//i, `${id} render must not load external CDNs`);
+            assert.doesNotMatch(html, FORBIDDEN_INTERNAL_OR_LICENSE_RE, `${id} render leaked internal terms`);
+            renderedHashes.add(createHash("sha256").update(html).digest("hex"));
+
+            const sourceRes = await fetchHttpHandler(
+              app,
+              `http://127.0.0.1:3100${prefix}/api/templates/${id}/source`
+            );
+            assert.equal(sourceRes.status, 200, `${prefix}/api/templates/${id}/source must return 200`);
+            const sourceBody = (await sourceRes.json()) as {
+              ok: boolean;
+              schema_version: string;
+              id: string;
+              license: string;
+              source_inspiration: string;
+              blocks: unknown[];
+              html: string;
+              design_tokens: { surface_bg: string; accent: string };
+            };
+            assert.equal(sourceBody.ok, true);
+            assert.equal(sourceBody.schema_version, "1.0.0");
+            assert.equal(sourceBody.id, id);
+            assert.equal(sourceBody.license, TEMPLATE_LICENSE);
+            assert.ok(sourceBody.source_inspiration.length > 0);
+            assert.ok(Array.isArray(sourceBody.blocks) && sourceBody.blocks.length >= 5);
+            assert.ok(sourceBody.html.includes("<!DOCTYPE html>"));
+            assert.ok(sourceBody.design_tokens.surface_bg.startsWith("#"));
+            assert.ok(sourceBody.design_tokens.accent.startsWith("#"));
+          }
+          assert.equal(
+            renderedHashes.size,
+            12,
+            `all 12 templates on ${prefix || "root"} must render 12 genuinely distinct HTML documents`
+          );
+
+          // NORMAL bilingual & brand/brief customization check
+          const enCustomRes = await fetchHttpHandler(
+            app,
+            `http://127.0.0.1:3100${prefix}/api/templates/serene-clinic-medical/render?lang=en&brand=TestBrand&brief=CustomBriefNote`
+          );
+          assert.equal(enCustomRes.status, 200);
+          const enCustomHtml = await enCustomRes.text();
+          assert.ok(enCustomHtml.includes('<html lang="en">'));
+          assert.ok(enCustomHtml.includes("TestBrand"));
+          assert.ok(enCustomHtml.includes("CustomBriefNote"));
+
+          // 2. FAILURE: unknown valid-format ID -> 404 on /render and /source
+          for (const suffix of ["render", "source"]) {
+            const missingRes = await fetchHttpHandler(
+              app,
+              `http://127.0.0.1:3100${prefix}/api/templates/unknown-template-id/${suffix}`
+            );
+            assert.equal(missingRes.status, 404, `unknown id /${suffix} must return 404`);
+            const missingBody = (await missingRes.json()) as { ok: boolean; error: string };
+            assert.equal(missingBody.ok, false);
+            assert.equal(missingBody.error, "TEMPLATE_NOT_FOUND");
+          }
+
+          // 3. ADVERSARIAL: malformed/traversal IDs -> 400; XSS query overrides strictly escaped
+          for (const badId of ["%2e%2e%2fpackage.json", "BadUpper", "a", "bad_id", "-dash"]) {
+            for (const suffix of ["render", "source"]) {
+              const badRes = await fetchHttpHandler(
+                app,
+                `http://127.0.0.1:3100${prefix}/api/templates/${badId}/${suffix}`
+              );
+              assert.equal(badRes.status, 400, `adversarial id ${badId}/${suffix} must return 400`);
+              const badBody = (await badRes.json()) as { ok: boolean; error: string };
+              assert.equal(badBody.ok, false);
+              assert.equal(badBody.error, "INVALID_TEMPLATE_ID");
+            }
+          }
+
+          const xssBrand = encodeURIComponent("<script>alert(1)</script>");
+          const xssBrief = encodeURIComponent('"><img src=x onerror=alert(1)>');
+          const xssRenderRes = await fetchHttpHandler(
+            app,
+            `http://127.0.0.1:3100${prefix}/api/templates/ocean-obsidian-ai-platform/render?brand=${xssBrand}&brief=${xssBrief}`
+          );
+          assert.equal(xssRenderRes.status, 200);
+          const xssHtml = await xssRenderRes.text();
+          assert.ok(xssHtml.includes("&lt;script&gt;alert(1)&lt;/script&gt;"), "XSS script payload must be HTML-escaped");
+          assert.equal(xssHtml.includes("<script>"), false, "raw <script> must never appear in rendered output");
+          assert.equal(xssHtml.includes("<img "), false, "raw <img tag must never appear in rendered output");
+
+          // 4. RECOVERY: valid /render and /source succeed cleanly after failure & adversarial probes
+          const recRender = await fetchHttpHandler(
+            app,
+            `http://127.0.0.1:3100${prefix}/api/templates/jade-botanical-skincare/render?lang=vi`
+          );
+          assert.equal(recRender.status, 200);
+          assert.ok((await recRender.text()).includes('data-template-id="jade-botanical-skincare"'));
+
+          const recSource = await fetchHttpHandler(
+            app,
+            `http://127.0.0.1:3100${prefix}/api/templates/jade-botanical-skincare/source?lang=en`
+          );
+          assert.equal(recSource.status, 200);
+          const recSourceBody = (await recSource.json()) as { ok: boolean; id: string; html: string };
+          assert.equal(recSourceBody.ok, true);
+          assert.equal(recSourceBody.id, "jade-botanical-skincare");
+          assert.ok(recSourceBody.html.includes('<html lang="en">'));
         }
       } finally {
         await handler.close();

@@ -9,6 +9,7 @@ const IMAGE_ASSETS = [
   "reel-01-botanical.webp",
   "reel-02-coastal-villa.webp",
   "reel-03-liquid-prism.webp",
+  "basalt-terrace-deck.webp",
 ] as const;
 
 const VIDEO_ASSETS = [
@@ -30,7 +31,9 @@ test("flagship WebP posters and 1080p MP4 cinema videos exist with valid headers
     assert.equal(bytes.subarray(8, 12).toString("ascii"), "WEBP", `${file} WEBP header`);
     totalWebpBytes += bytes.byteLength;
   }
-  assert.ok(totalWebpBytes <= 420 * 1024, `combined WebP size ${totalWebpBytes} exceeds 420 KB budget`);
+  assert.ok(totalWebpBytes <= 580 * 1024, `combined WebP size ${totalWebpBytes} exceeds 580 KB budget`);
+  const basaltBytes = readBytes("public/assets/basalt-terrace-deck.webp").byteLength;
+  assert.ok(basaltBytes <= 140 * 1024, `basalt-terrace-deck.webp size ${basaltBytes} exceeds 140 KB budget`);
 
   let totalMp4Bytes = 0;
   for (const file of VIDEO_ASSETS) {
@@ -45,7 +48,7 @@ test("flagship WebP posters and 1080p MP4 cinema videos exist with valid headers
   assert.ok(totalMp4Bytes <= 10 * 1024 * 1024, `combined MP4 size ${totalMp4Bytes} exceeds 10 MB budget`);
 });
 
-test("server.ts registers explicit 8-file allowlist (4 WebP + 4 MP4) without wildcard static or path-param routes", () => {
+test("server.ts registers explicit 9-file allowlist (5 WebP + 4 MP4) without wildcard static or path-param routes", () => {
   const server = readText("src/server.ts");
   assert.match(server, /const FLAGSHIP_IMAGE_ASSETS\s*=/);
   assert.match(server, /const FLAGSHIP_VIDEO_ASSETS\s*=/);
@@ -92,6 +95,11 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
     "removed finale eyebrow must stay absent"
   );
   assert.ok(html.includes('id="hero-seam-flare"'), "index.html missing #hero-seam-flare seamless loop optical flare");
+  assert.ok(html.includes('id="hero-starfield"'), "index.html missing #hero-starfield multi-depth SVG starfield");
+  assert.ok(html.includes("GLOW WEB · STUDIO KIẾN TẠO SỐ"), "index.html missing executive Hero eyebrow");
+  assert.ok(html.includes("Không gian số"), "index.html missing executive Hero headline line 1");
+  assert.ok(html.includes("xứng tầm thương hiệu."), "index.html missing executive Hero headline line 2");
+  assert.ok(html.includes("01 · CHUẨN MỰC THIẾT KẾ"), "index.html missing executive Manifesto eyebrow");
   assert.ok(html.includes('id="open-auth-modal"'), "index.html missing unified #open-auth-modal button");
   assert.ok(html.includes('id="auth-modal"'), "index.html missing unified #auth-modal dialog");
   assert.ok(html.includes('id="lang-toggle"'), "index.html missing far-right VI/EN #lang-toggle switcher");
@@ -100,6 +108,10 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   assert.ok(html.includes('id="pricing-billing-toggle"'), "index.html missing #pricing-billing-toggle switch");
   assert.ok(html.includes('id="template-gallery-grid"'), "index.html missing live #template-gallery-grid");
   assert.ok(html.includes('id="template-preview-modal"'), "index.html missing #template-preview-modal");
+  assert.ok(html.includes('id="preview-live-iframe"'), "index.html missing live #preview-live-iframe");
+  assert.ok(html.includes('id="preview-tab-live"'), "index.html missing #preview-tab-live tab");
+  assert.ok(html.includes('id="preview-tab-source"'), "index.html missing #preview-tab-source tab");
+  assert.ok(html.includes('id="copy-template-html"'), "index.html missing #copy-template-html button");
   assert.ok(html.includes("Đánh thức không gian số"), "index.html missing 1-line Hero CTA lead");
   assert.ok(html.includes("mang dấu ấn độc bản."), "index.html missing 1-line Hero CTA accent");
   assert.ok(html.includes('id="cta-connect-plugin"'), "index.html missing uniform Kết nối Plugin capsule");
@@ -163,10 +175,16 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   );
   assert.match(
     css,
-    /\.sanctuary-world\s*\{[^}]*margin-top:\s*0;/s,
-    "app.css .sanctuary-world must start cleanly at margin-top: 0 below Video 03"
+    /\.sanctuary-world\s*\{[^}]*margin-top:\s*0;[^}]*url\("\/assets\/basalt-terrace-deck\.webp"\)/s,
+    "app.css .sanctuary-world must start cleanly at margin-top: 0 and render real /assets/basalt-terrace-deck.webp"
   );
   assert.ok(css.includes("--flare-intensity"), "app.css must define --flare-intensity for Video 01 seamless loop flare");
+  assert.ok(css.includes(".hero-starfield"), "app.css must style .hero-starfield multi-depth SVG starfield");
+  assert.match(
+    css,
+    /\.mist-bridge-12\s*\{[^}]*margin-top:\s*0;[^}]*margin-bottom:\s*0;/s,
+    "app.css .mist-bridge-12 must eliminate negative margins for clean interlude spacing"
+  );
   assert.ok(css.includes(".terrace-coping-sheen"), "app.css must define .terrace-coping-sheen basalt continuation");
   assert.ok(css.includes(".terrace-basalt-grid"), "app.css must define .terrace-basalt-grid mineral terrace");
   assert.ok(css.includes(".pill-neon-capsule"), "app.css must define uniform .pill-neon-capsule buttons");
@@ -209,7 +227,7 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   assert.equal(js.includes("reel03-infinity-canvas"), false, "app.js must not reference removed fake canvas");
 });
 
-test("HTTP allowlist serves all 8 assets (4 WebP + 4 MP4) on root and basePath and rejects traversal or unknown assets", async () => {
+test("HTTP allowlist serves all 9 assets (5 WebP + 4 MP4) on root and basePath and rejects traversal or unknown assets", async () => {
   await hostFixture(
     {
       GLOW_DEPLOYMENT_TOPOLOGY: "SHARED_ECOSYSTEM_GATEWAY",
