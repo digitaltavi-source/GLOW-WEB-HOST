@@ -106,6 +106,8 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   assert.ok((html.match(/<video\b/g) || []).length >= 4, "must render 3 curated cinema videos + modal video player");
   assert.ok(html.includes('id="chapter-botanical"'), "index.html missing #chapter-botanical direct scroll chapter");
   assert.ok(html.includes('id="chapter-villa"'), "index.html missing #chapter-villa direct scroll chapter");
+  assert.ok(html.includes('class="chapter-editorial'), "index.html missing borderless .chapter-editorial film typography");
+  assert.equal(html.includes("chapter-card"), false, "hard bordered .chapter-card boxes over video frames must be removed");
   assert.ok(html.includes('id="sanctuary-sculpture"'), "index.html missing #sanctuary-sculpture atmospheric layer");
   assert.equal(html.includes("prism-ribbons-svg"), false, "crude SVG prism-ribbons-svg curves must be removed");
   assert.equal(html.includes("orbital-ring"), false, "thin wireframe orbital-ring circles must be removed");

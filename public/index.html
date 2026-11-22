@@ -223,7 +223,7 @@
     </div>
   </section>
 
-  <!-- ACT 2: Full-Bleed 100vw Video 02 — Botanical Sanctuary (Directly Visible in Scroll Flow) -->
+  <!-- ACT 2: Full-Bleed 100vw Video 02 — Botanical Sanctuary (Borderless Direct-on-Video Typography) -->
   <section class="cinema-chapter chapter-botanical" id="chapter-botanical" data-act-tone="dark" aria-labelledby="botanical-heading">
     <div class="chapter-stage">
       <video
@@ -245,39 +245,47 @@
       <div class="chapter-scrim chapter-scrim-left" aria-hidden="true"></div>
     </div>
 
-    <div class="container chapter-overlay chapter-overlay-left">
-      <article class="chapter-card reveal" data-specular>
-        <p class="chapter-eyebrow">01 · BOTANICAL SANCTUARY</p>
-        <h2 id="botanical-heading">Lặng sóng<br><span>sinh hương.</span></h2>
-        <p class="chapter-desc">Nhịp nước tĩnh và hơi sương ngọc bích dành cho thương hiệu chế tác thủ công, nghỉ dưỡng và nghệ thuật sống.</p>
-        <div class="chapter-actions">
-          <button
-            type="button"
-            class="video-control-pill"
-            data-toggle-video="reel01"
-            aria-pressed="false"
-            aria-label="Tạm dừng hoặc phát phim Botanical Sanctuary"
-          >
-            <span class="control-dot" aria-hidden="true"></span>
-            <span class="control-label">Tạm dừng</span>
-          </button>
-          <button
-            type="button"
-            class="pill pill-jade chapter-fs-btn btn-magnetic"
-            data-open-cinema="reel01"
-            data-src="/assets/reel-01-botanical.mp4"
-            data-poster="/assets/reel-01-botanical.webp"
-            data-title="01 · Botanical Sanctuary"
-            data-subtitle="Nhịp nước tĩnh và hơi sương ngọc bích cho thương hiệu chế tác và nghỉ dưỡng."
-          >
-            Toàn màn hình <span aria-hidden="true">↗</span>
-          </button>
+    <div class="container chapter-overlay chapter-overlay-bottom">
+      <div class="chapter-editorial cine-reveal reveal" data-parallax-editorial>
+        <p class="chapter-eyebrow cine-line" style="--cine-delay: 0ms"><span>01 · BOTANICAL SANCTUARY</span></p>
+        <h2 id="botanical-heading">
+          <span class="cine-line" style="--cine-delay: 110ms"><span>Lặng sóng</span></span>
+          <span class="cine-line" style="--cine-delay: 210ms"><span class="cine-serif">sinh hương.</span></span>
+        </h2>
+        <p class="chapter-desc cine-line" style="--cine-delay: 320ms"><span>Nhịp nước tĩnh và hơi sương ngọc bích cho thương hiệu chế tác &amp; nghệ thuật sống.</span></p>
+        <div class="chapter-link-row cine-line" style="--cine-delay: 420ms">
+          <span>
+            <button
+              type="button"
+              class="cinema-link"
+              data-open-cinema="reel01"
+              data-src="/assets/reel-01-botanical.mp4"
+              data-poster="/assets/reel-01-botanical.webp"
+              data-title="01 · Botanical Sanctuary"
+              data-subtitle="Nhịp nước tĩnh và hơi sương ngọc bích cho thương hiệu chế tác và nghỉ dưỡng."
+            >
+              Toàn màn hình <span aria-hidden="true">↗</span>
+            </button>
+          </span>
         </div>
-      </article>
+      </div>
+
+      <div class="chapter-corner-control">
+        <button
+          type="button"
+          class="video-control-pill video-control-subtle"
+          data-toggle-video="reel01"
+          aria-pressed="false"
+          aria-label="Tạm dừng hoặc phát phim Botanical Sanctuary"
+        >
+          <span class="control-dot" aria-hidden="true"></span>
+          <span class="control-label">Tạm dừng</span>
+        </button>
+      </div>
     </div>
   </section>
 
-  <!-- ACT 3: Full-Bleed 100vw Video 03 — Coastal Glass Pavilion (Directly Visible in Scroll Flow) -->
+  <!-- ACT 3: Full-Amplitude 100vw Video 03 — Coastal Glass Pavilion (Uncovered Villa & Infinity Pool) -->
   <section class="cinema-chapter chapter-villa" id="chapter-villa" data-act-tone="dark" aria-labelledby="villa-heading">
     <!-- Alpha-Zero Masked Mist Veil Dissolving Botanical Water into Starlit Coastal Pool -->
     <div class="matrix-mist-layer mist-corridor-23" aria-hidden="true">
@@ -285,15 +293,15 @@
         <defs>
           <filter id="mist-seam-23" x="-25%" y="-35%" width="150%" height="170%">
             <feTurbulence type="fractalNoise" baseFrequency="0.008 0.02" numOctaves="4" seed="37" result="turb23"/>
-            <feColorMatrix type="matrix" values="0 0 0 0 0.48  0 0 0 0 0.78  0 0 0 0 0.84  0 0 0 0.54 -0.22" in="turb23" result="coastalCloud"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 0.48  0 0 0 0 0.78  0 0 0 0 0.84  0 0 0 0.5 -0.22" in="turb23" result="coastalCloud"/>
             <feGaussianBlur stdDeviation="26" in="coastalCloud"/>
           </filter>
         </defs>
         <g class="mist-band mist-band-1">
-          <ellipse cx="460" cy="160" rx="740" ry="110" fill="#6DA4B8" opacity="0.2" filter="url(#mist-seam-23)"/>
+          <ellipse cx="460" cy="160" rx="740" ry="110" fill="#6DA4B8" opacity="0.18" filter="url(#mist-seam-23)"/>
         </g>
         <g class="mist-band mist-band-2">
-          <ellipse cx="1160" cy="175" rx="760" ry="120" fill="#88C4C2" opacity="0.18" filter="url(#mist-seam-23)"/>
+          <ellipse cx="1160" cy="175" rx="760" ry="120" fill="#88C4C2" opacity="0.16" filter="url(#mist-seam-23)"/>
         </g>
       </svg>
     </div>
@@ -315,38 +323,48 @@
       >
         <source src="/assets/reel-02-coastal-villa.mp4" type="video/mp4">
       </video>
-      <div class="chapter-scrim chapter-scrim-right" aria-hidden="true"></div>
+      <div class="chapter-scrim chapter-scrim-villa-upper-left" aria-hidden="true"></div>
     </div>
 
-    <div class="container chapter-overlay chapter-overlay-right">
-      <article class="chapter-card reveal" data-specular>
-        <p class="chapter-eyebrow">02 · COASTAL GLASS PAVILION</p>
-        <h2 id="villa-heading">Kiến trúc chạm<br><span>chân trời.</span></h2>
-        <p class="chapter-desc">Ánh sáng hoàng hôn xanh và mặt hồ vô cực phản chiếu không gian dành cho studio kiến trúc và bất động sản tầm vóc.</p>
-        <div class="chapter-actions">
-          <button
-            type="button"
-            class="video-control-pill"
-            data-toggle-video="reel02"
-            aria-pressed="false"
-            aria-label="Tạm dừng hoặc phát phim Coastal Glass Pavilion"
-          >
-            <span class="control-dot" aria-hidden="true"></span>
-            <span class="control-label">Tạm dừng</span>
-          </button>
-          <button
-            type="button"
-            class="pill pill-jade chapter-fs-btn btn-magnetic"
-            data-open-cinema="reel02"
-            data-src="/assets/reel-02-coastal-villa.mp4"
-            data-poster="/assets/reel-02-coastal-villa.webp"
-            data-title="02 · Coastal Glass Pavilion"
-            data-subtitle="Biệt thự kính ven biển và mặt hồ vô cực trong sắc xanh đại hải."
-          >
-            Toàn màn hình <span aria-hidden="true">↗</span>
-          </button>
+    <div class="container chapter-overlay chapter-overlay-villa-top">
+      <div class="chapter-editorial chapter-editorial-villa cine-reveal reveal" data-parallax-editorial>
+        <p class="chapter-eyebrow cine-line" style="--cine-delay: 0ms"><span>02 · COASTAL GLASS PAVILION</span></p>
+        <h2 id="villa-heading">
+          <span class="cine-line" style="--cine-delay: 110ms"><span>Kiến trúc chạm</span></span>
+          <span class="cine-line" style="--cine-delay: 210ms"><span class="cine-serif">chân trời.</span></span>
+        </h2>
+        <p class="chapter-desc cine-line" style="--cine-delay: 320ms"><span>Hoàng hôn xanh và mặt hồ vô cực cho studio kiến trúc &amp; bất động sản tầm vóc.</span></p>
+        <div class="chapter-link-row cine-line" style="--cine-delay: 420ms">
+          <span>
+            <button
+              type="button"
+              class="cinema-link"
+              data-open-cinema="reel02"
+              data-src="/assets/reel-02-coastal-villa.mp4"
+              data-poster="/assets/reel-02-coastal-villa.webp"
+              data-title="02 · Coastal Glass Pavilion"
+              data-subtitle="Biệt thự kính ven biển và mặt hồ vô cực trong sắc xanh đại hải."
+            >
+              Toàn màn hình <span aria-hidden="true">↗</span>
+            </button>
+          </span>
         </div>
-      </article>
+      </div>
+    </div>
+
+    <div class="container chapter-villa-footer-bar">
+      <div class="chapter-corner-control">
+        <button
+          type="button"
+          class="video-control-pill video-control-subtle"
+          data-toggle-video="reel02"
+          aria-pressed="false"
+          aria-label="Tạm dừng hoặc phát phim Coastal Glass Pavilion"
+        >
+          <span class="control-dot" aria-hidden="true"></span>
+          <span class="control-label">Tạm dừng</span>
+        </button>
+      </div>
     </div>
   </section>
 

@@ -177,6 +177,7 @@ async function refreshRuntime() {
 /* -------------------------------------------------------------------------- */
 const kineticWords = $$(".kinetic-manifesto .k-word");
 const railItems = $$(".rail-item");
+const parallaxEditorials = $$("[data-parallax-editorial]");
 let scrollRafId = 0;
 
 const WORLD_SCENE_MAP = {
@@ -235,6 +236,7 @@ function updateScrollChoreography() {
   if (isReducedMotion) {
     heroSection?.style.setProperty("--hero-p", "0");
     kineticWords.forEach((w) => w.style.setProperty("--w-lit", "1"));
+    parallaxEditorials.forEach((el) => el.style.setProperty("--ch-drift", "0"));
     craftThread?.style.setProperty("--craft-p", "1");
     return;
   }
@@ -244,6 +246,15 @@ function updateScrollChoreography() {
     const heroP = clamp01(scrollY / heroH);
     heroSection.style.setProperty("--hero-p", heroP.toFixed(4));
   }
+
+  parallaxEditorials.forEach((el) => {
+    const sec = el.closest(".cinema-chapter");
+    if (!sec) return;
+    const rect = sec.getBoundingClientRect();
+    const centerOffset = (rect.top + rect.height * 0.5 - vh * 0.5) / Math.max(vh, 1);
+    const clamped = Math.max(-0.85, Math.min(0.85, centerOffset));
+    el.style.setProperty("--ch-drift", clamped.toFixed(4));
+  });
 
   if (manifestoSection && kineticWords.length > 0) {
     const rect = manifestoSection.getBoundingClientRect();
