@@ -111,10 +111,14 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   assert.ok(html.includes('id="sanctuary-sculpture"'), "index.html missing #sanctuary-sculpture atmospheric layer");
   assert.equal(html.includes("prism-ribbons-svg"), false, "crude SVG prism-ribbons-svg curves must be removed");
   assert.equal(html.includes("orbital-ring"), false, "thin wireframe orbital-ring circles must be removed");
+  assert.equal(html.includes("ai-entry-card"), false, "redundant .ai-entry-card box must be removed from finale");
+  assert.ok(html.includes('id="open-intake-drawer"'), "index.html missing #open-intake-drawer trigger");
+  assert.ok(html.includes('class="intake-modal hidden" id="intake-modal"'), "index.html must keep #intake-modal closed by default");
 
   const css = readText("public/app.css");
   assert.equal(css.includes("prism-ribbons-svg"), false, "app.css must not contain removed prism-ribbons-svg rules");
   assert.equal(css.includes("orbital-ring"), false, "app.css must not contain removed orbital-ring rules");
+  assert.equal(css.includes("ai-entry-card"), false, "app.css must not contain removed ai-entry-card rules");
   assert.match(
     css,
     /\.sanctuary-sculpture\s*\{[^}]*mask-image:\s*linear-gradient\(\s*180deg,\s*transparent\s+0%/s,
@@ -127,8 +131,13 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   );
   assert.match(
     css,
-    /\.chapter-villa\s*\{[^}]*border-bottom:\s*1px\s+solid\s+rgba\(186,\s*232,\s*222,\s*0\.16\)/s,
-    "app.css .chapter-villa must preserve crisp architectural hairline boundary"
+    /\.chapter-stage-villa\s+\.chapter-video\s*\{[^}]*object-position:\s*center\s+bottom;/s,
+    "app.css Video 03 must preserve natural bottom pixel row (object-position: center bottom)"
+  );
+  assert.match(
+    css,
+    /\.chapter-villa\s*\{[^}]*aspect-ratio:\s*16\s*\/\s*9;[^}]*border-bottom:\s*1px\s+solid\s+rgba\(186,\s*232,\s*222,\s*0\.16\)/s,
+    "app.css .chapter-villa must enforce native 16/9 aspect ratio and crisp architectural hairline boundary"
   );
   assert.match(
     css,

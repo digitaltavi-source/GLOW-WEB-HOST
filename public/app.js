@@ -517,8 +517,44 @@ $$("[data-open-cinema]").forEach((btn) => {
 
 cinemaCloseBtn?.addEventListener("click", closeCinemaModal);
 $("[data-close-cinema]")?.addEventListener("click", closeCinemaModal);
+
+/* -------------------------------------------------------------------------- */
+/* 7. Collapsible 4-Step Intake Modal Controller (Closed by Default + ESC)    */
+/* -------------------------------------------------------------------------- */
+const intakeModal = $("#intake-modal");
+const openIntakeDrawerBtn = $("#open-intake-drawer");
+const closeIntakeModalBtn = $("#close-intake-modal");
+let lastIntakeTrigger = null;
+
+function openIntakeModal(triggerEl) {
+  if (!intakeModal) return;
+  lastIntakeTrigger = triggerEl || openIntakeDrawerBtn || null;
+  intakeModal.classList.remove("hidden");
+  intakeModal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  closeIntakeModalBtn?.focus();
+}
+
+function closeIntakeModal() {
+  if (!intakeModal || intakeModal.classList.contains("hidden")) return;
+  intakeModal.classList.add("hidden");
+  intakeModal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+  if (lastIntakeTrigger && typeof lastIntakeTrigger.focus === "function") {
+    lastIntakeTrigger.focus();
+  }
+  lastIntakeTrigger = null;
+}
+
+openIntakeDrawerBtn?.addEventListener("click", () => openIntakeModal(openIntakeDrawerBtn));
+closeIntakeModalBtn?.addEventListener("click", closeIntakeModal);
+$("[data-close-intake]")?.addEventListener("click", closeIntakeModal);
+
 window.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeCinemaModal();
+  if (e.key === "Escape") {
+    closeCinemaModal();
+    closeIntakeModal();
+  }
 });
 
 setStep(1);
