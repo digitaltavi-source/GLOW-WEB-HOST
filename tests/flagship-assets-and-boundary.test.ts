@@ -120,6 +120,21 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
     /\.sanctuary-sculpture\s*\{[^}]*mask-image:\s*linear-gradient\(\s*180deg,\s*transparent\s+0%/s,
     "app.css .sanctuary-sculpture must enforce alpha-zero vertical top fade mask"
   );
+  assert.match(
+    css,
+    /\.chapter-stage-villa\s*\{[^}]*mask-image:\s*linear-gradient\([^;]*#000\s+100%\s*\);/s,
+    "app.css .chapter-stage-villa must keep crisp unblurred bottom horizon (#000 100%)"
+  );
+  assert.match(
+    css,
+    /\.chapter-villa\s*\{[^}]*border-bottom:\s*1px\s+solid\s+rgba\(186,\s*232,\s*222,\s*0\.16\)/s,
+    "app.css .chapter-villa must preserve crisp architectural hairline boundary"
+  );
+  assert.match(
+    css,
+    /\.sanctuary-world\s*\{[^}]*margin-top:\s*0;/s,
+    "app.css .sanctuary-world must start cleanly at margin-top: 0 below Video 03"
+  );
 
   const requiredHtmlTokens = [
     'id="runtime-status"',

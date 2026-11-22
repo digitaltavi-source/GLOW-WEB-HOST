@@ -864,18 +864,19 @@ body[data-world-scene="sanctuary"] .world-bed-sanctuary {
 
 .chapter-botanical {
   z-index: 2;
-  min-height: 88svh;
-  min-height: 800px;
+  min-height: 980px;
+  min-height: max(108svh, 980px);
 }
 
 .chapter-villa {
   z-index: 3;
-  margin-top: -64px;
-  min-height: 112svh;
-  min-height: 1000px;
+  margin-top: -116px;
+  min-height: 1020px;
+  min-height: max(112svh, 1020px);
   flex-direction: column;
   justify-content: space-between;
   align-items: stretch;
+  border-bottom: 1px solid rgba(186, 232, 222, 0.16);
 }
 
 .mist-corridor-23 {
@@ -883,7 +884,7 @@ body[data-world-scene="sanctuary"] .world-bed-sanctuary {
   top: 0;
   left: 0;
   right: 0;
-  height: 220px;
+  height: 240px;
   z-index: 4;
   opacity: 0.78;
   -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 35%, #000 65%, transparent 100%);
@@ -897,41 +898,38 @@ body[data-world-scene="sanctuary"] .world-bed-sanctuary {
   -webkit-mask-image: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(0, 0, 0, 0.36) 11%,
-    #000 24%,
-    #000 78%,
-    rgba(0, 0, 0, 0.38) 90%,
+    rgba(0, 0, 0, 0.36) 10%,
+    #000 22%,
+    #000 80%,
+    rgba(0, 0, 0, 0.42) 91%,
     transparent 100%
   );
   mask-image: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(0, 0, 0, 0.36) 11%,
-    #000 24%,
-    #000 78%,
-    rgba(0, 0, 0, 0.38) 90%,
+    rgba(0, 0, 0, 0.36) 10%,
+    #000 22%,
+    #000 80%,
+    rgba(0, 0, 0, 0.42) 91%,
     transparent 100%
   );
 }
 
+/* Video 03: Seamless top fade (2<->3) + 100% CRISP UNBLURRED bottom horizon boundary */
 .chapter-stage-villa {
   -webkit-mask-image: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(0, 0, 0, 0.42) 8%,
-    #000 18%,
-    #000 86%,
-    rgba(0, 0, 0, 0.45) 94%,
-    transparent 100%
+    rgba(0, 0, 0, 0.5) 10%,
+    #000 22%,
+    #000 100%
   );
   mask-image: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(0, 0, 0, 0.42) 8%,
-    #000 18%,
-    #000 86%,
-    rgba(0, 0, 0, 0.45) 94%,
-    transparent 100%
+    rgba(0, 0, 0, 0.5) 10%,
+    #000 22%,
+    #000 100%
   );
 }
 
@@ -945,7 +943,7 @@ body[data-world-scene="sanctuary"] .world-bed-sanctuary {
 }
 
 .chapter-stage-villa .chapter-video {
-  object-position: center 42%;
+  object-position: center 44%;
 }
 
 .chapter-scrim {
@@ -958,15 +956,15 @@ body[data-world-scene="sanctuary"] .world-bed-sanctuary {
 /* Invisible localized vignette whisper ONLY (zero box outline, 90%+ frame uncovered) */
 .chapter-scrim-left {
   background:
-    radial-gradient(ellipse 46% 48% at 14% 84%, rgba(3, 12, 17, 0.62) 0%, rgba(3, 12, 17, 0.22) 52%, transparent 80%),
-    linear-gradient(180deg, rgba(3, 10, 15, 0.12) 0%, transparent 22%, transparent 82%, rgba(3, 10, 15, 0.34) 100%);
+    radial-gradient(ellipse 46% 48% at 14% 78%, rgba(3, 12, 17, 0.62) 0%, rgba(3, 12, 17, 0.22) 52%, transparent 80%),
+    linear-gradient(180deg, rgba(3, 10, 15, 0.12) 0%, transparent 22%, transparent 82%, rgba(3, 10, 15, 0.3) 100%);
 }
 
-/* Upper-left forest shadow feather leaving starry sky, glass villa & infinity pool 100% bright & uncovered */
+/* Upper-left forest shadow feather ONLY — starry sky, glass villa & infinity pool 100% bright & crisp to bottom line */
 .chapter-scrim-villa-upper-left {
   background:
-    radial-gradient(ellipse 42% 38% at 15% 22%, rgba(3, 11, 16, 0.62) 0%, rgba(3, 11, 16, 0.2) 56%, transparent 82%),
-    linear-gradient(180deg, rgba(3, 10, 15, 0.18) 0%, transparent 18%, transparent 86%, rgba(3, 9, 14, 0.38) 100%);
+    radial-gradient(ellipse 42% 38% at 15% 24%, rgba(3, 11, 16, 0.62) 0%, rgba(3, 11, 16, 0.2) 56%, transparent 82%),
+    linear-gradient(180deg, rgba(3, 10, 15, 0.16) 0%, transparent 18%, transparent 100%);
 }
 
 .chapter-overlay {
@@ -980,13 +978,13 @@ body[data-world-scene="sanctuary"] .world-bed-sanctuary {
   justify-content: space-between;
   gap: 28px;
   padding-top: 120px;
-  padding-bottom: 96px;
+  padding-bottom: 148px;
 }
 
 .chapter-overlay-villa-top {
   align-items: flex-start;
   justify-content: flex-start;
-  padding-top: 134px;
+  padding-top: 158px;
   padding-bottom: 24px;
 }
 
@@ -996,7 +994,7 @@ body[data-world-scene="sanctuary"] .world-bed-sanctuary {
   display: flex;
   justify-content: flex-end;
   padding-top: 24px;
-  padding-bottom: 66px;
+  padding-bottom: 34px;
 }
 
 /* Pure Borderless Direct-on-Video Film Typography (Zero Box · Zero Border · Zero Blur Rect) */
@@ -1144,17 +1142,17 @@ body[data-world-scene="sanctuary"] .world-bed-sanctuary {
 .sanctuary-world {
   position: relative;
   z-index: 4;
-  margin-top: -56px;
-  padding-top: 96px;
+  margin-top: 0;
+  padding-top: 72px;
   min-height: 820px;
   overflow: clip;
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(3, 10, 16, 0.24) 14%,
-    rgba(5, 22, 31, 0.68) 34%,
-    rgba(6, 29, 34, 0.88) 68%,
-    rgba(3, 11, 16, 0.96) 100%
+    rgba(4, 18, 26, 0.52) 18%,
+    rgba(5, 23, 32, 0.78) 44%,
+    rgba(6, 29, 34, 0.9) 74%,
+    rgba(3, 11, 16, 0.97) 100%
   );
 }
 
@@ -1163,9 +1161,9 @@ body[data-world-scene="sanctuary"] .world-bed-sanctuary {
   top: 0;
   left: 0;
   right: 0;
-  height: 240px;
+  height: 220px;
   z-index: 1;
-  opacity: 0.8;
+  opacity: 0.54;
   -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 35%, #000 65%, transparent 100%);
   mask-image: linear-gradient(180deg, transparent 0%, #000 35%, #000 65%, transparent 100%);
 }
@@ -2095,31 +2093,31 @@ body[data-world-scene="sanctuary"] .world-bed-sanctuary {
   }
 
   .chapter-botanical {
-    min-height: 74svh;
-    min-height: 600px;
+    min-height: 680px;
+    min-height: max(84svh, 680px);
   }
 
   .chapter-villa {
-    margin-top: -42px;
-    min-height: 88svh;
-    min-height: 740px;
+    margin-top: -64px;
+    min-height: 760px;
+    min-height: max(92svh, 760px);
   }
 
   .chapter-overlay-bottom {
     flex-direction: column;
     align-items: flex-start;
     padding-top: 84px;
-    padding-bottom: 58px;
+    padding-bottom: 92px;
   }
 
   .chapter-overlay-villa-top {
-    padding-top: 84px;
+    padding-top: 102px;
     padding-bottom: 16px;
   }
 
   .chapter-villa-footer-bar {
     justify-content: flex-start;
-    padding-bottom: 48px;
+    padding-bottom: 24px;
   }
 
   .chapter-editorial,
@@ -2128,8 +2126,8 @@ body[data-world-scene="sanctuary"] .world-bed-sanctuary {
   }
 
   .sanctuary-world {
-    margin-top: -42px;
-    padding-top: 76px;
+    margin-top: 0;
+    padding-top: 56px;
   }
 
   .craft-strip {
