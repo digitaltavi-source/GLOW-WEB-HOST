@@ -7,9 +7,12 @@ const progress = $("#progress");
 const siteHeader = $("#site-header");
 const heroSection = $("#top");
 const manifestoSection = $("#manifesto");
+const livingStage = $("#works");
 const craftSection = $("#craft");
 const craftThread = $("#craft-thread");
 const chapterRail = $("#chapter-rail");
+const sanctuaryWorld = $("#sanctuary-world");
+const sanctuarySculpture = $("#sanctuary-sculpture");
 
 const form = $("#intake-form");
 const steps = $$(".wizard-step");
@@ -171,40 +174,31 @@ async function refreshRuntime() {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 3. GPU-Smooth Scroll-Driven Cinema Choreography & Chapter Rail             */
+/* 3. GPU-Smooth Scroll Choreography & 4-Stop Micro-Rail Sync                 */
 /* -------------------------------------------------------------------------- */
 const kineticWords = $$(".kinetic-manifesto .k-word");
-const expandStages = $$("[data-scroll-expand]");
-const parallaxCards = $$("[data-parallax-card]");
 const railItems = $$(".rail-item");
-const tonedActs = $$("[data-act-tone]");
-
 let scrollRafId = 0;
 
-function updateChapterRail(vh) {
+function updateChapterRail(vh, scrollY, maxScroll) {
   if (!chapterRail || railItems.length === 0) return;
   const probeY = vh * 0.42;
 
-  let activeTone = "dark";
-  for (const sec of tonedActs) {
-    const rect = sec.getBoundingClientRect();
-    if (rect.top <= probeY && rect.bottom >= probeY) {
-      activeTone = sec.dataset.actTone || "dark";
-      break;
-    }
-  }
-  chapterRail.dataset.railTone = activeTone;
-
   let activeTarget = "top";
-  for (const item of railItems) {
-    const id = item.dataset.railTarget;
-    const sec = id ? document.getElementById(id) : null;
-    if (!sec) continue;
-    const rect = sec.getBoundingClientRect();
-    if (rect.top <= probeY) {
-      activeTarget = id;
+  if (maxScroll > 0 && scrollY >= maxScroll - 24) {
+    activeTarget = "intake";
+  } else {
+    for (const item of railItems) {
+      const id = item.dataset.railTarget;
+      const sec = id ? document.getElementById(id) : null;
+      if (!sec) continue;
+      const rect = sec.getBoundingClientRect();
+      if (rect.top <= probeY) {
+        activeTarget = id;
+      }
     }
   }
+
   railItems.forEach((item) => {
     item.classList.toggle("is-active", item.dataset.railTarget === activeTarget);
   });
@@ -213,84 +207,50 @@ function updateChapterRail(vh) {
 function updateScrollChoreography() {
   scrollRafId = 0;
   const vh = window.innerHeight || 900;
-  const vw = window.innerWidth || 1440;
   const scrollY = window.scrollY || 0;
-
-  // Scroll hairline progress
   const docEl = document.documentElement;
-  const maxScroll = docEl.scrollHeight - vh;
+  const maxScroll = Math.max(0, docEl.scrollHeight - vh);
+
   if (progress) {
     progress.style.width = `${maxScroll > 0 ? clamp01(scrollY / maxScroll) * 100 : 0}%`;
   }
 
-  // Header luminosity transition
-  const heroThreshold = heroSection ? Math.max(80, heroSection.offsetHeight - 180) : 80;
+  const heroThreshold = heroSection ? Math.max(80, heroSection.offsetHeight - 220) : 80;
   siteHeader?.classList.toggle("is-scrolled", scrollY > heroThreshold);
 
-  // Right-edge cinema chapter rail
-  updateChapterRail(vh);
+  updateChapterRail(vh, scrollY, maxScroll);
 
-  // Reduced-motion static equivalence
   if (isReducedMotion) {
     heroSection?.style.setProperty("--hero-p", "0");
     kineticWords.forEach((w) => w.style.setProperty("--w-lit", "1"));
-    expandStages.forEach((stage) => stage.style.setProperty("--expand", "1"));
-    parallaxCards.forEach((card) => card.style.setProperty("--drift", "0"));
     craftThread?.style.setProperty("--craft-p", "1");
     return;
   }
 
-  // ACT 0: Hero cinema curtain depth parallax
   if (heroSection) {
     const heroH = Math.max(heroSection.offsetHeight, 1);
     const heroP = clamp01(scrollY / heroH);
     heroSection.style.setProperty("--hero-p", heroP.toFixed(4));
   }
 
-  // ACT 1: Word-by-word kinetic illumination (smooth forward & reverse)
   if (manifestoSection && kineticWords.length > 0) {
     const rect = manifestoSection.getBoundingClientRect();
-    const start = vh * 0.88;
-    const end = vh * 0.24;
-    const raw = (start - rect.top) / Math.max(start - end + rect.height * 0.36, 1);
+    const start = vh * 0.94;
+    const end = vh * 0.2;
+    const raw = (start - rect.top) / Math.max(start - end + rect.height * 0.35, 1);
     const p = clamp01(raw);
     const total = kineticWords.length;
     for (let i = 0; i < total; i += 1) {
-      const wordStart = (i / total) * 0.78;
-      const wordSpan = 0.22;
-      const lit = 0.18 + 0.82 * clamp01((p - wordStart) / wordSpan);
+      const wordStart = (i / total) * 0.72;
+      const wordSpan = 0.28;
+      const lit = 0.28 + 0.72 * clamp01((p - wordStart) / wordSpan);
       kineticWords[i].style.setProperty("--w-lit", lit.toFixed(3));
     }
   }
 
-  // ACT 2: Scroll-driven cinema frame expansion & overlapping glass card counter-drift
-  const desktopStage = vw > 900;
-  expandStages.forEach((stage) => {
-    if (!desktopStage) {
-      stage.style.setProperty("--expand", "1");
-      return;
-    }
-    const rect = stage.getBoundingClientRect();
-    const centerDelta = Math.abs(rect.top + rect.height * 0.5 - vh * 0.5);
-    const norm = 1 - clamp01(centerDelta / (vh * 0.92));
-    stage.style.setProperty("--expand", norm.toFixed(4));
-  });
-
-  parallaxCards.forEach((card) => {
-    if (!desktopStage) {
-      card.style.setProperty("--drift", "0");
-      return;
-    }
-    const rect = card.getBoundingClientRect();
-    const rel = clamp01((vh - rect.top) / (vh + rect.height));
-    const drift = (rel - 0.5) * 1.4;
-    card.style.setProperty("--drift", drift.toFixed(4));
-  });
-
-  // ACT 3: Scroll-illuminated luminous emerald progress thread
   if (craftSection && craftThread) {
     const rect = craftSection.getBoundingClientRect();
-    const p = clamp01((vh * 0.84 - rect.top) / Math.max(vh * 0.62, 1));
+    const p = clamp01((vh * 0.88 - rect.top) / Math.max(vh * 0.56, 1));
     craftThread.style.setProperty("--craft-p", p.toFixed(4));
   }
 }
@@ -310,7 +270,7 @@ const revealObserver = new IntersectionObserver(
       }
     });
   },
-  { threshold: 0.1, rootMargin: "0px 0px -3%" }
+  { threshold: 0.08, rootMargin: "0px 0px -2%" }
 );
 $$(".reveal").forEach((el) => revealObserver.observe(el));
 
@@ -319,7 +279,7 @@ window.addEventListener("resize", scheduleScrollChoreography, { passive: true })
 updateScrollChoreography();
 
 /* -------------------------------------------------------------------------- */
-/* 4. Pointer-Tracking Specular Glass Monoliths & Magnetic Pill Buttons       */
+/* 4. Pointer-Tracking Specular Glass, Magnetic Buttons & Sanctuary Caustics  */
 /* -------------------------------------------------------------------------- */
 function initPointerCraft() {
   if (!finePointerQuery.matches) return;
@@ -334,6 +294,17 @@ function initPointerCraft() {
       card.style.setProperty("--my", `${y.toFixed(1)}px`);
     });
   });
+
+  if (sanctuaryWorld && sanctuarySculpture) {
+    sanctuaryWorld.addEventListener("pointermove", (e) => {
+      if (isReducedMotion) return;
+      const rect = sanctuaryWorld.getBoundingClientRect();
+      const px = ((e.clientX - rect.left) / Math.max(rect.width, 1)) * 100;
+      const py = ((e.clientY - rect.top) / Math.max(rect.height, 1)) * 100;
+      sanctuarySculpture.style.setProperty("--sanctuary-mx", `${px.toFixed(2)}%`);
+      sanctuarySculpture.style.setProperty("--sanctuary-my", `${py.toFixed(2)}%`);
+    });
+  }
 
   $$(".btn-magnetic").forEach((btn) => {
     const maxShift = 4.5;
@@ -361,13 +332,24 @@ initPointerCraft();
 /* -------------------------------------------------------------------------- */
 const cinemaVideos = $$("video[data-cinema-video]");
 const manualOverrides = new Map();
+let activeStageScene = "botanical";
+let activeStageVideoKey = "reel01";
 
-function syncToggleButton(key, paused) {
-  const btn = $(`[data-toggle-video="${key}"]`);
+const stageToggleBtn = $("#stage-toggle-btn");
+
+function setButtonPausedState(btn, paused) {
   if (!btn) return;
   btn.setAttribute("aria-pressed", String(paused));
   const label = $(".control-label", btn);
   if (label) label.textContent = paused ? "Phát phim" : "Tạm dừng";
+}
+
+function syncToggleButton(key, paused) {
+  const directBtn = $(`[data-toggle-video="${key}"]`);
+  if (directBtn) setButtonPausedState(directBtn, paused);
+  if (key === activeStageVideoKey && stageToggleBtn) {
+    setButtonPausedState(stageToggleBtn, paused);
+  }
 }
 
 function safePlay(video) {
@@ -418,7 +400,7 @@ const videoVisibilityObserver = new IntersectionObserver(
       }
     });
   },
-  { threshold: 0.15 }
+  { threshold: 0.12 }
 );
 
 cinemaVideos.forEach((video) => {
@@ -450,81 +432,116 @@ $$("[data-toggle-video]").forEach((btn) => {
   });
 });
 
+stageToggleBtn?.addEventListener("click", () => {
+  const video = $(`video[data-cinema-video="${activeStageVideoKey}"]`);
+  if (!video) return;
+  if (video.paused) {
+    manualOverrides.set(activeStageVideoKey, "playing");
+    safePlay(video);
+    syncToggleButton(activeStageVideoKey, false);
+  } else {
+    manualOverrides.set(activeStageVideoKey, "paused");
+    video.pause();
+    syncToggleButton(activeStageVideoKey, true);
+  }
+});
+
 reducedMotionQuery.addEventListener?.("change", (e) => {
   isReducedMotion = e.matches;
   applyReducedMotionState();
 });
 
 /* -------------------------------------------------------------------------- */
-/* 6. Interactive 4-Reel IMAX Cinema Switcher                                 */
+/* 6. Act 2 Mist-Sweep Scene Switcher & Dynamic World-Atmosphere Sync         */
 /* -------------------------------------------------------------------------- */
-const imaxVideo = $("#imax-stage-video");
-const imaxSource = $("#imax-stage-source");
-const imaxEyebrow = $("#imax-eyebrow");
-const imaxHeading = $("#chapter-03-heading");
-const imaxFullscreenBtn = $("#imax-fullscreen-btn");
-const imaxReelTabs = $$("[data-imax-reel]");
-let imaxSwitchTimer = 0;
+const sceneTabs = $$("[data-scene-switch]");
+const stageVideos = $$("video[data-scene-video]");
+const stageMistSweep = $("#stage-mist-sweep");
+const stageEyebrow = $("#stage-eyebrow");
+const stageHeading = $("#stage-heading");
+const stageDesc = $("#stage-desc");
+const stageFullscreenBtn = $("#stage-fullscreen-btn");
+let sweepTimer = 0;
 
-function switchImaxReel(tabBtn) {
-  if (!tabBtn || !imaxVideo || !imaxSource) return;
+function renderStageHeading(line1, line2) {
+  if (!stageHeading) return;
+  const span = document.createElement("span");
+  span.textContent = line2;
+  stageHeading.replaceChildren(
+    document.createTextNode(line1),
+    document.createElement("br"),
+    span
+  );
+}
 
-  const src = tabBtn.dataset.src || "/assets/reel-03-liquid-prism.mp4";
-  const poster = tabBtn.dataset.poster || "/assets/reel-03-liquid-prism.webp";
-  const eyebrow = tabBtn.dataset.eyebrow || "04 · LIQUID PLATINUM EMERALD";
-  const title = tabBtn.dataset.title || "Dòng chảy Vô cực · Ánh sáng Bạch kim & Ngọc lục bảo";
-  const subtitle = tabBtn.dataset.subtitle || title;
+function switchLivingStageScene(tabBtn) {
+  if (!tabBtn) return;
+  const targetScene = tabBtn.dataset.sceneSwitch || "botanical";
+  const targetVideoKey = tabBtn.dataset.videoKey || "reel01";
 
-  imaxReelTabs.forEach((btn) => {
+  activeStageScene = targetScene;
+  activeStageVideoKey = targetVideoKey;
+
+  document.body.dataset.worldScene = targetScene;
+  if (livingStage) livingStage.dataset.activeScene = targetScene;
+
+  sceneTabs.forEach((btn) => {
     const active = btn === tabBtn;
     btn.classList.toggle("is-active", active);
     btn.setAttribute("aria-selected", String(active));
   });
 
-  if (imaxEyebrow) imaxEyebrow.textContent = eyebrow;
-  if (imaxHeading) imaxHeading.textContent = title;
-  if (imaxFullscreenBtn) {
-    imaxFullscreenBtn.dataset.src = src;
-    imaxFullscreenBtn.dataset.poster = poster;
-    imaxFullscreenBtn.dataset.title = eyebrow;
-    imaxFullscreenBtn.dataset.subtitle = subtitle;
+  stageVideos.forEach((video) => {
+    const isTarget = video.dataset.sceneVideo === targetScene;
+    video.classList.toggle("is-active", isTarget);
+    if (isTarget) {
+      const override = manualOverrides.get(targetVideoKey);
+      if (!isReducedMotion && override !== "paused") {
+        safePlay(video);
+        syncToggleButton(targetVideoKey, false);
+      } else {
+        syncToggleButton(targetVideoKey, video.paused);
+      }
+    }
+  });
+
+  if (stageEyebrow && tabBtn.dataset.eyebrow) {
+    stageEyebrow.textContent = tabBtn.dataset.eyebrow;
+  }
+  if (tabBtn.dataset.titleLine1 && tabBtn.dataset.titleLine2) {
+    renderStageHeading(tabBtn.dataset.titleLine1, tabBtn.dataset.titleLine2);
+  }
+  if (stageDesc && tabBtn.dataset.desc) {
+    stageDesc.textContent = tabBtn.dataset.desc;
+  }
+  if (stageFullscreenBtn) {
+    stageFullscreenBtn.dataset.openCinema = targetVideoKey;
+    stageFullscreenBtn.dataset.src = tabBtn.dataset.src || "/assets/reel-01-botanical.mp4";
+    stageFullscreenBtn.dataset.poster = tabBtn.dataset.poster || "/assets/reel-01-botanical.webp";
+    stageFullscreenBtn.dataset.title = tabBtn.dataset.modalTitle || "01 · Botanical Sanctuary";
+    stageFullscreenBtn.dataset.subtitle = tabBtn.dataset.modalSubtitle || "";
   }
 
-  if (imaxSource.getAttribute("src") === src) return;
-
-  window.clearTimeout(imaxSwitchTimer);
-  const performSwap = () => {
-    imaxVideo.poster = poster;
-    imaxSource.setAttribute("src", src);
-    imaxVideo.load();
-    const shouldPlay = !isReducedMotion && manualOverrides.get("reel03") !== "paused";
-    if (shouldPlay) {
-      safePlay(imaxVideo);
-      syncToggleButton("reel03", false);
-    } else {
-      imaxVideo.pause();
-      syncToggleButton("reel03", true);
-    }
-    imaxVideo.classList.remove("is-switching");
-  };
-
-  if (isReducedMotion) {
-    performSwap();
-  } else {
-    imaxVideo.classList.add("is-switching");
-    imaxSwitchTimer = window.setTimeout(performSwap, 160);
+  if (stageMistSweep && !isReducedMotion) {
+    window.clearTimeout(sweepTimer);
+    stageMistSweep.classList.remove("is-sweeping");
+    void stageMistSweep.offsetWidth;
+    stageMistSweep.classList.add("is-sweeping");
+    sweepTimer = window.setTimeout(() => {
+      stageMistSweep.classList.remove("is-sweeping");
+    }, 900);
   }
 }
 
-imaxReelTabs.forEach((tab, idx) => {
-  tab.addEventListener("click", () => switchImaxReel(tab));
+sceneTabs.forEach((tab, idx) => {
+  tab.addEventListener("click", () => switchLivingStageScene(tab));
   tab.addEventListener("keydown", (e) => {
     if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
     e.preventDefault();
     const dir = e.key === "ArrowRight" ? 1 : -1;
-    const nextIdx = (idx + dir + imaxReelTabs.length) % imaxReelTabs.length;
-    imaxReelTabs[nextIdx].focus();
-    switchImaxReel(imaxReelTabs[nextIdx]);
+    const nextIdx = (idx + dir + sceneTabs.length) % sceneTabs.length;
+    sceneTabs[nextIdx].focus();
+    switchLivingStageScene(sceneTabs[nextIdx]);
   });
 });
 
@@ -543,8 +560,8 @@ function openCinemaModal(triggerEl) {
   if (!cinemaModal || !triggerEl) return;
   lastCinemaTrigger = triggerEl;
 
-  const src = triggerEl.dataset.src || "/assets/reel-03-liquid-prism.mp4";
-  const poster = triggerEl.dataset.poster || "/assets/reel-03-liquid-prism.webp";
+  const src = triggerEl.dataset.src || "/assets/reel-01-botanical.mp4";
+  const poster = triggerEl.dataset.poster || "/assets/reel-01-botanical.webp";
   const title = triggerEl.dataset.title || "GLOW Showcase";
   const subtitle = triggerEl.dataset.subtitle || "";
 

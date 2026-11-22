@@ -87,13 +87,24 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   assert.equal(html.includes("hero-water-canvas"), false, "legacy hero-water-canvas must be removed");
   assert.equal(html.includes('id="tiers"'), false, "e-commerce pricing table must be removed");
 
-  for (const file of VIDEO_ASSETS) {
-    assert.ok(html.includes(`/assets/${file}`), `index.html missing real video source /assets/${file}`);
+  const PUBLIC_HOME_VIDEOS = [
+    "hero-ocean-jade.mp4",
+    "reel-01-botanical.mp4",
+    "reel-02-coastal-villa.mp4",
+  ] as const;
+  const PUBLIC_HOME_POSTERS = [
+    "hero-ocean-jade.webp",
+    "reel-01-botanical.webp",
+    "reel-02-coastal-villa.webp",
+  ] as const;
+  for (const file of PUBLIC_HOME_VIDEOS) {
+    assert.ok(html.includes(`/assets/${file}`), `index.html missing curated video source /assets/${file}`);
   }
-  for (const file of IMAGE_ASSETS) {
-    assert.ok(html.includes(`/assets/${file}`), `index.html missing poster /assets/${file}`);
+  for (const file of PUBLIC_HOME_POSTERS) {
+    assert.ok(html.includes(`/assets/${file}`), `index.html missing curated poster /assets/${file}`);
   }
-  assert.ok((html.match(/<video\b/g) || []).length >= 5, "must render 4 cinema videos + modal video player");
+  assert.ok((html.match(/<video\b/g) || []).length >= 4, "must render 3 curated cinema videos + modal video player");
+  assert.ok(html.includes('id="sanctuary-sculpture"'), "index.html missing coded #sanctuary-sculpture optical art");
 
   const requiredHtmlTokens = [
     'id="runtime-status"',
