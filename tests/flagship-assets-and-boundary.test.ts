@@ -96,9 +96,9 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   );
   assert.ok(html.includes('id="hero-seam-flare"'), "index.html missing #hero-seam-flare seamless loop optical flare");
   assert.ok(html.includes('id="hero-starfield"'), "index.html missing #hero-starfield multi-depth SVG starfield");
-  assert.ok(html.includes("GLOW WEB · STUDIO KIẾN TẠO SỐ"), "index.html missing executive Hero eyebrow");
+  assert.ok(html.includes("GLOW WEBSITE · STUDIO KIẾN TẠO SỐ"), "index.html missing executive Hero eyebrow");
   assert.ok(html.includes("Không gian số"), "index.html missing executive Hero headline line 1");
-  assert.ok(html.includes("xứng tầm thương hiệu."), "index.html missing executive Hero headline line 2");
+  assert.ok(html.includes("mang dấu ấn riêng."), "index.html missing executive Hero headline line 2");
   assert.ok(html.includes("01 · CHUẨN MỰC THIẾT KẾ"), "index.html missing executive Manifesto eyebrow");
   assert.ok(html.includes('id="open-auth-modal"'), "index.html missing unified #open-auth-modal button");
   assert.ok(html.includes('id="auth-modal"'), "index.html missing unified #auth-modal dialog");
