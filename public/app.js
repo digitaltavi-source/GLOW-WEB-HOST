@@ -736,6 +736,7 @@ mobileMenuToggle?.addEventListener("click", () => {
 });
 
 function setActiveView(route, { pushHistory = true, scrollTop = true } = {}) {
+  cancelHomeFrameSnap();
   const safeRoute = VALID_ROUTES.includes(route) ? route : "home";
   activeView = safeRoute;
   document.body.dataset.activeView = safeRoute;
@@ -1874,6 +1875,234 @@ window.addEventListener("scroll", scheduleScrollChoreography, { passive: true })
 window.addEventListener("resize", scheduleScrollChoreography, { passive: true });
 
 /* -------------------------------------------------------------------------- */
+/* 10.5. Silky-Light Frame-Locked Scroll Engine (Home Desktop >= 1024px)      */
+/* -------------------------------------------------------------------------- */
+const HOME_FRAME_IDS = ["top", "chapter-botanical", "chapter-villa", "sanctuary-world"];
+let snapRafId = 0;
+let snapAnimating = false;
+let snapLockUntil = 0;
+
+function cancelHomeFrameSnap() {
+  if (snapRafId) {
+    window.cancelAnimationFrame(snapRafId);
+    snapRafId = 0;
+  }
+  snapAnimating = false;
+  snapLockUntil = 0;
+}
+
+function areAllModalsClosed() {
+  const modalIds = ["auth-modal", "intake-modal", "cinema-modal", "template-preview-modal"];
+  for (const id of modalIds) {
+    const el = document.getElementById(id);
+    if (el && !el.classList.contains("hidden")) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function isHomeFrameSnapActive() {
+  return Boolean(
+    mainContent &&
+      mainContent.dataset.activeView === "home" &&
+      activeView === "home" &&
+      window.innerWidth >= 1024 &&
+      !isReducedMotion &&
+      areAllModalsClosed()
+  );
+}
+
+function getFrameTops() {
+  const scrollY = window.scrollY || 0;
+  return HOME_FRAME_IDS.map((id) => {
+    const el = document.getElementById(id);
+    return el ? Math.max(0, Math.round(el.getBoundingClientRect().top + scrollY)) : 0;
+  });
+}
+
+function getNearestFrameIndex(scrollY, tops) {
+  let bestIdx = 0;
+  let bestDist = Infinity;
+  for (let i = 0; i < tops.length; i += 1) {
+    const dist = Math.abs(tops[i] - scrollY);
+    if (dist < bestDist) {
+      bestDist = dist;
+      bestIdx = i;
+    }
+  }
+  return bestIdx;
+}
+
+function animateScrollToY(targetY, durationMs = 540) {
+  cancelHomeFrameSnap();
+  const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  const destY = Math.max(0, Math.min(maxScroll, Math.round(targetY)));
+  const startY = window.scrollY || 0;
+  const delta = destY - startY;
+
+  if (isReducedMotion || Math.abs(delta) < 2) {
+    window.scrollTo({ top: destY, behavior: "instant" });
+    return;
+  }
+
+  const startTime = performance.now();
+  snapAnimating = true;
+  snapLockUntil = startTime + durationMs + 150;
+
+  const stepFrame = (now) => {
+    if (!isHomeFrameSnapActive()) {
+      cancelHomeFrameSnap();
+      return;
+    }
+    const elapsed = now - startTime;
+    const t = Math.min(1, Math.max(0, elapsed / durationMs));
+    const eased = 1 - Math.pow(1 - t, 3);
+    const nextY = t >= 1 ? destY : Math.round(startY + delta * eased);
+    window.scrollTo({ top: nextY, behavior: "instant" });
+
+    if (t < 1) {
+      snapRafId = window.requestAnimationFrame(stepFrame);
+    } else {
+      snapRafId = 0;
+      snapAnimating = false;
+    }
+  };
+
+  snapRafId = window.requestAnimationFrame(stepFrame);
+}
+
+function stepHomeFrameByDirection(dir) {
+  const tops = getFrameTops();
+  const scrollY = window.scrollY || 0;
+  const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  const idx = getNearestFrameIndex(scrollY, tops);
+  const lastIdx = tops.length - 1;
+
+  if (idx === lastIdx || scrollY >= tops[lastIdx] - 24) {
+    if (dir > 0) {
+      if (scrollY < maxScroll - 4) {
+        animateScrollToY(maxScroll, 420);
+        return true;
+      }
+      return false;
+    }
+    if (scrollY > tops[lastIdx] + 28) {
+      animateScrollToY(tops[lastIdx], 420);
+      return true;
+    }
+    animateScrollToY(tops[lastIdx - 1], 540);
+    return true;
+  }
+
+  const nextIdx = Math.max(0, Math.min(lastIdx, idx + dir));
+  if (nextIdx === idx) return false;
+  animateScrollToY(tops[nextIdx], 540);
+  return true;
+}
+
+function initHomeFrameSnap() {
+  window.addEventListener(
+    "wheel",
+    (e) => {
+      if (!isHomeFrameSnapActive()) return;
+      if (e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+
+      const now = performance.now();
+      if (snapAnimating || now < snapLockUntil) {
+        e.preventDefault();
+        return;
+      }
+
+      if (Math.abs(e.deltaY) < 6) return;
+
+      const dir = e.deltaY > 0 ? 1 : -1;
+      const moved = stepHomeFrameByDirection(dir);
+      if (moved) {
+        e.preventDefault();
+      }
+    },
+    { passive: false }
+  );
+
+  window.addEventListener("keydown", (e) => {
+    if (!isHomeFrameSnapActive()) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+    const target = e.target;
+    const tag = target && typeof target.tagName === "string" ? target.tagName.toUpperCase() : "";
+    if (
+      tag === "INPUT" ||
+      tag === "TEXTAREA" ||
+      tag === "SELECT" ||
+      (target && target.isContentEditable) ||
+      (tag === "BUTTON" && e.key === " ")
+    ) {
+      return;
+    }
+
+    if (e.key === "PageDown") {
+      e.preventDefault();
+      stepHomeFrameByDirection(1);
+    } else if (e.key === "PageUp") {
+      e.preventDefault();
+      stepHomeFrameByDirection(-1);
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      const tops = getFrameTops();
+      animateScrollToY(tops[0], 540);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      animateScrollToY(maxScroll, 540);
+    }
+  });
+
+  $$(".rail-item, .scroll-cue").forEach((anchor) => {
+    anchor.addEventListener("click", (e) => {
+      if (!isHomeFrameSnapActive()) return;
+      const targetId =
+        anchor.dataset.railTarget ||
+        (anchor.getAttribute("href") || "").replace(/^#/, "");
+      if (!targetId) return;
+
+      const tops = getFrameTops();
+      const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      let destY = null;
+
+      if (targetId === "top") {
+        destY = tops[0];
+      } else if (targetId === "chapter-botanical") {
+        destY = tops[1];
+      } else if (targetId === "chapter-villa") {
+        destY = tops[2];
+      } else if (targetId === "sanctuary-world" || targetId === "craft") {
+        destY = tops[3];
+      } else if (targetId === "intake") {
+        const el = document.getElementById("intake");
+        const elTop = el ? Math.round(el.getBoundingClientRect().top + (window.scrollY || 0)) : tops[3];
+        destY = Math.min(maxScroll, Math.max(tops[3], elTop - 72));
+      }
+
+      if (destY !== null) {
+        e.preventDefault();
+        animateScrollToY(destY, 540);
+      }
+    });
+  });
+
+  window.addEventListener(
+    "resize",
+    () => {
+      if (window.innerWidth < 1024) {
+        cancelHomeFrameSnap();
+      }
+    },
+    { passive: true }
+  );
+}
+
+/* -------------------------------------------------------------------------- */
 /* 11. Pointer-Tracking Specular Glass, Magnetic Buttons & Sanctuary Caustics */
 /* -------------------------------------------------------------------------- */
 function initPointerCraft() {
@@ -2152,6 +2381,7 @@ window.addEventListener("keydown", (e) => {
 setStep(1);
 applyLanguage(currentLang, false);
 setActiveView(activeView, { pushHistory: false, scrollTop: false });
+initHomeFrameSnap();
 void ensureTemplatesLoaded();
 void refreshRuntime();
 syncHeroFlareLoopState();

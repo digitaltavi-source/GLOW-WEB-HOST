@@ -172,13 +172,18 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   );
   assert.match(
     css,
-    /\.chapter-villa\s*\{[^}]*aspect-ratio:\s*16\s*\/\s*9;[^}]*border-bottom:\s*1px\s+solid\s+rgba\(186,\s*232,\s*222,\s*0\.16\)/s,
-    "app.css .chapter-villa must enforce native 16/9 aspect ratio and crisp architectural hairline boundary"
+    /\.hero-stage\s*\{[^}]*mask-image:\s*linear-gradient\(\s*180deg,\s*#000\s+0%,\s*#000\s+93%/s,
+    "app.css .hero-stage must keep solid #000 mask down to 93% for zero Frame-1 foot bleed"
   );
   assert.match(
     css,
-    /\.sanctuary-world\s*\{[^}]*margin-top:\s*0;[^}]*url\("\/assets\/basalt-terrace-deck\.webp"\)/s,
-    "app.css .sanctuary-world must start cleanly at margin-top: 0 and render real /assets/basalt-terrace-deck.webp"
+    /\.chapter-villa\s*\{[^}]*margin-top:\s*0;[^}]*border-bottom:\s*0;/s,
+    "app.css .chapter-villa must enforce margin-top: 0 and border-bottom: 0 for seamless obsidian coping merge"
+  );
+  assert.match(
+    css,
+    /\.sanctuary-world\s*\{[^}]*margin-top:\s*0;[^}]*min-height:\s*100svh;[^}]*url\("\/assets\/basalt-terrace-deck\.webp"\)/s,
+    "app.css .sanctuary-world must start cleanly at margin-top: 0 with min-height: 100svh and render real /assets/basalt-terrace-deck.webp"
   );
   assert.ok(css.includes("--flare-intensity"), "app.css must define --flare-intensity for Video 01 seamless loop flare");
   assert.ok(css.includes(".hero-starfield"), "app.css must style .hero-starfield multi-depth SVG starfield");
@@ -186,8 +191,23 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   assert.equal(css.includes(".mist-bridge-12"), false, "app.css must not contain removed opaque .mist-bridge-12 section");
   assert.match(
     css,
-    /\.chapter-botanical\s*\{[^}]*margin-top:\s*-72px;/s,
-    "app.css .chapter-botanical must feather-overlap Video 01 seamlessly (-72px)"
+    /\.chapter-botanical\s*\{[^}]*margin-top:\s*0;/s,
+    "app.css .chapter-botanical must use margin-top: 0 (zero negative overlap bleed into Frame 1)"
+  );
+  assert.doesNotMatch(
+    css,
+    /\.chapter-botanical\s*\{[^}]*margin-top:\s*-/s,
+    "app.css .chapter-botanical must never use negative margin-top"
+  );
+  assert.match(
+    css,
+    /\.footer-links\s*\{[^}]*flex-shrink:\s*0;/s,
+    "app.css .footer-links must enforce flex-shrink: 0 for single-line desktop footer"
+  );
+  assert.match(
+    css,
+    /\.footer-links\s+a\s*\{[^}]*white-space:\s*nowrap;/s,
+    "app.css .footer-links a must enforce white-space: nowrap for single-line desktop footer links"
   );
   assert.ok(css.includes(".terrace-coping-sheen"), "app.css must define .terrace-coping-sheen basalt continuation");
   assert.ok(css.includes(".terrace-basalt-grid"), "app.css must define .terrace-basalt-grid mineral terrace");
@@ -227,6 +247,8 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   assert.match(js, /prefers-reduced-motion:\s*reduce/);
   assert.ok(js.includes("--flare-intensity"), "app.js must drive --flare-intensity on Video 01 loop seam");
   assert.ok(js.includes("--flare-progress"), "app.js must drive --flare-progress on Video 01 loop seam");
+  assert.match(js, /function\s+initHomeFrameSnap\s*\(/, "app.js must define initHomeFrameSnap() frame-locked scroll engine");
+  assert.ok(js.includes('"wheel"') && js.includes('"PageDown"') && js.includes('"PageUp"'), "app.js initHomeFrameSnap must wire wheel, PageDown, and PageUp navigation");
   assert.doesNotMatch(js, /\binnerHTML\b/, "app.js must strictly forbid innerHTML (safe DOM creation only)");
   assert.equal(js.includes("reel03-infinity-canvas"), false, "app.js must not reference removed fake canvas");
 });

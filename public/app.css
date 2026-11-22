@@ -747,12 +747,22 @@ body:not([data-active-view="home"]) .chapter-rail {
   z-index: 2;
 }
 
+@media (min-width: 1024px) {
+  .hero {
+    height: 100svh;
+  }
+
+  .hero-shell {
+    height: 100%;
+  }
+}
+
 .hero-stage {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 78%, rgba(0, 0, 0, 0.45) 92%, transparent 100%);
-  mask-image: linear-gradient(180deg, #000 0%, #000 78%, rgba(0, 0, 0, 0.45) 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 93%, rgba(0, 0, 0, 0.45) 97.5%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 93%, rgba(0, 0, 0, 0.45) 97.5%, transparent 100%);
 }
 
 .hero-video {
@@ -1133,7 +1143,7 @@ body:not([data-active-view="home"]) .chapter-rail {
 
 .chapter-botanical {
   z-index: 2;
-  margin-top: -72px;
+  margin-top: 0;
   width: 100%;
   aspect-ratio: 16 / 9;
   min-height: 820px;
@@ -1141,14 +1151,23 @@ body:not([data-active-view="home"]) .chapter-rail {
 
 .chapter-villa {
   z-index: 3;
-  margin-top: -116px;
+  margin-top: 0;
   width: 100%;
   aspect-ratio: 16 / 9;
   min-height: 760px;
   flex-direction: column;
   justify-content: space-between;
   align-items: stretch;
-  border-bottom: 1px solid rgba(186, 232, 222, 0.16);
+  border-bottom: 0;
+}
+
+@media (min-width: 1024px) {
+  .chapter-botanical,
+  .chapter-villa {
+    height: 100svh;
+    min-height: 100svh;
+    aspect-ratio: auto;
+  }
 }
 
 .mist-corridor-23 {
@@ -1156,9 +1175,9 @@ body:not([data-active-view="home"]) .chapter-rail {
   top: 0;
   left: 0;
   right: 0;
-  height: 220px;
+  height: 160px;
   z-index: 4;
-  opacity: 0.78;
+  opacity: 0.45;
   -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 35%, #000 65%, transparent 100%);
   mask-image: linear-gradient(180deg, transparent 0%, #000 35%, #000 65%, transparent 100%);
 }
@@ -1170,37 +1189,37 @@ body:not([data-active-view="home"]) .chapter-rail {
   -webkit-mask-image: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(0, 0, 0, 0.5) 8%,
-    #000 18%,
-    #000 82%,
-    rgba(0, 0, 0, 0.42) 92%,
+    rgba(0, 0, 0, 0.52) 3%,
+    #000 6%,
+    #000 94%,
+    rgba(0, 0, 0, 0.52) 97%,
     transparent 100%
   );
   mask-image: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(0, 0, 0, 0.36) 10%,
-    #000 22%,
-    #000 80%,
-    rgba(0, 0, 0, 0.42) 91%,
+    rgba(0, 0, 0, 0.52) 3%,
+    #000 6%,
+    #000 94%,
+    rgba(0, 0, 0, 0.52) 97%,
     transparent 100%
   );
 }
 
-/* Video 03: Seamless top fade (2<->3: 0%->20%) + 100% CRISP UNCROPPED bottom horizon (#000 100%) */
+/* Video 03: Subtle top feather (0%..6%) + 100% CRISP UNCROPPED bottom obsidian pool coping (#000 100%) */
 .chapter-stage-villa {
   -webkit-mask-image: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(0, 0, 0, 0.5) 10%,
-    #000 20%,
+    rgba(0, 0, 0, 0.52) 3%,
+    #000 6%,
     #000 100%
   );
   mask-image: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(0, 0, 0, 0.5) 10%,
-    #000 20%,
+    rgba(0, 0, 0, 0.52) 3%,
+    #000 6%,
     #000 100%
   );
 }
@@ -1251,14 +1270,14 @@ body:not([data-active-view="home"]) .chapter-rail {
   align-items: flex-end;
   justify-content: space-between;
   gap: 28px;
-  padding-top: 120px;
-  padding-bottom: 148px;
+  padding-top: 112px;
+  padding-bottom: clamp(48px, 6.5vh, 76px);
 }
 
 .chapter-overlay-villa-top {
   align-items: flex-start;
   justify-content: flex-start;
-  padding-top: 132px;
+  padding-top: clamp(104px, 11.5vh, 132px);
   padding-bottom: 18px;
 }
 
@@ -1417,16 +1436,21 @@ body:not([data-active-view="home"]) .chapter-rail {
   position: relative;
   z-index: 4;
   margin-top: 0;
-  padding-top: 44px;
-  min-height: 540px;
+  padding-top: 56px;
+  padding-bottom: 24px;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   overflow: clip;
   background-color: #03080C;
   background-image:
     linear-gradient(
       180deg,
-      rgba(24, 38, 47, 0.22) 0%,
-      rgba(10, 20, 27, 0.18) 38%,
-      rgba(5, 12, 17, 0.68) 76%,
+      rgba(4, 9, 14, 0.78) 0%,
+      rgba(4, 9, 14, 0.24) 12%,
+      rgba(4, 10, 15, 0.14) 44%,
+      rgba(3, 8, 12, 0.62) 82%,
       #03080C 100%
     ),
     url("/assets/basalt-terrace-deck.webp");
@@ -1435,19 +1459,22 @@ body:not([data-active-view="home"]) .chapter-rail {
   background-repeat: no-repeat, no-repeat;
 }
 
-/* 1px Wet Stone Coping Rim + Soft Lunar Water-Edge Specular Reflection Band */
+/* Seamless Wet Obsidian Coping Blend (Zero Bright Contrast Step at Seam) */
 .terrace-coping-sheen {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 76px;
+  height: 84px;
   z-index: 1;
   pointer-events: none;
-  border-top: 1px solid rgba(208, 236, 240, 0.22);
-  background:
-    radial-gradient(ellipse 68% 44% at 50% 0%, rgba(196, 232, 238, 0.14) 0%, rgba(112, 168, 178, 0.04) 48%, transparent 82%),
-    linear-gradient(180deg, rgba(210, 238, 242, 0.06) 0%, transparent 100%);
+  border-top: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(4, 9, 14, 0.68) 0%,
+    rgba(4, 9, 14, 0.22) 42%,
+    transparent 100%
+  );
 }
 
 /* Clean Architectural Stone Plane (Zero Fake CSS Grid — Real Basalt WebP Carries Surface) */
@@ -2313,6 +2340,7 @@ body:not([data-active-view="home"]) .chapter-rail {
 .footer-links {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   gap: 20px;
 }
 
@@ -2320,6 +2348,7 @@ body:not([data-active-view="home"]) .chapter-rail {
   text-decoration: none;
   font-size: 13px;
   font-weight: 500;
+  white-space: nowrap;
   color: var(--ink-silver);
   transition: color 0.18s ease;
 }
@@ -3661,14 +3690,14 @@ body:not([data-active-view="home"]) .chapter-rail {
 
   .chapter-botanical {
     aspect-ratio: auto;
-    margin-top: -42px;
+    margin-top: 0;
     min-height: 640px;
     min-height: max(80svh, 640px);
   }
 
   .chapter-villa {
     aspect-ratio: auto;
-    margin-top: -58px;
+    margin-top: 0;
     min-height: 680px;
     min-height: max(84svh, 680px);
   }
@@ -3698,6 +3727,8 @@ body:not([data-active-view="home"]) .chapter-rail {
   .sanctuary-world {
     margin-top: 0;
     padding-top: 38px;
+    min-height: auto;
+    display: block;
   }
 
   .gateway {
@@ -3744,6 +3775,11 @@ body:not([data-active-view="home"]) .chapter-rail {
   .footer-inner {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .footer-links {
+    flex-wrap: wrap;
+    gap: 12px 18px;
   }
 
   .footer-status {
