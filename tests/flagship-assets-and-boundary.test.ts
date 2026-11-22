@@ -182,8 +182,8 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   );
   assert.match(
     css,
-    /\.sanctuary-world\s*\{[^}]*margin-top:\s*0;[^}]*min-height:\s*100svh;[^}]*url\("\/assets\/basalt-terrace-deck\.webp"\)/s,
-    "app.css .sanctuary-world must start cleanly at margin-top: 0 with min-height: 100svh and render real /assets/basalt-terrace-deck.webp"
+    /\.sanctuary-world\s*\{[^}]*margin-top:\s*0;[^}]*min-height:\s*100svh;[^}]*rgba\(3,\s*10,\s*13,\s*0\.56\)\s+0%[^}]*rgba\(4,\s*24,\s*22,\s*0\.14\)\s+14%[^}]*rgba\(4,\s*26,\s*24,\s*0\.18\)\s+68%[^}]*url\("\/assets\/basalt-terrace-deck\.webp"\)/s,
+    "app.css .sanctuary-world must start cleanly at margin-top: 0 with min-height: 100svh, v5.3 nocturnal jade-abyss overlay, and real /assets/basalt-terrace-deck.webp"
   );
   assert.ok(css.includes("--flare-intensity"), "app.css must define --flare-intensity for Video 01 seamless loop flare");
   assert.ok(css.includes(".hero-starfield"), "app.css must style .hero-starfield multi-depth SVG starfield");
