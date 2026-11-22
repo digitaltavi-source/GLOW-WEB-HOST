@@ -96,6 +96,8 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   );
   assert.ok(html.includes('id="hero-seam-flare"'), "index.html missing #hero-seam-flare seamless loop optical flare");
   assert.ok(html.includes('id="hero-starfield"'), "index.html missing #hero-starfield multi-depth SVG starfield");
+  assert.ok(html.includes('class="hero-manifesto-dock" id="manifesto"'), "index.html must dock #manifesto inside Frame 1 .hero-shell");
+  assert.equal(html.includes("mist-bridge-12"), false, "opaque .mist-bridge-12 horizontal cut block must remain removed");
   assert.ok(html.includes("GLOW WEBSITE · STUDIO KIẾN TẠO SỐ"), "index.html missing executive Hero eyebrow");
   assert.ok(html.includes("Không gian số"), "index.html missing executive Hero headline line 1");
   assert.ok(html.includes("mang dấu ấn riêng."), "index.html missing executive Hero headline line 2");
@@ -180,10 +182,12 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   );
   assert.ok(css.includes("--flare-intensity"), "app.css must define --flare-intensity for Video 01 seamless loop flare");
   assert.ok(css.includes(".hero-starfield"), "app.css must style .hero-starfield multi-depth SVG starfield");
+  assert.ok(css.includes(".hero-manifesto-dock"), "app.css must style .hero-manifesto-dock inside Frame 1");
+  assert.equal(css.includes(".mist-bridge-12"), false, "app.css must not contain removed opaque .mist-bridge-12 section");
   assert.match(
     css,
-    /\.mist-bridge-12\s*\{[^}]*margin-top:\s*0;[^}]*margin-bottom:\s*0;/s,
-    "app.css .mist-bridge-12 must eliminate negative margins for clean interlude spacing"
+    /\.chapter-botanical\s*\{[^}]*margin-top:\s*-72px;/s,
+    "app.css .chapter-botanical must feather-overlap Video 01 seamlessly (-72px)"
   );
   assert.ok(css.includes(".terrace-coping-sheen"), "app.css must define .terrace-coping-sheen basalt continuation");
   assert.ok(css.includes(".terrace-basalt-grid"), "app.css must define .terrace-basalt-grid mineral terrace");

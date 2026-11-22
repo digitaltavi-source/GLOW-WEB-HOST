@@ -1831,15 +1831,15 @@ function updateScrollChoreography() {
 
   if (manifestoSection && kineticWords.length > 0) {
     const rect = manifestoSection.getBoundingClientRect();
-    const start = vh * 0.94;
-    const end = vh * 0.2;
+    const start = vh * 1.05;
+    const end = vh * 0.15;
     const raw = (start - rect.top) / Math.max(start - end + rect.height * 0.35, 1);
     const p = clamp01(raw);
     const total = kineticWords.length;
     for (let i = 0; i < total; i += 1) {
-      const wordStart = (i / total) * 0.72;
-      const wordSpan = 0.28;
-      const lit = 0.28 + 0.72 * clamp01((p - wordStart) / wordSpan);
+      const wordStart = (i / total) * 0.65;
+      const wordSpan = 0.35;
+      const lit = 0.94 + 0.06 * clamp01((p - wordStart) / wordSpan);
       kineticWords[i].style.setProperty("--w-lit", lit.toFixed(3));
     }
   }
