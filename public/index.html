@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="GLOW Web — Kiến trúc điện ảnh cho thương hiệu. Khởi tạo website độc bản, ánh sáng tinh khiết và kết nối liền mạch với ChatGPT &amp; Google Gemini.">
+<meta name="description" content="GLOW Web — Kiến trúc điện ảnh cho thương hiệu. Khởi tạo website độc bản, thư viện 12+ mẫu chuẩn mực và kết nối liền mạch với ChatGPT &amp; Google Gemini.">
 <meta name="theme-color" content="#05161F">
 <title>GLOW Web — Ánh Sáng Đại Hải · Kiến Trúc Điện Ảnh Cho Thương Hiệu</title>
 <link rel="preload" as="image" href="/assets/hero-ocean-jade.webp" fetchpriority="high">
 <link rel="stylesheet" href="/app.css">
 </head>
-<body data-world-scene="ocean">
-<a class="skip-link" href="#main-content">Chuyển tới nội dung chính</a>
+<body data-world-scene="ocean" data-active-view="home" data-lang="vi">
+<a class="skip-link" href="#main-content" data-i18n="a11y.skip">Chuyển tới nội dung chính</a>
 
 <!-- LAYER 1: Continuous Living Atmospheric World Bed (Synchronized with Active Scroll Act) -->
 <div class="world-atmosphere" id="world-atmosphere" aria-hidden="true">
@@ -43,10 +43,10 @@
 <div class="film-grain" aria-hidden="true"></div>
 <div id="progress" aria-hidden="true"></div>
 
-<!-- Floating Translucent Twilight-Platinum Header -->
+<!-- Floating Translucent Twilight-Platinum Header (Centered 5 Tabs + Sign In + Far-Right VI | EN) -->
 <header class="site-header" id="site-header">
   <div class="header-inner">
-    <a class="brand" href="#top" aria-label="GLOW Web — Trang chủ">
+    <a class="brand" href="/" data-route="home" aria-label="GLOW Web — Trang chủ">
       <svg class="brand-emblem" viewBox="0 0 36 36" width="30" height="30" fill="none" aria-hidden="true">
         <defs>
           <linearGradient id="glow-prism-ring" x1="4" y1="4" x2="32" y2="32" gradientUnits="userSpaceOnUse">
@@ -65,477 +65,871 @@
       <span class="brand-wordmark">GLOW</span>
     </a>
 
-    <nav class="nav-links" aria-label="Điều hướng chính">
-      <a href="#chapter-botanical">Ngọc bích</a>
-      <a href="#chapter-villa">Chân trời</a>
-      <a href="#craft">Nghệ thuật</a>
-      <a href="#register">Khởi tạo</a>
+    <nav class="nav-links" id="primary-nav" aria-label="Điều hướng chính">
+      <a href="/" data-route="home" data-i18n="nav.home" class="is-active" aria-current="page">Trang chủ</a>
+      <a href="/product" data-route="product" data-i18n="nav.product">Sản phẩm</a>
+      <a href="/solutions" data-route="solutions" data-i18n="nav.solutions">Giải pháp</a>
+      <a href="/resources" data-route="resources" data-i18n="nav.resources">Tài nguyên</a>
+      <a href="/pricing" data-route="pricing" data-i18n="nav.pricing">Bảng giá</a>
     </nav>
 
     <div class="header-actions">
-      <a class="pill pill-header-ghost" href="/auth/login?next=%2Fworkspace">Đăng nhập Google</a>
-      <a class="pill pill-jade btn-magnetic" href="/workspace">Vào Xưởng <span aria-hidden="true">↗</span></a>
+      <button type="button" class="pill pill-header-signin" id="open-auth-modal" data-i18n="header.signin">Đăng nhập</button>
+      <button
+        type="button"
+        class="lang-toggle"
+        id="lang-toggle"
+        aria-label="Chuyển ngôn ngữ / Switch language"
+        aria-pressed="false"
+      >
+        <span class="lang-opt is-active" data-lang-code="vi">VI</span>
+        <span class="lang-sep" aria-hidden="true">|</span>
+        <span class="lang-opt" data-lang-code="en">EN</span>
+      </button>
+      <button
+        type="button"
+        class="mobile-menu-btn"
+        id="mobile-menu-toggle"
+        aria-expanded="false"
+        aria-controls="mobile-nav-drawer"
+        aria-label="Mở trình đơn điều hướng"
+      >
+        <span class="menu-bar"></span>
+        <span class="menu-bar"></span>
+        <span class="menu-bar"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Accessible Mobile Navigation Drawer (<= 900px, 0px horizontal overflow) -->
+  <div class="mobile-nav-drawer hidden" id="mobile-nav-drawer" role="region" aria-label="Trình đơn di động">
+    <nav class="mobile-nav-links" aria-label="Điều hướng di động">
+      <a href="/" data-route="home" data-i18n="nav.home" class="is-active">Trang chủ</a>
+      <a href="/product" data-route="product" data-i18n="nav.product">Sản phẩm</a>
+      <a href="/solutions" data-route="solutions" data-i18n="nav.solutions">Giải pháp</a>
+      <a href="/resources" data-route="resources" data-i18n="nav.resources">Tài nguyên</a>
+      <a href="/pricing" data-route="pricing" data-i18n="nav.pricing">Bảng giá</a>
+    </nav>
+    <div class="mobile-nav-footer">
+      <button type="button" class="pill pill-neon-capsule mobile-signin-btn" data-open-auth data-i18n="header.signin">Đăng nhập</button>
     </div>
   </div>
 </header>
 
-<!-- Slim 40px Right-Edge Micro-Rail (5 Compact Stops · Zero Overlap) -->
+<!-- Slim 40px Right-Edge Micro-Rail (Home View Only · 5 Compact Stops · Zero Overlap) -->
 <nav class="chapter-rail" id="chapter-rail" data-rail-tone="dark" aria-label="Mục lục chương điện ảnh">
   <a class="rail-item is-active" href="#top" data-rail-target="top" aria-label="00 · Khởi màn">
-    <span class="rail-label">Khởi màn</span>
+    <span class="rail-label" data-i18n="rail.00">Khởi màn</span>
     <span class="rail-code">00</span>
     <span class="rail-tick" aria-hidden="true"></span>
   </a>
   <a class="rail-item" href="#chapter-botanical" data-rail-target="chapter-botanical" aria-label="01 · Ngọc bích">
-    <span class="rail-label">Ngọc bích</span>
+    <span class="rail-label" data-i18n="rail.01">Ngọc bích</span>
     <span class="rail-code">01</span>
     <span class="rail-tick" aria-hidden="true"></span>
   </a>
   <a class="rail-item" href="#chapter-villa" data-rail-target="chapter-villa" aria-label="02 · Chân trời">
-    <span class="rail-label">Chân trời</span>
+    <span class="rail-label" data-i18n="rail.02">Chân trời</span>
     <span class="rail-code">02</span>
     <span class="rail-tick" aria-hidden="true"></span>
   </a>
   <a class="rail-item" href="#craft" data-rail-target="craft" aria-label="03 · Nghệ thuật">
-    <span class="rail-label">Nghệ thuật</span>
+    <span class="rail-label" data-i18n="rail.03">Nghệ thuật</span>
     <span class="rail-code">03</span>
     <span class="rail-tick" aria-hidden="true"></span>
   </a>
   <a class="rail-item" href="#intake" data-rail-target="intake" aria-label="04 · Khởi tạo">
-    <span class="rail-label">Khởi tạo</span>
+    <span class="rail-label" data-i18n="rail.04">Khởi tạo</span>
     <span class="rail-code">04</span>
     <span class="rail-tick" aria-hidden="true"></span>
   </a>
 </nav>
 
-<main id="main-content">
-  <!-- ACT 1: Full-Bleed 100vw Hero Ocean-Jade Portal with Optical Bottom Dissolve -->
-  <section class="hero" id="top" data-act-tone="dark" aria-labelledby="hero-heading">
-    <div class="hero-stage">
-      <video
-        class="hero-video"
-        autoplay
-        muted
-        loop
-        playsinline
-        preload="metadata"
-        poster="/assets/hero-ocean-jade.webp"
-        width="1920"
-        height="1080"
-        data-cinema-video="hero"
-        aria-label="Ánh sáng đại hải và bình minh ngọc bích — khung hình mở đầu GLOW Web"
-      >
-        <source src="/assets/hero-ocean-jade.mp4" type="video/mp4">
-      </video>
-      <div class="hero-scrim" aria-hidden="true"></div>
-    </div>
+<main id="main-content" data-active-view="home">
+  <!-- ====================================================================== -->
+  <!-- VIEW 1: HOME — 4-Act Full-Bleed Cinema + Basalt Terrace Finale         -->
+  <!-- ====================================================================== -->
+  <div class="platform-view is-active" id="view-home" data-view="home">
+    <!-- ACT 1: Full-Bleed 100vw Hero Ocean-Jade Portal with Frame-Locked Seamless Loop Flare -->
+    <section class="hero" id="top" data-act-tone="dark" aria-labelledby="hero-heading">
+      <div class="hero-stage">
+        <video
+          class="hero-video"
+          id="hero-ocean-video"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="metadata"
+          poster="/assets/hero-ocean-jade.webp"
+          width="1920"
+          height="1080"
+          data-cinema-video="hero"
+          aria-label="Ánh sáng đại hải và bình minh ngọc bích — khung hình mở đầu GLOW Web"
+        >
+          <source src="/assets/hero-ocean-jade.mp4" type="video/mp4">
+        </video>
+        <div class="hero-seam-flare" id="hero-seam-flare" aria-hidden="true">
+          <span class="hero-seam-sweep"></span>
+          <span class="hero-seam-bloom"></span>
+        </div>
+        <div class="hero-scrim" aria-hidden="true"></div>
+      </div>
 
-    <div class="hero-shell">
-      <div class="hero-copy reveal in">
-        <p class="hero-eyebrow">GLOW WEB · ÁNH SÁNG ĐẠI HẢI</p>
-        <h1 id="hero-heading">Kiến trúc điện ảnh<br>cho thương hiệu.</h1>
-        <p class="hero-sub">Nơi bản sắc trở thành không gian sống động — tĩnh tại, tinh khiết và độc bản.</p>
-        <div class="hero-actions">
-          <a class="pill pill-jade pill-lg btn-magnetic" href="#register">Khởi tạo website <span aria-hidden="true">→</span></a>
-          <a class="pill pill-glass-light pill-lg btn-magnetic" href="/auth/login?next=%2Fworkspace">Đăng nhập Google</a>
+      <div class="hero-shell">
+        <div class="hero-copy reveal in">
+          <p class="hero-eyebrow" data-i18n="hero.eyebrow">GLOW WEB · ÁNH SÁNG ĐẠI HẢI</p>
+          <h1 id="hero-heading">
+            <span data-i18n="hero.line1">Kiến trúc điện ảnh</span><br>
+            <span data-i18n="hero.line2">cho thương hiệu.</span>
+          </h1>
+          <p class="hero-sub" data-i18n="hero.sub">Nơi bản sắc trở thành không gian sống động — tĩnh tại, tinh khiết và độc bản.</p>
+          <div class="hero-actions">
+            <a class="pill pill-jade pill-lg btn-magnetic" href="#register"><span data-i18n="hero.ctaStart">Khởi tạo website</span> <span aria-hidden="true">→</span></a>
+            <a class="pill pill-glass-light pill-lg btn-magnetic" href="/resources" data-route="resources" data-i18n="hero.ctaGallery">Khám phá 12+ mẫu</a>
+          </div>
+        </div>
+
+        <div class="hero-aside">
+          <a class="scroll-cue" href="#chapter-botanical" aria-label="Cuộn xuống khám phá không gian điện ảnh">
+            <span class="scroll-cue-line" aria-hidden="true"></span>
+            <span data-i18n="hero.scrollCue">Khám phá</span>
+          </a>
+
+          <button
+            type="button"
+            class="video-control-pill hero-playback-btn"
+            data-toggle-video="hero"
+            aria-pressed="false"
+            aria-label="Tạm dừng hoặc phát video mở đầu"
+          >
+            <span class="control-dot" aria-hidden="true"></span>
+            <span class="control-label" data-i18n="video.pause">Tạm dừng</span>
+          </button>
         </div>
       </div>
+    </section>
 
-      <div class="hero-aside">
-        <a class="scroll-cue" href="#chapter-botanical" aria-label="Cuộn xuống khám phá không gian điện ảnh">
-          <span class="scroll-cue-line" aria-hidden="true"></span>
-          <span>Khám phá</span>
-        </a>
-
-        <button
-          type="button"
-          class="video-control-pill hero-playback-btn"
-          data-toggle-video="hero"
-          aria-pressed="false"
-          aria-label="Tạm dừng hoặc phát video mở đầu"
-        >
-          <span class="control-dot" aria-hidden="true"></span>
-          <span class="control-label">Tạm dừng</span>
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- SEAM BRIDGE 1 -> 2: Alpha-Zero Masked Mist Corridor + 1-Sentence Kinetic Manifesto -->
-  <section class="mist-bridge mist-bridge-12" id="manifesto" data-act-tone="dark" aria-labelledby="manifesto-heading">
-    <div class="matrix-mist-layer mist-corridor" aria-hidden="true">
-      <svg class="mist-svg" viewBox="0 0 1600 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-        <defs>
-          <filter id="mist-seam-12" x="-25%" y="-35%" width="150%" height="170%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.0075 0.022" numOctaves="4" seed="23" result="turb"/>
-            <feColorMatrix type="matrix" values="0 0 0 0 0.66  0 0 0 0 0.84  0 0 0 0 0.84  0 0 0 0.68 -0.22" in="turb" result="cloud"/>
-            <feGaussianBlur stdDeviation="24" in="cloud"/>
-          </filter>
-          <radialGradient id="seam-12-halo" cx="50%" cy="56%" r="54%">
-            <stop offset="0%" stop-color="#A6CFD1" stop-opacity="0.22"/>
-            <stop offset="52%" stop-color="#25676B" stop-opacity="0.1"/>
-            <stop offset="100%" stop-color="#030A10" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-        <rect width="1600" height="420" fill="url(#seam-12-halo)"/>
-        <g class="mist-band mist-band-1">
-          <ellipse cx="420" cy="210" rx="680" ry="130" fill="#B8D9DC" opacity="0.24" filter="url(#mist-seam-12)"/>
-        </g>
-        <g class="mist-band mist-band-2">
-          <ellipse cx="1160" cy="230" rx="720" ry="140" fill="#8CC5C2" opacity="0.2" filter="url(#mist-seam-12)"/>
-        </g>
-        <g class="mist-band mist-band-3">
-          <ellipse cx="800" cy="245" rx="820" ry="115" fill="#CFE7E8" opacity="0.18" filter="url(#mist-seam-12)"/>
-        </g>
-      </svg>
-    </div>
-
-    <div class="container bridge-inner">
-      <p class="bridge-coord" aria-hidden="true">01 · TRIẾT LÝ KHÔNG GIAN · GLOW ATELIER</p>
-      <h2 id="manifesto-heading" class="manifesto-whisper kinetic-manifesto">
-        <span class="k-word">Một</span>
-        <span class="k-word">website</span>
-        <span class="k-word">tầm</span>
-        <span class="k-word">vóc</span>
-        <span class="k-word">không</span>
-        <span class="k-word">phô</span>
-        <span class="k-word">diễn</span>
-        <span class="k-word">kỹ</span>
-        <span class="k-word">thuật</span>
-        <span class="k-word">—</span>
-        <span class="k-word k-accent">nó</span>
-        <span class="k-word k-accent">hiện</span>
-        <span class="k-word k-accent">lên</span>
-        <span class="k-word k-accent">như</span>
-        <span class="k-word k-accent">tác</span>
-        <span class="k-word k-accent">phẩm</span>
-        <span class="k-word k-accent">điện</span>
-        <span class="k-word k-accent">ảnh,</span>
-        <span class="k-word">còn</span>
-        <span class="k-word">mọi</span>
-        <span class="k-word">tinh</span>
-        <span class="k-word">xảo</span>
-        <span class="k-word">ở</span>
-        <span class="k-word">lại</span>
-        <span class="k-word">phía</span>
-        <span class="k-word">sau.</span>
-      </h2>
-    </div>
-  </section>
-
-  <!-- ACT 2: Full-Bleed 100vw Video 02 — Botanical Sanctuary (Borderless Direct-on-Video Typography) -->
-  <section class="cinema-chapter chapter-botanical" id="chapter-botanical" data-act-tone="dark" aria-labelledby="botanical-heading">
-    <div class="chapter-stage">
-      <video
-        class="chapter-video"
-        id="chapter-video-botanical"
-        autoplay
-        muted
-        loop
-        playsinline
-        preload="metadata"
-        poster="/assets/reel-01-botanical.webp"
-        width="1920"
-        height="1080"
-        data-cinema-video="reel01"
-        aria-label="Botanical Sanctuary — không gian gợn nước bạch kim và hơi sương ngọc bích"
-      >
-        <source src="/assets/reel-01-botanical.mp4" type="video/mp4">
-      </video>
-      <div class="chapter-scrim chapter-scrim-left" aria-hidden="true"></div>
-    </div>
-
-    <div class="container chapter-overlay chapter-overlay-bottom">
-      <div class="chapter-editorial cine-reveal reveal" data-parallax-editorial>
-        <p class="chapter-eyebrow cine-line" style="--cine-delay: 0ms"><span>01 · BOTANICAL SANCTUARY</span></p>
-        <h2 id="botanical-heading">
-          <span class="cine-line" style="--cine-delay: 110ms"><span>Lặng sóng</span></span>
-          <span class="cine-line" style="--cine-delay: 210ms"><span class="cine-serif">sinh hương.</span></span>
-        </h2>
-        <p class="chapter-desc cine-line" style="--cine-delay: 320ms"><span>Nhịp nước tĩnh và hơi sương ngọc bích cho thương hiệu chế tác &amp; nghệ thuật sống.</span></p>
-        <div class="chapter-link-row cine-line" style="--cine-delay: 420ms">
-          <span>
-            <button
-              type="button"
-              class="cinema-link"
-              data-open-cinema="reel01"
-              data-src="/assets/reel-01-botanical.mp4"
-              data-poster="/assets/reel-01-botanical.webp"
-              data-title="01 · Botanical Sanctuary"
-              data-subtitle="Nhịp nước tĩnh và hơi sương ngọc bích cho thương hiệu chế tác và nghỉ dưỡng."
-            >
-              Toàn màn hình <span aria-hidden="true">↗</span>
-            </button>
-          </span>
-        </div>
-      </div>
-
-      <div class="chapter-corner-control">
-        <button
-          type="button"
-          class="video-control-pill video-control-subtle"
-          data-toggle-video="reel01"
-          aria-pressed="false"
-          aria-label="Tạm dừng hoặc phát phim Botanical Sanctuary"
-        >
-          <span class="control-dot" aria-hidden="true"></span>
-          <span class="control-label">Tạm dừng</span>
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ACT 3: Full-Amplitude 100vw Video 03 — Coastal Glass Pavilion (Uncovered Villa & Infinity Pool) -->
-  <section class="cinema-chapter chapter-villa" id="chapter-villa" data-act-tone="dark" aria-labelledby="villa-heading">
-    <!-- Alpha-Zero Masked Mist Veil Dissolving Botanical Water into Starlit Coastal Pool -->
-    <div class="matrix-mist-layer mist-corridor-23" aria-hidden="true">
-      <svg class="mist-svg" viewBox="0 0 1600 320" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-        <defs>
-          <filter id="mist-seam-23" x="-25%" y="-35%" width="150%" height="170%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.008 0.02" numOctaves="4" seed="37" result="turb23"/>
-            <feColorMatrix type="matrix" values="0 0 0 0 0.48  0 0 0 0 0.78  0 0 0 0 0.84  0 0 0 0.5 -0.22" in="turb23" result="coastalCloud"/>
-            <feGaussianBlur stdDeviation="26" in="coastalCloud"/>
-          </filter>
-        </defs>
-        <g class="mist-band mist-band-1">
-          <ellipse cx="460" cy="160" rx="740" ry="110" fill="#6DA4B8" opacity="0.18" filter="url(#mist-seam-23)"/>
-        </g>
-        <g class="mist-band mist-band-2">
-          <ellipse cx="1160" cy="175" rx="760" ry="120" fill="#88C4C2" opacity="0.16" filter="url(#mist-seam-23)"/>
-        </g>
-      </svg>
-    </div>
-
-    <div class="chapter-stage chapter-stage-villa">
-      <video
-        class="chapter-video"
-        id="chapter-video-villa"
-        autoplay
-        muted
-        loop
-        playsinline
-        preload="metadata"
-        poster="/assets/reel-02-coastal-villa.webp"
-        width="1920"
-        height="1080"
-        data-cinema-video="reel02"
-        aria-label="Coastal Glass Pavilion — biệt thự kính ven biển và mặt hồ vô cực"
-      >
-        <source src="/assets/reel-02-coastal-villa.mp4" type="video/mp4">
-      </video>
-      <div class="chapter-scrim chapter-scrim-villa-upper-left" aria-hidden="true"></div>
-    </div>
-
-    <div class="container chapter-overlay chapter-overlay-villa-top">
-      <div class="chapter-editorial chapter-editorial-villa cine-reveal reveal" data-parallax-editorial>
-        <p class="chapter-eyebrow cine-line" style="--cine-delay: 0ms"><span>02 · COASTAL GLASS PAVILION</span></p>
-        <h2 id="villa-heading">
-          <span class="cine-line" style="--cine-delay: 110ms"><span>Kiến trúc chạm</span></span>
-          <span class="cine-line" style="--cine-delay: 210ms"><span class="cine-serif">chân trời.</span></span>
-        </h2>
-        <p class="chapter-desc cine-line" style="--cine-delay: 320ms"><span>Hoàng hôn xanh và mặt hồ vô cực cho studio kiến trúc &amp; bất động sản tầm vóc.</span></p>
-        <div class="chapter-link-row cine-line" style="--cine-delay: 420ms">
-          <span>
-            <button
-              type="button"
-              class="cinema-link"
-              data-open-cinema="reel02"
-              data-src="/assets/reel-02-coastal-villa.mp4"
-              data-poster="/assets/reel-02-coastal-villa.webp"
-              data-title="02 · Coastal Glass Pavilion"
-              data-subtitle="Biệt thự kính ven biển và mặt hồ vô cực trong sắc xanh đại hải."
-            >
-              Toàn màn hình <span aria-hidden="true">↗</span>
-            </button>
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <div class="container chapter-villa-footer-bar">
-      <div class="chapter-corner-control">
-        <button
-          type="button"
-          class="video-control-pill video-control-subtle"
-          data-toggle-video="reel02"
-          aria-pressed="false"
-          aria-label="Tạm dừng hoặc phát phim Coastal Glass Pavilion"
-        >
-          <span class="control-dot" aria-hidden="true"></span>
-          <span class="control-label">Tạm dừng</span>
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ACT 4 + SEAMLESS FOOTER: Photorealistic Deep-Water Atmospheric Sanctuary (Zero Vector Curves · Alpha-Zero Top Mask) -->
-  <div class="sanctuary-world" id="sanctuary-world" data-act-tone="dark">
-    <!-- SEAM BRIDGE 3 -> 4: Alpha-Zero Masked Mist Dissolving Infinity Pool Reflection into Act 4 -->
-    <div class="matrix-mist-layer mist-corridor-34" aria-hidden="true">
-      <svg class="mist-svg" viewBox="0 0 1600 320" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-        <defs>
-          <filter id="mist-seam-34" x="-25%" y="-35%" width="150%" height="170%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.0078 0.019" numOctaves="4" seed="53" result="turb34"/>
-            <feColorMatrix type="matrix" values="0 0 0 0 0.36  0 0 0 0 0.72  0 0 0 0 0.68  0 0 0 0.5 -0.22" in="turb34" result="poolMist"/>
-            <feGaussianBlur stdDeviation="28" in="poolMist"/>
-          </filter>
-        </defs>
-        <g class="mist-band mist-band-1">
-          <ellipse cx="480" cy="160" rx="740" ry="105" fill="#4BA898" opacity="0.16" filter="url(#mist-seam-34)"/>
-        </g>
-        <g class="mist-band mist-band-2">
-          <ellipse cx="1140" cy="170" rx="760" ry="115" fill="#7AB8BA" opacity="0.15" filter="url(#mist-seam-34)"/>
-        </g>
-      </svg>
-    </div>
-
-    <!-- PHOTOREALISTIC DEEP-WATER VOLUMETRIC ATMOSPHERE (Zero Canvas · Zero Crude Vector Lines · Alpha-Zero Top Mask) -->
-    <div class="sanctuary-sculpture" id="sanctuary-sculpture" aria-hidden="true">
-      <!-- Layer A: Ultra-Soft Deep-Water Volumetric Aurora Pools (Coprime Cycles 19s / 29s / 43s / 53s) -->
-      <div class="sanctuary-aurora-mesh">
-        <span class="aurora-orb orb-ocean"></span>
-        <span class="aurora-orb orb-emerald"></span>
-        <span class="aurora-orb orb-deep-jade"></span>
-        <span class="aurora-orb orb-moonlight"></span>
-      </div>
-
-      <!-- Layer B: Organic Billowing Matrix Mist Veils Flowing Down Under Translucent Footer (Pure feTurbulence Fog) -->
-      <div class="matrix-mist-layer sanctuary-mist-veil">
-        <svg class="mist-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <!-- SEAM BRIDGE 1 -> 2: Alpha-Zero Masked Mist Corridor + 1-Sentence Kinetic Manifesto -->
+    <section class="mist-bridge mist-bridge-12" id="manifesto" data-act-tone="dark" aria-labelledby="manifesto-heading">
+      <div class="matrix-mist-layer mist-corridor" aria-hidden="true">
+        <svg class="mist-svg" viewBox="0 0 1600 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
           <defs>
-            <filter id="sanctuary-fog-filter" x="-25%" y="-25%" width="150%" height="150%">
-              <feTurbulence type="fractalNoise" baseFrequency="0.006 0.014" numOctaves="4" seed="67" result="fogNoise"/>
-              <feColorMatrix type="matrix" values="0 0 0 0 0.34  0 0 0 0 0.72  0 0 0 0 0.66  0 0 0 0.44 -0.2" in="fogNoise" result="fog"/>
-              <feGaussianBlur stdDeviation="32" in="fog"/>
+            <filter id="mist-seam-12" x="-25%" y="-35%" width="150%" height="170%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.0075 0.022" numOctaves="4" seed="23" result="turb"/>
+              <feColorMatrix type="matrix" values="0 0 0 0 0.66  0 0 0 0 0.84  0 0 0 0 0.84  0 0 0 0.68 -0.22" in="turb" result="cloud"/>
+              <feGaussianBlur stdDeviation="24" in="cloud"/>
             </filter>
+            <radialGradient id="seam-12-halo" cx="50%" cy="56%" r="54%">
+              <stop offset="0%" stop-color="#A6CFD1" stop-opacity="0.22"/>
+              <stop offset="52%" stop-color="#25676B" stop-opacity="0.1"/>
+              <stop offset="100%" stop-color="#030A10" stop-opacity="0"/>
+            </radialGradient>
           </defs>
+          <rect width="1600" height="420" fill="url(#seam-12-halo)"/>
           <g class="mist-band mist-band-1">
-            <rect x="-220" y="140" width="2040" height="780" filter="url(#sanctuary-fog-filter)"/>
+            <ellipse cx="420" cy="210" rx="680" ry="130" fill="#B8D9DC" opacity="0.24" filter="url(#mist-seam-12)"/>
           </g>
           <g class="mist-band mist-band-2">
-            <rect x="-260" y="220" width="2120" height="720" filter="url(#sanctuary-fog-filter)"/>
+            <ellipse cx="1160" cy="230" rx="720" ry="140" fill="#8CC5C2" opacity="0.2" filter="url(#mist-seam-12)"/>
           </g>
           <g class="mist-band mist-band-3">
-            <rect x="-180" y="340" width="1960" height="620" filter="url(#sanctuary-fog-filter)"/>
+            <ellipse cx="800" cy="245" rx="820" ry="115" fill="#CFE7E8" opacity="0.18" filter="url(#mist-seam-12)"/>
           </g>
         </svg>
       </div>
 
-      <!-- Layer C: Subtle Cursor-Responsive Ambient Caustic Glow -->
-      <div class="sanctuary-caustic-halo" id="sanctuary-caustic-halo"></div>
+      <div class="container bridge-inner">
+        <p class="bridge-coord" aria-hidden="true" data-i18n="manifesto.coord">01 · TRIẾT LÝ KHÔNG GIAN · GLOW ATELIER</p>
+        <h2 id="manifesto-heading" class="manifesto-whisper kinetic-manifesto">
+          <span class="k-word">Một</span>
+          <span class="k-word">website</span>
+          <span class="k-word">tầm</span>
+          <span class="k-word">vóc</span>
+          <span class="k-word">không</span>
+          <span class="k-word">phô</span>
+          <span class="k-word">diễn</span>
+          <span class="k-word">kỹ</span>
+          <span class="k-word">thuật</span>
+          <span class="k-word">—</span>
+          <span class="k-word k-accent">nó</span>
+          <span class="k-word k-accent">hiện</span>
+          <span class="k-word k-accent">lên</span>
+          <span class="k-word k-accent">như</span>
+          <span class="k-word k-accent">tác</span>
+          <span class="k-word k-accent">phẩm</span>
+          <span class="k-word k-accent">điện</span>
+          <span class="k-word k-accent">ảnh,</span>
+          <span class="k-word">còn</span>
+          <span class="k-word">mọi</span>
+          <span class="k-word">tinh</span>
+          <span class="k-word">xảo</span>
+          <span class="k-word">ở</span>
+          <span class="k-word">lại</span>
+          <span class="k-word">phía</span>
+          <span class="k-word">sau.</span>
+        </h2>
+      </div>
+    </section>
 
-      <!-- Layer D: 12 Delicate Out-of-Focus Suspended Dew-Silver Bokeh Motes -->
-      <div class="sanctuary-motes">
-        <span class="dew-mote mote-01"></span>
-        <span class="dew-mote mote-02"></span>
-        <span class="dew-mote mote-03"></span>
-        <span class="dew-mote mote-04"></span>
-        <span class="dew-mote mote-05"></span>
-        <span class="dew-mote mote-06"></span>
-        <span class="dew-mote mote-07"></span>
-        <span class="dew-mote mote-08"></span>
-        <span class="dew-mote mote-09"></span>
-        <span class="dew-mote mote-10"></span>
-        <span class="dew-mote mote-11"></span>
-        <span class="dew-mote mote-12"></span>
+    <!-- ACT 2: Full-Bleed 100vw Video 02 — Botanical Sanctuary -->
+    <section class="cinema-chapter chapter-botanical" id="chapter-botanical" data-act-tone="dark" aria-labelledby="botanical-heading">
+      <div class="chapter-stage">
+        <video
+          class="chapter-video"
+          id="chapter-video-botanical"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="metadata"
+          poster="/assets/reel-01-botanical.webp"
+          width="1920"
+          height="1080"
+          data-cinema-video="reel01"
+          aria-label="Botanical Sanctuary — không gian gợn nước bạch kim và hơi sương ngọc bích"
+        >
+          <source src="/assets/reel-01-botanical.mp4" type="video/mp4">
+        </video>
+        <div class="chapter-scrim chapter-scrim-left" aria-hidden="true"></div>
+      </div>
+
+      <div class="container chapter-overlay chapter-overlay-bottom">
+        <div class="chapter-editorial cine-reveal reveal" data-parallax-editorial>
+          <p class="chapter-eyebrow cine-line" style="--cine-delay: 0ms"><span data-i18n="ch1.eyebrow">01 · BOTANICAL SANCTUARY</span></p>
+          <h2 id="botanical-heading">
+            <span class="cine-line" style="--cine-delay: 110ms"><span data-i18n="ch1.line1">Lặng sóng</span></span>
+            <span class="cine-line" style="--cine-delay: 210ms"><span class="cine-serif" data-i18n="ch1.line2">sinh hương.</span></span>
+          </h2>
+          <p class="chapter-desc cine-line" style="--cine-delay: 320ms"><span data-i18n="ch1.desc">Nhịp nước tĩnh và hơi sương ngọc bích cho thương hiệu chế tác &amp; nghệ thuật sống.</span></p>
+          <div class="chapter-link-row cine-line" style="--cine-delay: 420ms">
+            <span>
+              <button
+                type="button"
+                class="cinema-link"
+                data-open-cinema="reel01"
+                data-src="/assets/reel-01-botanical.mp4"
+                data-poster="/assets/reel-01-botanical.webp"
+                data-title="01 · Botanical Sanctuary"
+                data-subtitle="Nhịp nước tĩnh và hơi sương ngọc bích cho thương hiệu chế tác và nghỉ dưỡng."
+              >
+                <span data-i18n="video.fullscreen">Toàn màn hình</span> <span aria-hidden="true">↗</span>
+              </button>
+            </span>
+          </div>
+        </div>
+
+        <div class="chapter-corner-control">
+          <button
+            type="button"
+            class="video-control-pill video-control-subtle"
+            data-toggle-video="reel01"
+            aria-pressed="false"
+            aria-label="Tạm dừng hoặc phát phim Botanical Sanctuary"
+          >
+            <span class="control-dot" aria-hidden="true"></span>
+            <span class="control-label" data-i18n="video.pause">Tạm dừng</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACT 3: Full-Amplitude 100vw Video 03 — Coastal Glass Pavilion (Uncovered Villa & Infinity Pool) -->
+    <section class="cinema-chapter chapter-villa" id="chapter-villa" data-act-tone="dark" aria-labelledby="villa-heading">
+      <div class="matrix-mist-layer mist-corridor-23" aria-hidden="true">
+        <svg class="mist-svg" viewBox="0 0 1600 320" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs>
+            <filter id="mist-seam-23" x="-25%" y="-35%" width="150%" height="170%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.008 0.02" numOctaves="4" seed="37" result="turb23"/>
+              <feColorMatrix type="matrix" values="0 0 0 0 0.48  0 0 0 0 0.78  0 0 0 0 0.84  0 0 0 0.5 -0.22" in="turb23" result="coastalCloud"/>
+              <feGaussianBlur stdDeviation="26" in="coastalCloud"/>
+            </filter>
+          </defs>
+          <g class="mist-band mist-band-1">
+            <ellipse cx="460" cy="160" rx="740" ry="110" fill="#6DA4B8" opacity="0.18" filter="url(#mist-seam-23)"/>
+          </g>
+          <g class="mist-band mist-band-2">
+            <ellipse cx="1160" cy="175" rx="760" ry="120" fill="#88C4C2" opacity="0.16" filter="url(#mist-seam-23)"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="chapter-stage chapter-stage-villa">
+        <video
+          class="chapter-video"
+          id="chapter-video-villa"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="metadata"
+          poster="/assets/reel-02-coastal-villa.webp"
+          width="1920"
+          height="1080"
+          data-cinema-video="reel02"
+          aria-label="Coastal Glass Pavilion — biệt thự kính ven biển và mặt hồ vô cực"
+        >
+          <source src="/assets/reel-02-coastal-villa.mp4" type="video/mp4">
+        </video>
+        <div class="chapter-scrim chapter-scrim-villa-upper-left" aria-hidden="true"></div>
+      </div>
+
+      <div class="container chapter-overlay chapter-overlay-villa-top">
+        <div class="chapter-editorial chapter-editorial-villa cine-reveal reveal" data-parallax-editorial>
+          <p class="chapter-eyebrow cine-line" style="--cine-delay: 0ms"><span data-i18n="ch2.eyebrow">02 · COASTAL GLASS PAVILION</span></p>
+          <h2 id="villa-heading">
+            <span class="cine-line" style="--cine-delay: 110ms"><span data-i18n="ch2.line1">Kiến trúc chạm</span></span>
+            <span class="cine-line" style="--cine-delay: 210ms"><span class="cine-serif" data-i18n="ch2.line2">chân trời.</span></span>
+          </h2>
+          <p class="chapter-desc cine-line" style="--cine-delay: 320ms"><span data-i18n="ch2.desc">Hoàng hôn xanh và mặt hồ vô cực cho studio kiến trúc &amp; bất động sản tầm vóc.</span></p>
+          <div class="chapter-link-row cine-line" style="--cine-delay: 420ms">
+            <span>
+              <button
+                type="button"
+                class="cinema-link"
+                data-open-cinema="reel02"
+                data-src="/assets/reel-02-coastal-villa.mp4"
+                data-poster="/assets/reel-02-coastal-villa.webp"
+                data-title="02 · Coastal Glass Pavilion"
+                data-subtitle="Biệt thự kính ven biển và mặt hồ vô cực trong sắc xanh đại hải."
+              >
+                <span data-i18n="video.fullscreen">Toàn màn hình</span> <span aria-hidden="true">↗</span>
+              </button>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="container chapter-villa-footer-bar">
+        <div class="chapter-corner-control">
+          <button
+            type="button"
+            class="video-control-pill video-control-subtle"
+            data-toggle-video="reel02"
+            aria-pressed="false"
+            aria-label="Tạm dừng hoặc phát phim Coastal Glass Pavilion"
+          >
+            <span class="control-dot" aria-hidden="true"></span>
+            <span class="control-label" data-i18n="video.pause">Tạm dừng</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACT 4: Natural Wet Basalt/Slate Infinity-Pool Terrace Continuation -->
+    <div class="sanctuary-world" id="sanctuary-world" data-act-tone="dark">
+      <!-- Wet Basalt Pool Coping Rim & Lunar Water-Edge Specular Sheen -->
+      <div class="terrace-coping-sheen" aria-hidden="true"></div>
+      <!-- Subtle Architectural Stone-Paver Perspective Grid & Mineral Basalt Grain -->
+      <div class="terrace-basalt-grid" aria-hidden="true">
+        <svg class="basalt-grain-svg" viewBox="0 0 1600 720" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs>
+            <filter id="basalt-mineral-grain" x="0%" y="0%" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.68 0.92" numOctaves="3" seed="19" result="stone"/>
+              <feColorMatrix type="matrix" values="0 0 0 0 0.72  0 0 0 0 0.84  0 0 0 0 0.88  0 0 0 0.14 0" in="stone"/>
+            </filter>
+          </defs>
+          <rect width="1600" height="720" filter="url(#basalt-mineral-grain)"/>
+        </svg>
+      </div>
+
+      <!-- Soft Mist Corridor Drifting Gently Above the Wet Stone Terrace -->
+      <div class="matrix-mist-layer mist-corridor-34" aria-hidden="true">
+        <svg class="mist-svg" viewBox="0 0 1600 320" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs>
+            <filter id="mist-seam-34" x="-25%" y="-35%" width="150%" height="170%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.0078 0.019" numOctaves="4" seed="53" result="turb34"/>
+              <feColorMatrix type="matrix" values="0 0 0 0 0.42  0 0 0 0 0.72  0 0 0 0 0.76  0 0 0 0.44 -0.22" in="turb34" result="poolMist"/>
+              <feGaussianBlur stdDeviation="28" in="poolMist"/>
+            </filter>
+          </defs>
+          <g class="mist-band mist-band-1">
+            <ellipse cx="480" cy="160" rx="740" ry="105" fill="#5D9EA6" opacity="0.14" filter="url(#mist-seam-34)"/>
+          </g>
+          <g class="mist-band mist-band-2">
+            <ellipse cx="1140" cy="170" rx="760" ry="115" fill="#7AB8BA" opacity="0.12" filter="url(#mist-seam-34)"/>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Photorealistic Nocturnal Jade-Silver Mist & Dew Bokeh Above Basalt Terrace -->
+      <div class="sanctuary-sculpture" id="sanctuary-sculpture" aria-hidden="true">
+        <div class="sanctuary-aurora-mesh">
+          <span class="aurora-orb orb-ocean"></span>
+          <span class="aurora-orb orb-emerald"></span>
+          <span class="aurora-orb orb-deep-jade"></span>
+          <span class="aurora-orb orb-moonlight"></span>
+        </div>
+
+        <div class="matrix-mist-layer sanctuary-mist-veil">
+          <svg class="mist-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <defs>
+              <filter id="sanctuary-fog-filter" x="-25%" y="-25%" width="150%" height="150%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.006 0.014" numOctaves="4" seed="67" result="fogNoise"/>
+                <feColorMatrix type="matrix" values="0 0 0 0 0.36  0 0 0 0 0.70  0 0 0 0 0.70  0 0 0 0.40 -0.2" in="fogNoise" result="fog"/>
+                <feGaussianBlur stdDeviation="32" in="fog"/>
+              </filter>
+            </defs>
+            <g class="mist-band mist-band-1">
+              <rect x="-220" y="140" width="2040" height="780" filter="url(#sanctuary-fog-filter)"/>
+            </g>
+            <g class="mist-band mist-band-2">
+              <rect x="-260" y="220" width="2120" height="720" filter="url(#sanctuary-fog-filter)"/>
+            </g>
+            <g class="mist-band mist-band-3">
+              <rect x="-180" y="340" width="1960" height="620" filter="url(#sanctuary-fog-filter)"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="sanctuary-caustic-halo" id="sanctuary-caustic-halo"></div>
+
+        <div class="sanctuary-motes">
+          <span class="dew-mote mote-01"></span>
+          <span class="dew-mote mote-02"></span>
+          <span class="dew-mote mote-03"></span>
+          <span class="dew-mote mote-04"></span>
+          <span class="dew-mote mote-05"></span>
+          <span class="dew-mote mote-06"></span>
+          <span class="dew-mote mote-07"></span>
+          <span class="dew-mote mote-08"></span>
+          <span class="dew-mote mote-09"></span>
+          <span class="dew-mote mote-10"></span>
+          <span class="dew-mote mote-11"></span>
+          <span class="dew-mote mote-12"></span>
+        </div>
+      </div>
+
+      <!-- COMPACT ARCHITECTURAL CRAFT RAIL (#craft) -->
+      <section class="craft-rail-section" id="craft" aria-labelledby="craft-heading">
+        <div class="container">
+          <div class="craft-bar-head reveal">
+            <p class="eyebrow" data-i18n="craft.eyebrow">NGHỆ THUẬT CHẾ TÁC · 04 NHỊP CHẢY</p>
+            <h2 id="craft-heading">
+              <span data-i18n="craft.headLead">Tinh giản ở bề mặt. </span>
+              <span class="craft-accent" data-i18n="craft.headAccent">Vững chắc ở chiều sâu.</span>
+            </h2>
+          </div>
+
+          <div class="craft-thread" id="craft-thread" aria-hidden="true">
+            <span class="craft-thread-fill"></span>
+          </div>
+
+          <ol class="craft-strip">
+            <li class="craft-step reveal">
+              <span class="step-num">01</span>
+              <div>
+                <h3 data-i18n="craft.s1.title">Khởi nguồn cảm hứng</h3>
+                <p data-i18n="craft.s1.desc">Lắng nghe bản sắc và khoảnh khắc thương hiệu cần chạm tới.</p>
+              </div>
+            </li>
+            <li class="craft-step reveal">
+              <span class="step-num">02</span>
+              <div>
+                <h3 data-i18n="craft.s2.title">Định hình điện ảnh</h3>
+                <p data-i18n="craft.s2.desc">Thiết lập ánh sáng, bố cục, kiểu chữ và nhịp chuyển động riêng.</p>
+              </div>
+            </li>
+            <li class="craft-step reveal">
+              <span class="step-num">03</span>
+              <div>
+                <h3 data-i18n="craft.s3.title">Chế tác tinh xảo</h3>
+                <p data-i18n="craft.s3.desc">Hoàn thiện từng điểm ảnh, tương thích đa màn hình và mượt mà.</p>
+              </div>
+            </li>
+            <li class="craft-step reveal">
+              <span class="step-num">04</span>
+              <div>
+                <h3 data-i18n="craft.s4.title">Bàn giao &amp; Kết nối AI</h3>
+                <p data-i18n="craft.s4.desc">Đồng hành liền mạch cùng ChatGPT &amp; Google Gemini theo quyền duyệt của bạn.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- CENTERED 1-LINE EDITORIAL FINALE INVITATION (#register + #intake · 3 Uniform Neon Capsules) -->
+      <section class="gateway" id="intake" aria-labelledby="gateway-heading">
+        <span id="register" class="anchor-offset" aria-hidden="true"></span>
+        <div class="container gateway-container">
+          <div class="gateway-centered reveal">
+            <h2 id="gateway-heading">
+              <span data-i18n="gateway.headingLead">Đánh thức không gian số </span><span class="gateway-accent" data-i18n="gateway.headingAccent">mang dấu ấn độc bản.</span>
+            </h2>
+            <p class="gateway-desc" data-i18n="gateway.desc">Kết nối ngay AI của bạn với Glow Website qua Plugin để khởi tạo dự án theo dấu ấn riêng của bạn.</p>
+
+            <div class="gateway-cta-row">
+              <a class="pill pill-neon-capsule btn-magnetic" id="cta-connect-plugin" href="/auth/login?next=%2Fworkspace%23ai-connect" data-i18n="gateway.ctaPlugin">Kết nối Plugin</a>
+              <a class="pill pill-neon-capsule btn-magnetic" id="cta-design-website" href="/workspace" data-i18n="gateway.ctaDesign">Thiết kế Website</a>
+              <button type="button" class="pill pill-neon-capsule btn-magnetic" id="open-intake-drawer" data-i18n="gateway.ctaConsult">Tư vấn nhanh</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ====================================================================== -->
+  <!-- VIEW 2: PRODUCT (/product) — 3-Pillar Bento Platform Architecture      -->
+  <!-- ====================================================================== -->
+  <section class="platform-view subpage-view" id="view-product" data-view="product" hidden aria-labelledby="product-heading">
+    <div class="container subpage-container">
+      <header class="subpage-head">
+        <p class="eyebrow" data-i18n="product.eyebrow">NỀN TẢNG GLOW WEB · KIẾN TRÚC THẾ HỆ MỚI</p>
+        <h1 id="product-heading">
+          <span data-i18n="product.titleLead">Mọi công cụ để kiến tạo </span>
+          <span class="subpage-accent" data-i18n="product.titleAccent">website đẳng cấp điện ảnh.</span>
+        </h1>
+        <p class="subpage-lead" data-i18n="product.lead">Kết hợp sức mạnh điều phối AI trực tiếp qua MCP, xưởng thiết kế trực quan có rào thẩm mỹ và mã nguồn tĩnh sạch không khóa nền tảng.</p>
+      </header>
+
+      <div class="bento-grid">
+        <article class="bento-card bento-card-wide">
+          <span class="bento-badge" data-i18n="product.p1.badge">01 · KẾT NỐI AI TRỰC TIẾP</span>
+          <h2 data-i18n="product.p1.title">GLOW AI Plugin &amp; Cầu nối MCP</h2>
+          <p data-i18n="product.p1.desc">Kết nối liền mạch với ChatGPT và Google Gemini tại điểm cuối chuẩn /mcp-v2. Mọi bước khởi tạo, chỉnh sửa và duyệt bàn giao đều nằm dưới quyền kiểm soát OAuth minh bạch của bạn.</p>
+          <ul class="bento-points">
+            <li data-i18n="product.p1.b1">Điều phối dự án bằng ngôn ngữ tự nhiên tiếng Việt &amp; tiếng Anh</li>
+            <li data-i18n="product.p1.b2">Ranh giới bảo mật OAuth tách biệt, không tự ý xuất bản khi chưa duyệt</li>
+            <li data-i18n="product.p1.b3">Tương thích trọn bộ 12+ mẫu chuẩn trong thư viện tài nguyên</li>
+          </ul>
+          <div class="bento-foot">
+            <span class="code-chip">MCP · /mcp-v2</span>
+            <a class="inline-action-link" href="/auth/login?next=%2Fworkspace%23ai-connect" data-i18n="product.p1.cta">Kết nối AI Plugin →</a>
+          </div>
+        </article>
+
+        <article class="bento-card">
+          <span class="bento-badge" data-i18n="product.p2.badge">02 · XƯỞNG STUDIO TRỰC QUAN</span>
+          <h2 data-i18n="product.p2.title">Khối bố cục JSON có rào thẩm mỹ</h2>
+          <p data-i18n="product.p2.desc">Mỗi trang được lắp ghép từ các khối chuẩn hóa rõ ràng về nhịp chữ, khoảng thở và tương phản. Tự do tùy biến nội dung mà không bao giờ vỡ bố cục trên di động.</p>
+          <ul class="bento-points">
+            <li data-i18n="product.p2.b1">Xem trước tức thì trên khung Desktop &amp; Mobile</li>
+            <li data-i18n="product.p2.b2">Tùy chọn 3 sắc thái thẩm mỹ: Ngọc bích · Ven biển · Điện ảnh</li>
+          </ul>
+          <div class="bento-foot">
+            <a class="inline-action-link" href="/workspace" data-i18n="product.p2.cta">Mở Xưởng Studio →</a>
+          </div>
+        </article>
+
+        <article class="bento-card">
+          <span class="bento-badge" data-i18n="product.p3.badge">03 · XUẤT BẢN SIÊU TỐC</span>
+          <h2 data-i18n="product.p3.title">Mã nguồn sạch &amp; Đồng bộ GitHub</h2>
+          <p data-i18n="product.p3.desc">Xuất bản trực tiếp sang HTML/CSS/JS tối ưu, không phụ thuộc CDN bên ngoài, không rác thẻ lồng ghép và sẵn sàng đồng bộ GitHub hay hạ tầng edge của riêng bạn.</p>
+          <ul class="bento-points">
+            <li data-i18n="product.p3.b1">Tốc độ tải siêu nhanh, không khóa nền tảng (zero lock-in)</li>
+            <li data-i18n="product.p3.b2">Chuẩn hóa khả năng tiếp cận bàn phím và giảm chuyển động</li>
+          </ul>
+          <div class="bento-foot">
+            <a class="inline-action-link" href="/resources" data-route="resources" data-i18n="product.p3.cta">Xem thư viện mẫu →</a>
+          </div>
+        </article>
+      </div>
+
+      <div class="subpage-cta-band">
+        <div>
+          <h2 data-i18n="product.bandTitle">Sẵn sàng khởi tạo không gian số mang dấu ấn riêng?</h2>
+          <p data-i18n="product.bandDesc">Chọn một mẫu ngành nghề chuẩn mực hoặc kết nối AI của bạn ngay trong Xưởng Studio.</p>
+        </div>
+        <div class="subpage-cta-actions">
+          <a class="pill pill-neon-capsule" href="/workspace" data-i18n="gateway.ctaDesign">Thiết kế Website</a>
+          <a class="pill pill-twilight-outline" href="/resources" data-route="resources" data-i18n="hero.ctaGallery">Khám phá 12+ mẫu</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================================== -->
+  <!-- VIEW 3: SOLUTIONS (/solutions) — 6 Curated Industry Solution Pillars   -->
+  <!-- ====================================================================== -->
+  <section class="platform-view subpage-view" id="view-solutions" data-view="solutions" hidden aria-labelledby="solutions-heading">
+    <div class="container subpage-container">
+      <header class="subpage-head">
+        <p class="eyebrow" data-i18n="solutions.eyebrow">GIẢI PHÁP THEO LĨNH VỰC · CHUYÊN SÂU NGÀNH NGHỀ</p>
+        <h1 id="solutions-heading">
+          <span data-i18n="solutions.titleLead">Thiết kế đúng ngôn ngữ cho </span>
+          <span class="subpage-accent" data-i18n="solutions.titleAccent">từng lĩnh vực kinh doanh.</span>
+        </h1>
+        <p class="subpage-lead" data-i18n="solutions.lead">Mỗi ngành nghề đòi hỏi một nhịp kể chuyện, cấu trúc tin cậy và điểm chuyển đổi khác nhau. Chọn lĩnh vực của bạn để khám phá ngay bộ mẫu tương ứng.</p>
+      </header>
+
+      <div class="solutions-grid" id="solutions-grid"></div>
+    </div>
+  </section>
+
+  <!-- ====================================================================== -->
+  <!-- VIEW 4: RESOURCES (/resources) — Live Cleanroom Template Gallery       -->
+  <!-- ====================================================================== -->
+  <section class="platform-view subpage-view" id="view-resources" data-view="resources" hidden aria-labelledby="resources-heading">
+    <div class="container subpage-container">
+      <header class="subpage-head">
+        <p class="eyebrow" data-i18n="resources.eyebrow">THƯ VIỆN TÀI NGUYÊN · 12+ MẪU CLEANROOM CHUẨN MỰC</p>
+        <h1 id="resources-heading">
+          <span data-i18n="resources.titleLead">Khám phá thư viện mẫu </span>
+          <span class="subpage-accent" data-i18n="resources.titleAccent">sẵn sàng tùy biến với AI.</span>
+        </h1>
+        <p class="subpage-lead" data-i18n="resources.lead">Toàn bộ mẫu được thiết kế sạch từ đầu, tương thích trực tiếp với GLOW AI Plugin và Xưởng Studio. Xem trước Desktop/Mobile hoặc mở ngay để tinh chỉnh theo thương hiệu của bạn.</p>
+      </header>
+
+      <div class="gallery-toolbar">
+        <div class="gallery-search-wrap">
+          <label class="sr-only" for="resource-search" data-i18n="resources.searchLabel">Tìm kiếm mẫu giao diện</label>
+          <input
+            type="search"
+            id="resource-search"
+            class="gallery-search-input"
+            placeholder="Tìm theo ngành nghề, phong cách hoặc từ khóa..."
+            autocomplete="off"
+          >
+        </div>
+
+        <div class="gallery-filter-group" id="resource-mood-filters" role="group" aria-label="Lọc theo sắc thái thẩm mỹ"></div>
+      </div>
+
+      <div class="gallery-industry-bar">
+        <div class="gallery-industry-chips" id="resource-industry-filters" role="group" aria-label="Lọc theo ngành nghề"></div>
+        <p class="gallery-count" id="resources-count" role="status" aria-live="polite"></p>
+      </div>
+
+      <div class="template-gallery-grid" id="template-gallery-grid"></div>
+    </div>
+  </section>
+
+  <!-- ====================================================================== -->
+  <!-- VIEW 5: PRICING (/pricing) — Transparent Plans with Billing Toggle     -->
+  <!-- ====================================================================== -->
+  <section class="platform-view subpage-view" id="view-pricing" data-view="pricing" hidden aria-labelledby="pricing-heading">
+    <div class="container subpage-container">
+      <header class="subpage-head">
+        <p class="eyebrow" data-i18n="pricing.eyebrow">BẢNG GIÁ MINH BẠCH · EARLY ACCESS</p>
+        <h1 id="pricing-heading">
+          <span data-i18n="pricing.titleLead">Lựa chọn linh hoạt theo </span>
+          <span class="subpage-accent" data-i18n="pricing.titleAccent">tốc độ phát triển của bạn.</span>
+        </h1>
+        <p class="subpage-lead" data-i18n="pricing.lead">Bắt đầu trải nghiệm miễn phí với toàn bộ thư viện 12+ mẫu chuẩn và nâng cấp khi thương hiệu sẵn sàng kết nối tên miền riêng cùng AI Plugin.</p>
+
+        <div class="billing-toggle-wrap">
+          <button
+            type="button"
+            class="billing-toggle"
+            id="pricing-billing-toggle"
+            role="switch"
+            aria-checked="true"
+            data-billing="annual"
+          >
+            <span class="billing-opt" data-billing-mode="monthly" data-i18n="pricing.monthly">Theo tháng</span>
+            <span class="billing-opt is-active" data-billing-mode="annual">
+              <span data-i18n="pricing.annual">Theo năm</span>
+              <em class="billing-save" data-i18n="pricing.saveBadge">Tiết kiệm 20%</em>
+            </span>
+          </button>
+        </div>
+      </header>
+
+      <div class="pricing-grid" id="pricing-plans">
+        <article class="pricing-card">
+          <div class="pricing-card-head">
+            <span class="pricing-tag" data-i18n="pricing.p1.tag">EARLY ACCESS</span>
+            <h2 data-i18n="pricing.p1.name">Trải nghiệm</h2>
+            <p class="pricing-sub" data-i18n="pricing.p1.sub">Dành cho cá nhân và nhà sáng tạo muốn khám phá ngôn ngữ thiết kế GLOW.</p>
+          </div>
+          <div class="pricing-price-row">
+            <strong class="pricing-amount" data-price-key="starter">0đ</strong>
+            <span class="pricing-unit" data-i18n="pricing.p1.unit">Miễn phí trải nghiệm</span>
+          </div>
+          <ul class="pricing-features">
+            <li data-i18n="pricing.p1.f1">Truy cập toàn bộ thư viện 12+ mẫu ngành nghề chuẩn</li>
+            <li data-i18n="pricing.p1.f2">1 dự án thử nghiệm trong Xưởng Studio</li>
+            <li data-i18n="pricing.p1.f3">Xem trước trực tiếp trên Desktop &amp; Mobile</li>
+            <li data-i18n="pricing.p1.f4">Đóng gói hồ sơ khởi tạo dự án chuẩn JSON</li>
+          </ul>
+          <a class="pill pill-twilight-outline pricing-cta" href="/workspace" data-i18n="pricing.p1.cta">Bắt đầu miễn phí</a>
+        </article>
+
+        <article class="pricing-card pricing-card-featured">
+          <div class="pricing-card-head">
+            <span class="pricing-tag pricing-tag-jade" data-i18n="pricing.p2.tag">PHỔ BIẾN NHẤT</span>
+            <h2 data-i18n="pricing.p2.name">Studio Pro</h2>
+            <p class="pricing-sub" data-i18n="pricing.p2.sub">Dành cho thương hiệu, studio và chuyên gia cần vận hành website trọn gói cùng AI.</p>
+          </div>
+          <div class="pricing-price-row">
+            <strong class="pricing-amount" data-price-key="pro">390.000đ</strong>
+            <span class="pricing-unit" data-i18n="pricing.perMonth">/ tháng</span>
+          </div>
+          <ul class="pricing-features">
+            <li data-i18n="pricing.p2.f1">Không giới hạn số lượng mẫu &amp; biến thể bố cục</li>
+            <li data-i18n="pricing.p2.f2">Kết nối trực tiếp AI Plugin (ChatGPT &amp; Gemini MCP)</li>
+            <li data-i18n="pricing.p2.f3">Xuất mã nguồn tĩnh sạch không phụ thuộc CDN</li>
+            <li data-i18n="pricing.p2.f4">Hỗ trợ gắn tên miền riêng &amp; tối ưu tốc độ</li>
+          </ul>
+          <a class="pill pill-neon-capsule pricing-cta" href="/auth/login?next=%2Fworkspace" data-i18n="pricing.p2.cta">Kích hoạt Studio Pro</a>
+        </article>
+
+        <article class="pricing-card">
+          <div class="pricing-card-head">
+            <span class="pricing-tag" data-i18n="pricing.p3.tag">TÙY CHỈNH</span>
+            <h2 data-i18n="pricing.p3.name">Doanh nghiệp &amp; Agency</h2>
+            <p class="pricing-sub" data-i18n="pricing.p3.sub">Dành cho tổ chức đa thương hiệu cần phân quyền quản trị và đồng bộ quy trình riêng.</p>
+          </div>
+          <div class="pricing-price-row">
+            <strong class="pricing-amount" data-price-key="enterprise">1.490.000đ</strong>
+            <span class="pricing-unit" data-i18n="pricing.perMonth">/ tháng</span>
+          </div>
+          <ul class="pricing-features">
+            <li data-i18n="pricing.p3.f1">Không gian làm việc đa thương hiệu (Multi-brand Workspace)</li>
+            <li data-i18n="pricing.p3.f2">Quản trị phân quyền Admin &amp; phê duyệt nhiều cấp</li>
+            <li data-i18n="pricing.p3.f3">Đồng bộ kho lưu trữ GitHub &amp; quy trình xuất bản riêng</li>
+            <li data-i18n="pricing.p3.f4">Tư vấn kiến trúc trải nghiệm 1-1 cùng đội ngũ GLOW</li>
+          </ul>
+          <button type="button" class="pill pill-twilight-outline pricing-cta" data-open-intake data-i18n="pricing.p3.cta">Đặt lịch tư vấn</button>
+        </article>
+      </div>
+
+      <div class="pricing-notice" role="note">
+        <span class="notice-dot" aria-hidden="true"></span>
+        <p data-i18n="pricing.notice">Thông báo minh bạch: GLOW Web hiện đang ở giai đoạn Early Access Trải nghiệm Giới hạn. Chưa thu phí trực tuyến hay tích hợp cổng thanh toán tự động; mức giá hiển thị là kế hoạch tham khảo minh bạch khi mở bản thương mại chính thức.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHARED SEAMLESS TRANSLUCENT FOOTER -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <svg class="brand-emblem" viewBox="0 0 36 36" width="24" height="24" fill="none" aria-hidden="true">
+          <circle cx="18" cy="18" r="15" stroke="#CFEBE6" stroke-opacity="0.45" stroke-width="1.3"/>
+          <path d="M18 9L23.2 18L18 27L12.8 18L18 9Z" stroke="#6EE7B7" stroke-width="1.3"/>
+        </svg>
+        <div>
+          <span class="brand-wordmark">GLOW</span>
+          <p class="footer-note" data-i18n="footer.note">Phiên bản Trải nghiệm Giới hạn · Chế tác bởi GLOW Web Studio</p>
+        </div>
+      </div>
+
+      <div class="footer-status" role="status" aria-live="polite">
+        <span class="status-pill">
+          <i class="status-dot" aria-hidden="true"></i>
+          <b id="runtime-status">Đang kết nối</b>
+        </span>
+        <span class="status-sep" aria-hidden="true">·</span>
+        <span class="status-ready" id="ready-state">Đang kiểm tra trạng thái…</span>
+      </div>
+
+      <nav class="footer-links" aria-label="Liên kết cuối trang">
+        <a href="/workspace" data-i18n="footer.workspace">Xưởng Studio</a>
+        <a href="/resources" data-route="resources" data-i18n="footer.resources">Thư viện mẫu</a>
+        <a href="/auth/login?next=%2Fworkspace" data-i18n="footer.google">Đăng nhập Google</a>
+        <a href="/privacy" data-i18n="footer.privacy">Quyền riêng tư</a>
+      </nav>
+    </div>
+  </footer>
+</main>
+
+<!-- Unified Sign In / Quick Sign Up Frosted Obsidian-Jade Modal (#auth-modal · Closed by Default) -->
+<div class="auth-modal hidden" id="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" aria-hidden="true">
+  <div class="intake-backdrop" data-close-auth></div>
+  <div class="auth-dialog">
+    <div class="glass-atelier auth-panel" data-specular>
+      <div class="wizard-top">
+        <span class="wizard-eyebrow" id="auth-modal-title" data-i18n="auth.eyebrow">TÀI KHOẢN GLOW WEB</span>
+        <button type="button" class="pill pill-twilight-outline intake-close-btn" id="close-auth-modal" aria-label="Đóng cửa sổ đăng nhập" data-i18n="common.close">Đóng ✕</button>
+      </div>
+
+      <div class="auth-tabs" role="tablist" aria-label="Chọn đăng nhập hoặc đăng ký">
+        <button type="button" class="auth-tab is-active" id="auth-tab-signin" role="tab" aria-selected="true" aria-controls="auth-panel-signin" data-auth-tab="signin" data-i18n="auth.tabSignin">Đăng nhập</button>
+        <button type="button" class="auth-tab" id="auth-tab-signup" role="tab" aria-selected="false" aria-controls="auth-panel-signup" data-auth-tab="signup" data-i18n="auth.tabSignup">Đăng ký nhanh</button>
+      </div>
+
+      <!-- Tab 1: Sign In -->
+      <div class="auth-pane" id="auth-panel-signin" role="tabpanel" aria-labelledby="auth-tab-signin">
+        <p class="auth-lead" data-i18n="auth.signinLead">Tiếp tục vào Xưởng Studio và kết nối AI Plugin của bạn trong một chạm.</p>
+        <a class="pill pill-neon-capsule auth-google-btn" href="/auth/login?next=%2Fworkspace" data-i18n="auth.googleCta">Tiếp tục với Google · 1 chạm</a>
+        <div class="auth-divider"><span data-i18n="auth.orEmail">hoặc đăng nhập bằng Email OTP</span></div>
+        <form class="auth-form" id="auth-signin-form" novalidate>
+          <label class="auth-label" for="auth-signin-email" data-i18n="auth.emailLabel">Địa chỉ email công việc</label>
+          <input type="email" id="auth-signin-email" required autocomplete="email" placeholder="ban@thuonghieu.vn">
+          <button type="submit" class="pill pill-twilight-outline auth-submit-btn" data-i18n="auth.sendOtp">Tiếp tục với Email OTP →</button>
+        </form>
+      </div>
+
+      <!-- Tab 2: Quick 1-Step Sign Up -->
+      <div class="auth-pane hidden" id="auth-panel-signup" role="tabpanel" aria-labelledby="auth-tab-signup">
+        <p class="auth-lead" data-i18n="auth.signupLead">Tạo tài khoản Xưởng Studio chỉ trong 1 bước duy nhất.</p>
+        <a class="pill pill-neon-capsule auth-google-btn" href="/auth/login?next=%2Fworkspace" data-i18n="auth.googleSignupCta">Đăng ký nhanh bằng Google</a>
+        <div class="auth-divider"><span data-i18n="auth.orQuickEmail">hoặc nhập Email &amp; Tên thương hiệu</span></div>
+        <form class="auth-form" id="auth-signup-form" novalidate>
+          <label class="auth-label" for="auth-signup-email" data-i18n="auth.emailLabel">Địa chỉ email công việc</label>
+          <input type="email" id="auth-signup-email" required autocomplete="email" placeholder="ban@thuonghieu.vn">
+          <label class="auth-label" for="auth-signup-brand" data-i18n="auth.brandLabel">Tên cá nhân hoặc thương hiệu</label>
+          <input type="text" id="auth-signup-brand" maxlength="100" autocomplete="organization" placeholder="Ví dụ: Sora Studio">
+          <button type="submit" class="pill pill-twilight-outline auth-submit-btn" data-i18n="auth.createAccount">Khởi tạo tài khoản →</button>
+        </form>
+        <p class="auth-transparent-note" data-i18n="auth.transparentNote">Google hoặc Email OTP sẽ tự động tạo không gian làm việc của bạn trong 1 bước mà không cần đặt mật khẩu rườm rà.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rich Template Preview Modal (#template-preview-modal · Closed by Default) -->
+<div class="template-modal hidden" id="template-preview-modal" role="dialog" aria-modal="true" aria-labelledby="template-preview-title" aria-hidden="true">
+  <div class="cinema-backdrop" data-close-template-preview></div>
+  <div class="template-preview-dialog">
+    <div class="template-preview-bar">
+      <div>
+        <span class="wizard-eyebrow" id="template-preview-industry">NGÀNH NGHỀ</span>
+        <h3 id="template-preview-title">Tên mẫu</h3>
+        <p id="template-preview-tagline"></p>
+      </div>
+      <div class="template-preview-controls">
+        <div class="viewport-switch" role="group" aria-label="Chuyển khung xem trước">
+          <button type="button" class="viewport-btn is-active" data-preview-viewport="desktop" data-i18n="preview.desktop">Desktop</button>
+          <button type="button" class="viewport-btn" data-preview-viewport="mobile" data-i18n="preview.mobile">Mobile</button>
+        </div>
+        <button type="button" class="pill pill-twilight-outline intake-close-btn" id="close-template-preview" aria-label="Đóng xem trước mẫu" data-i18n="common.close">Đóng ✕</button>
       </div>
     </div>
 
-    <!-- COMPACT ARCHITECTURAL CRAFT RAIL (#craft — Whisper-Light Borderless Horizontal Strip) -->
-    <section class="craft-rail-section" id="craft" aria-labelledby="craft-heading">
-      <div class="container">
-        <div class="craft-bar-head reveal">
-          <p class="eyebrow">NGHỆ THUẬT CHẾ TÁC · 04 NHỊP CHẢY</p>
-          <h2 id="craft-heading">Tinh giản ở bề mặt. <span>Vững chắc ở chiều sâu.</span></h2>
-        </div>
-
-        <div class="craft-thread" id="craft-thread" aria-hidden="true">
-          <span class="craft-thread-fill"></span>
-        </div>
-
-        <ol class="craft-strip">
-          <li class="craft-step reveal">
-            <span class="step-num">01</span>
-            <div>
-              <h3>Khởi nguồn cảm hứng</h3>
-              <p>Lắng nghe bản sắc và khoảnh khắc thương hiệu cần chạm tới.</p>
-            </div>
-          </li>
-          <li class="craft-step reveal">
-            <span class="step-num">02</span>
-            <div>
-              <h3>Định hình điện ảnh</h3>
-              <p>Thiết lập ánh sáng, bố cục, kiểu chữ và nhịp chuyển động riêng.</p>
-            </div>
-          </li>
-          <li class="craft-step reveal">
-            <span class="step-num">03</span>
-            <div>
-              <h3>Chế tác tinh xảo</h3>
-              <p>Hoàn thiện từng điểm ảnh, tương thích đa màn hình và mượt mà.</p>
-            </div>
-          </li>
-          <li class="craft-step reveal">
-            <span class="step-num">04</span>
-            <div>
-              <h3>Bàn giao &amp; Kết nối AI</h3>
-              <p>Đồng hành liền mạch cùng ChatGPT &amp; Google Gemini theo quyền duyệt của bạn.</p>
-            </div>
-          </li>
-        </ol>
-      </div>
-    </section>
-
-    <!-- CENTERED EDITORIAL FINALE INVITATION (#register + #intake · Zero Redundant Boxes) -->
-    <section class="gateway" id="intake" aria-labelledby="gateway-heading">
-      <span id="register" class="anchor-offset" aria-hidden="true"></span>
-      <div class="container gateway-container">
-        <div class="gateway-centered reveal">
-          <p class="eyebrow">KHỞI TẠO KHÔNG GIAN · XƯỞNG STUDIO</p>
-          <h2 id="gateway-heading">Bắt đầu theo cách<br><span>tự nhiên nhất với bạn.</span></h2>
-          <p class="gateway-desc">Đăng nhập Google để kết nối ngay với ChatGPT &amp; Google Gemini trong Xưởng Studio — hoặc mở hồ sơ khởi tạo dự án theo dấu ấn riêng của bạn.</p>
-
-          <div class="gateway-cta-row">
-            <a class="pill pill-jade btn-magnetic" href="/auth/login?next=%2Fworkspace">Đăng nhập Google · Kết nối AI <span aria-hidden="true">↗</span></a>
-            <a class="pill pill-twilight-outline btn-magnetic" href="/workspace">Mở Xưởng Studio</a>
-            <button type="button" class="pill-editorial-link" id="open-intake-drawer">Tạo hồ sơ nhanh (4 bước) <span aria-hidden="true">→</span></button>
-          </div>
+    <div class="template-preview-body">
+      <div class="template-stage-wrap" id="template-stage-wrap" data-viewport="desktop">
+        <div class="template-stage-frame">
+          <video
+            id="template-preview-video"
+            autoplay
+            muted
+            loop
+            playsinline
+            controls
+            poster="/assets/reel-02-coastal-villa.webp"
+            width="1920"
+            height="1080"
+          >
+            <source id="template-preview-source" src="/assets/reel-02-coastal-villa.mp4" type="video/mp4">
+          </video>
         </div>
       </div>
-    </section>
 
-    <!-- SEAMLESS TRANSLUCENT FOOTER (Deep-Water Atmosphere & Mist Flow Right Underneath) -->
-    <footer class="site-footer">
-      <div class="container footer-inner">
-        <div class="footer-brand">
-          <svg class="brand-emblem" viewBox="0 0 36 36" width="24" height="24" fill="none" aria-hidden="true">
-            <circle cx="18" cy="18" r="15" stroke="#CFEBE6" stroke-opacity="0.45" stroke-width="1.3"/>
-            <path d="M18 9L23.2 18L18 27L12.8 18L18 9Z" stroke="#6EE7B7" stroke-width="1.3"/>
-          </svg>
-          <div>
-            <span class="brand-wordmark">GLOW</span>
-            <p class="footer-note">Phiên bản Trải nghiệm Giới hạn · Chế tác bởi GLOW Web Studio</p>
-          </div>
+      <aside class="template-preview-meta">
+        <div class="meta-section">
+          <h4 data-i18n="preview.blocksHeading">Cấu trúc khối bố cục JSON</h4>
+          <ol class="preview-blocks-list" id="template-preview-blocks"></ol>
         </div>
-
-        <div class="footer-status" role="status" aria-live="polite">
-          <span class="status-pill">
-            <i class="status-dot" aria-hidden="true"></i>
-            <b id="runtime-status">Đang kết nối</b>
-          </span>
-          <span class="status-sep" aria-hidden="true">·</span>
-          <span class="status-ready" id="ready-state">Đang kiểm tra trạng thái…</span>
+        <div class="meta-section">
+          <h4 data-i18n="preview.briefHeading">Kịch bản thương hiệu mẫu</h4>
+          <p class="preview-sample-brand" id="template-preview-brand"></p>
+          <p class="preview-sample-brief" id="template-preview-brief"></p>
         </div>
-
-        <nav class="footer-links" aria-label="Liên kết cuối trang">
-          <a href="/workspace">Xưởng Studio</a>
-          <a href="/auth/login?next=%2Fworkspace">Đăng nhập Google</a>
-          <a href="/privacy">Quyền riêng tư</a>
-        </nav>
-      </div>
-    </footer>
+        <div class="meta-section">
+          <h4 data-i18n="preview.highlightsHeading">Điểm nổi bật</h4>
+          <ul class="preview-highlights-list" id="template-preview-highlights"></ul>
+        </div>
+        <div class="preview-meta-actions">
+          <a class="pill pill-neon-capsule" id="template-preview-use-link" href="/workspace" data-i18n="resources.useTemplate">Dùng mẫu này →</a>
+          <span class="preview-license-chip" id="template-preview-license"></span>
+        </div>
+      </aside>
+    </div>
   </div>
-</main>
+</div>
 
 <!-- Contract-Safe Collapsible 4-Step Frosted Glass Intake Modal (Closed by Default) -->
 <div class="intake-modal hidden" id="intake-modal" role="dialog" aria-modal="true" aria-labelledby="intake-modal-title" aria-hidden="true">
@@ -543,7 +937,7 @@
   <div class="intake-dialog">
     <div class="wizard glass-atelier" id="wizard" data-specular>
       <div class="wizard-top">
-        <span class="wizard-eyebrow" id="intake-modal-title">TẠO HỒ SƠ KHỞI TẠO · 04 BƯỚC</span>
+        <span class="wizard-eyebrow" id="intake-modal-title" data-i18n="wizard.eyebrow">TẠO HỒ SƠ KHỞI TẠO · 04 BƯỚC</span>
         <div class="wizard-top-right">
           <div class="wizard-progress" aria-label="Tiến độ 4 bước khởi tạo">
             <span class="active">01</span>
@@ -551,50 +945,50 @@
             <span>03</span>
             <span>04</span>
           </div>
-          <button type="button" class="pill pill-twilight-outline intake-close-btn" id="close-intake-modal" aria-label="Đóng bảng khởi tạo">Đóng ✕</button>
+          <button type="button" class="pill pill-twilight-outline intake-close-btn" id="close-intake-modal" aria-label="Đóng bảng khởi tạo" data-i18n="common.close">Đóng ✕</button>
         </div>
       </div>
 
       <form id="intake-form" novalidate>
         <section class="wizard-step active" data-step="1">
-          <label>Website này dành cho ai?</label>
+          <label data-i18n="wizard.s1.label">Website này dành cho ai?</label>
           <div class="choice-grid">
             <button type="button" data-choice="Cá nhân / Portfolio">
-              <strong>Cá nhân</strong>
-              <small>Portfolio · Hồ sơ · Nhà sáng tạo</small>
+              <strong data-i18n="wizard.s1.c1.title">Cá nhân</strong>
+              <small data-i18n="wizard.s1.c1.desc">Portfolio · Hồ sơ · Nhà sáng tạo</small>
             </button>
             <button type="button" data-choice="Thương hiệu / Studio">
-              <strong>Thương hiệu</strong>
-              <small>Studio · Doanh nghiệp · Dịch vụ</small>
+              <strong data-i18n="wizard.s1.c2.title">Thương hiệu</strong>
+              <small data-i18n="wizard.s1.c2.desc">Studio · Doanh nghiệp · Dịch vụ</small>
             </button>
             <button type="button" data-choice="Sản phẩm / Dự án">
-              <strong>Sản phẩm</strong>
-              <small>Sản phẩm số · Ra mắt · Chiến dịch</small>
+              <strong data-i18n="wizard.s1.c3.title">Sản phẩm</strong>
+              <small data-i18n="wizard.s1.c3.desc">Sản phẩm số · Ra mắt · Chiến dịch</small>
             </button>
           </div>
           <input id="site-type" type="hidden" required>
         </section>
 
         <section class="wizard-step" data-step="2">
-          <label for="goal">Một câu thôi: website phải giúp bạn đạt điều gì?</label>
+          <label for="goal" data-i18n="wizard.s2.label">Một câu thôi: website phải giúp bạn đạt điều gì?</label>
           <textarea id="goal" maxlength="700" placeholder="Ví dụ: Giúp đối tác cảm nhận ngay đẳng cấp thương hiệu và chủ động đặt lịch trao đổi." required></textarea>
         </section>
 
         <section class="wizard-step" data-step="3">
-          <label>Bạn muốn người xem cảm thấy thế nào?</label>
+          <label data-i18n="wizard.s3.label">Bạn muốn người xem cảm thấy thế nào?</label>
           <div class="feeling-grid">
-            <button type="button" data-feeling="Tinh tế / Đẳng cấp">Tinh tế</button>
-            <button type="button" data-feeling="Điện ảnh / Sâu lắng">Điện ảnh</button>
-            <button type="button" data-feeling="Tĩnh tại / Thiên nhiên">Tĩnh tại</button>
-            <button type="button" data-feeling="Tiên phong / Công nghệ">Tiên phong</button>
-            <button type="button" data-feeling="Tối giản / Biên tập">Tối giản</button>
-            <button type="button" data-feeling="Tôi chưa biết — hãy gợi ý cho tôi">Hãy gợi ý</button>
+            <button type="button" data-feeling="Tinh tế / Đẳng cấp" data-i18n="wizard.s3.f1">Tinh tế</button>
+            <button type="button" data-feeling="Điện ảnh / Sâu lắng" data-i18n="wizard.s3.f2">Điện ảnh</button>
+            <button type="button" data-feeling="Tĩnh tại / Thiên nhiên" data-i18n="wizard.s3.f3">Tĩnh tại</button>
+            <button type="button" data-feeling="Tiên phong / Công nghệ" data-i18n="wizard.s3.f4">Tiên phong</button>
+            <button type="button" data-feeling="Tối giản / Biên tập" data-i18n="wizard.s3.f5">Tối giản</button>
+            <button type="button" data-feeling="Tôi chưa biết — hãy gợi ý cho tôi" data-i18n="wizard.s3.f6">Hãy gợi ý</button>
           </div>
           <input id="feeling" type="hidden" required>
         </section>
 
         <section class="wizard-step" data-step="4">
-          <label for="name">Hoàn tất hồ sơ khởi tạo dự án của bạn.</label>
+          <label for="name" data-i18n="wizard.s4.label">Hoàn tất hồ sơ khởi tạo dự án của bạn.</label>
           <div class="final-fields">
             <input id="name" placeholder="Tên cá nhân hoặc thương hiệu (tuỳ chọn)" maxlength="120" autocomplete="organization">
             <select id="language" aria-label="Ngôn ngữ website">
@@ -606,27 +1000,27 @@
           </div>
           <div class="privacy-note">
             <span aria-hidden="true">✓</span>
-            <p>Hồ sơ chỉ được đóng gói ngay trên trình duyệt của bạn. Không gửi dữ liệu riêng tư hay tự động khởi chạy khi chưa có xác nhận.</p>
+            <p data-i18n="wizard.privacy">Hồ sơ chỉ được đóng gói ngay trên trình duyệt của bạn. Không gửi dữ liệu riêng tư hay tự động khởi chạy khi chưa có xác nhận.</p>
           </div>
         </section>
 
         <div class="wizard-actions">
-          <button class="pill pill-twilight-outline" type="button" id="back" disabled>Quay lại</button>
-          <button class="pill pill-jade btn-magnetic" type="button" id="next">Tiếp tục <span aria-hidden="true">→</span></button>
-          <button class="pill pill-jade btn-magnetic hidden" type="submit" id="launch">Tạo hồ sơ &amp; Mở ChatGPT <span aria-hidden="true">↗</span></button>
+          <button class="pill pill-twilight-outline" type="button" id="back" disabled data-i18n="wizard.back">Quay lại</button>
+          <button class="pill pill-jade btn-magnetic" type="button" id="next"><span data-i18n="wizard.next">Tiếp tục</span> <span aria-hidden="true">→</span></button>
+          <button class="pill pill-jade btn-magnetic hidden" type="submit" id="launch"><span data-i18n="wizard.launch">Tạo hồ sơ &amp; Mở ChatGPT</span> <span aria-hidden="true">↗</span></button>
         </div>
       </form>
 
       <div class="capsule-result hidden" id="capsule-result">
         <div class="capsule-head">
-          <small>HỒ SƠ KHỞI TẠO SẴN SÀNG</small>
-          <h3>Yêu cầu dự án đã được đóng gói.</h3>
-          <p>Nội dung đã được sao chép. Dán vào ChatGPT hoặc mở Xưởng Studio để bắt đầu chế tác.</p>
+          <small data-i18n="wizard.capsuleReady">HỒ SƠ KHỞI TẠO SẴN SÀNG</small>
+          <h3 data-i18n="wizard.capsuleTitle">Yêu cầu dự án đã được đóng gói.</h3>
+          <p data-i18n="wizard.capsuleDesc">Nội dung đã được sao chép. Dán vào ChatGPT hoặc mở Xưởng Studio để bắt đầu chế tác.</p>
         </div>
         <pre id="capsule-preview"></pre>
         <div class="capsule-actions">
-          <button class="pill pill-twilight-outline" type="button" id="copy-capsule">Copy lại capsule</button>
-          <a class="pill pill-jade btn-magnetic" href="/auth/login?next=%2Fworkspace">Vào Xưởng Studio <span aria-hidden="true">↗</span></a>
+          <button class="pill pill-twilight-outline" type="button" id="copy-capsule" data-i18n="wizard.copy">Copy lại capsule</button>
+          <a class="pill pill-jade btn-magnetic" href="/auth/login?next=%2Fworkspace"><span data-i18n="wizard.enterStudio">Vào Xưởng Studio</span> <span aria-hidden="true">↗</span></a>
         </div>
       </div>
     </div>
@@ -642,7 +1036,7 @@
         <h3 id="cinema-title">01 · Botanical Sanctuary</h3>
         <p id="cinema-subtitle">Nhịp nước tĩnh và hơi sương ngọc bích cho thương hiệu chế tác và nghỉ dưỡng.</p>
       </div>
-      <button type="button" class="pill pill-glass-light" id="cinema-close" aria-label="Đóng khung toàn màn hình">Đóng ✕</button>
+      <button type="button" class="pill pill-glass-light" id="cinema-close" aria-label="Đóng khung toàn màn hình" data-i18n="common.close">Đóng ✕</button>
     </div>
     <div class="cinema-frame">
       <video

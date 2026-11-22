@@ -21,6 +21,7 @@ import { createGlowMcpExpressApp } from "./mcp-app.js";
 import { NextFactoryControlInputSchema } from "./next-factory-schema.js";
 import { resolveHostDomainTopology } from "./domain-topology.js";
 import {PHASE_ACCEPTANCE_SCOPE,PHASE_ACCEPTANCE_MISSION_PATTERN,toolOAuthMetadata,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,phaseAcceptanceAuthorityStatus,validateAcceptanceBytes} from './phase-acceptance.js';
+import { queryTemplates, getTemplateById } from "./template-registry.js";
 
 const HOST_ADAPTER_REVISION = "0.3.10-file-artifact-input-candidate";
 const HOST_CONTRACT_ID = "GWF_NEXT_FACTORY_ACTIVE_DEMO_CANDIDATE_V2";
@@ -559,6 +560,55 @@ const FLAGSHIP_VIDEO_ASSETS = [
   "reel-03-liquid-prism.mp4",
 ] as const;
 
+const PUBLIC_PLATFORM_ROUTES = [
+  "/product",
+  "/solutions",
+  "/resources",
+  "/pricing",
+] as const;
+
+function firstQueryString(value: unknown): string | undefined {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value) && typeof value[0] === "string") return value[0];
+  return undefined;
+}
+
+function registerPublicTemplateAndPlatformRoutes(prefix: string): void {
+  for (const route of PUBLIC_PLATFORM_ROUTES) {
+    app.get(`${prefix}${route}`, (_req, res) => {
+      res.type("html").sendFile("index.html", { root: publicDir });
+    });
+  }
+
+  app.get(`${prefix}/api/templates`, (req, res) => {
+    const featuredParam = firstQueryString(req.query.featured)?.trim().toLowerCase();
+    const payload = queryTemplates({
+      industry: firstQueryString(req.query.industry),
+      category: firstQueryString(req.query.category),
+      mood: firstQueryString(req.query.mood),
+      q: firstQueryString(req.query.q),
+      featuredOnly: featuredParam === "1" || featuredParam === "true",
+      mcpResource: "/mcp-v2",
+    });
+    res.setHeader("Cache-Control", "public, max-age=300");
+    res.json(payload);
+  });
+
+  app.get(`${prefix}/api/templates/:id`, (req, res) => {
+    const rawId = Array.isArray(req.params.id) ? "" : String(req.params.id ?? "");
+    const result = getTemplateById(rawId);
+    if (!result.ok) {
+      res.status(result.status).json({
+        ok: false,
+        error: result.code,
+      });
+      return;
+    }
+    res.setHeader("Cache-Control", "public, max-age=300");
+    res.json(result);
+  });
+}
+
 app.get("/",(_req,res) => {
   res.type("html").sendFile("index.html", { root: publicDir });
 });
@@ -566,6 +616,7 @@ app.get("/",(_req,res) => {
 app.get("/app",(_req,res) => {
   res.type("html").sendFile("index.html", { root: publicDir });
 });
+registerPublicTemplateAndPlatformRoutes("");
 app.get("/workspace",(_req,res) => {
   res.type("html").sendFile("workspace.html", { root: publicDir });
 });
@@ -648,6 +699,7 @@ if (domainTopology.basePath) {
   app.get(`${bp}/app`, (_req, res) => {
     res.type("html").sendFile("index.html", { root: publicDir });
   });
+  registerPublicTemplateAndPlatformRoutes(bp);
   app.get(`${bp}/workspace`, (_req, res) => {
     res.type("html").sendFile("workspace.html", { root: publicDir });
   });

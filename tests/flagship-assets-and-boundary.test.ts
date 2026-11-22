@@ -71,7 +71,7 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
     assert.equal(content.includes("\r"), false, `${file} must be LF-only`);
     assert.doesNotMatch(
       content,
-      /(?<!<\/?)\bH[123]\b(?!>)|KIT[_ -]?[ABC]|CAP\.WEB\.|MODEL_SESSION_PRIVATE|Pyodide|SQLite|GLOW-WEB-FACTORY/u,
+      /(?<!<\/?)\bH[123]\b(?!>)|KIT[_ -]?[ABC]|CAP\.WEB\.|MODEL_SESSION_PRIVATE|Pyodide|SQLite|GLOW-WEB-FACTORY|Kim sinh Thủy sinh Mộc/u,
       `internal process leak in ${file}`
     );
     assert.doesNotMatch(
@@ -86,6 +86,28 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   assert.equal(html.includes("reel03-infinity-canvas"), false, "legacy reel03-infinity-canvas must be removed");
   assert.equal(html.includes("hero-water-canvas"), false, "legacy hero-water-canvas must be removed");
   assert.equal(html.includes('id="tiers"'), false, "e-commerce pricing table must be removed");
+  assert.equal(
+    html.includes("KHỞI TẠO KHÔNG GIAN · XƯỞNG STUDIO"),
+    false,
+    "removed finale eyebrow must stay absent"
+  );
+  assert.ok(html.includes('id="hero-seam-flare"'), "index.html missing #hero-seam-flare seamless loop optical flare");
+  assert.ok(html.includes('id="open-auth-modal"'), "index.html missing unified #open-auth-modal button");
+  assert.ok(html.includes('id="auth-modal"'), "index.html missing unified #auth-modal dialog");
+  assert.ok(html.includes('id="lang-toggle"'), "index.html missing far-right VI/EN #lang-toggle switcher");
+  assert.ok(html.includes('id="mobile-menu-toggle"'), "index.html missing mobile navigation toggle");
+  assert.ok(html.includes('id="pricing-plans"'), "index.html missing #pricing-plans container");
+  assert.ok(html.includes('id="pricing-billing-toggle"'), "index.html missing #pricing-billing-toggle switch");
+  assert.ok(html.includes('id="template-gallery-grid"'), "index.html missing live #template-gallery-grid");
+  assert.ok(html.includes('id="template-preview-modal"'), "index.html missing #template-preview-modal");
+  assert.ok(html.includes("Đánh thức không gian số"), "index.html missing 1-line Hero CTA lead");
+  assert.ok(html.includes("mang dấu ấn độc bản."), "index.html missing 1-line Hero CTA accent");
+  assert.ok(html.includes('id="cta-connect-plugin"'), "index.html missing uniform Kết nối Plugin capsule");
+  assert.ok(html.includes('id="cta-design-website"'), "index.html missing uniform Thiết kế Website capsule");
+  for (const route of ["home", "product", "solutions", "resources", "pricing"]) {
+    assert.ok(html.includes(`data-route="${route}"`), `index.html missing 5-tab route ${route}`);
+    assert.ok(html.includes(`data-view="${route}"`), `index.html missing platform view ${route}`);
+  }
 
   const PUBLIC_HOME_VIDEOS = [
     "hero-ocean-jade.mp4",
@@ -144,6 +166,11 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
     /\.sanctuary-world\s*\{[^}]*margin-top:\s*0;/s,
     "app.css .sanctuary-world must start cleanly at margin-top: 0 below Video 03"
   );
+  assert.ok(css.includes("--flare-intensity"), "app.css must define --flare-intensity for Video 01 seamless loop flare");
+  assert.ok(css.includes(".terrace-coping-sheen"), "app.css must define .terrace-coping-sheen basalt continuation");
+  assert.ok(css.includes(".terrace-basalt-grid"), "app.css must define .terrace-basalt-grid mineral terrace");
+  assert.ok(css.includes(".pill-neon-capsule"), "app.css must define uniform .pill-neon-capsule buttons");
+  assert.ok(css.includes("#34E8B4"), "app.css must define neon jade-aqua hover glow #34E8B4");
 
   const requiredHtmlTokens = [
     'id="runtime-status"',
@@ -176,6 +203,9 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   assert.match(js, /GLOW_WEB_PUBLIC_INTAKE_V1/);
   assert.match(js, /IntersectionObserver/);
   assert.match(js, /prefers-reduced-motion:\s*reduce/);
+  assert.ok(js.includes("--flare-intensity"), "app.js must drive --flare-intensity on Video 01 loop seam");
+  assert.ok(js.includes("--flare-progress"), "app.js must drive --flare-progress on Video 01 loop seam");
+  assert.doesNotMatch(js, /\binnerHTML\b/, "app.js must strictly forbid innerHTML (safe DOM creation only)");
   assert.equal(js.includes("reel03-infinity-canvas"), false, "app.js must not reference removed fake canvas");
 });
 
