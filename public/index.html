@@ -4,20 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="GLOW Web — Kiến trúc điện ảnh cho thương hiệu. Khởi tạo website độc bản, ánh sáng tinh khiết và kết nối liền mạch với ChatGPT &amp; Google Gemini.">
-<meta name="theme-color" content="#061923">
+<meta name="theme-color" content="#05161F">
 <title>GLOW Web — Ánh Sáng Đại Hải · Kiến Trúc Điện Ảnh Cho Thương Hiệu</title>
 <link rel="preload" as="image" href="/assets/hero-ocean-jade.webp" fetchpriority="high">
 <link rel="stylesheet" href="/app.css">
 </head>
-<body data-world-scene="botanical">
+<body data-world-scene="ocean">
 <a class="skip-link" href="#main-content">Chuyển tới nội dung chính</a>
 
-<!-- LAYER 1: Continuous Living Atmospheric World Bed (Synchronized with Active Cinema Scene) -->
+<!-- LAYER 1: Continuous Living Atmospheric World Bed (Synchronized with Active Scroll Act) -->
 <div class="world-atmosphere" id="world-atmosphere" aria-hidden="true">
   <div class="world-bed world-bed-base"></div>
+  <div class="world-bed world-bed-ocean"></div>
   <div class="world-bed world-bed-botanical"></div>
   <div class="world-bed world-bed-coastal"></div>
-  <div class="world-bed world-bed-ocean"></div>
+  <div class="world-bed world-bed-sanctuary"></div>
   <div class="world-ambient-glow"></div>
 </div>
 
@@ -26,8 +27,8 @@
   <svg class="mist-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
     <defs>
       <filter id="global-mist-filter" x="-20%" y="-20%" width="140%" height="140%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.0085 0.018" numOctaves="4" seed="11" result="noise"/>
-        <feColorMatrix type="matrix" values="0 0 0 0 0.72  0 0 0 0 0.89  0 0 0 0 0.87  0 0 0 0.55 -0.18" in="noise" result="mist"/>
+        <feTurbulence type="fractalNoise" baseFrequency="0.008 0.017" numOctaves="4" seed="11" result="noise"/>
+        <feColorMatrix type="matrix" values="0 0 0 0 0.72  0 0 0 0 0.89  0 0 0 0 0.87  0 0 0 0.52 -0.18" in="noise" result="mist"/>
         <feGaussianBlur stdDeviation="24" in="mist"/>
       </filter>
     </defs>
@@ -65,7 +66,8 @@
     </a>
 
     <nav class="nav-links" aria-label="Điều hướng chính">
-      <a href="#works">Triển lãm</a>
+      <a href="#chapter-botanical">Ngọc bích</a>
+      <a href="#chapter-villa">Chân trời</a>
       <a href="#craft">Nghệ thuật</a>
       <a href="#register">Khởi tạo</a>
     </nav>
@@ -77,26 +79,31 @@
   </div>
 </header>
 
-<!-- Slim 40px Right-Edge Micro-Rail (4 Compact Stops · Zero Overlap) -->
+<!-- Slim 40px Right-Edge Micro-Rail (5 Compact Stops · Zero Overlap) -->
 <nav class="chapter-rail" id="chapter-rail" data-rail-tone="dark" aria-label="Mục lục chương điện ảnh">
   <a class="rail-item is-active" href="#top" data-rail-target="top" aria-label="00 · Khởi màn">
     <span class="rail-label">Khởi màn</span>
     <span class="rail-code">00</span>
     <span class="rail-tick" aria-hidden="true"></span>
   </a>
-  <a class="rail-item" href="#works" data-rail-target="works" aria-label="01 · Triển lãm">
-    <span class="rail-label">Triển lãm</span>
+  <a class="rail-item" href="#chapter-botanical" data-rail-target="chapter-botanical" aria-label="01 · Ngọc bích">
+    <span class="rail-label">Ngọc bích</span>
     <span class="rail-code">01</span>
     <span class="rail-tick" aria-hidden="true"></span>
   </a>
-  <a class="rail-item" href="#craft" data-rail-target="craft" aria-label="02 · Nghệ thuật">
-    <span class="rail-label">Nghệ thuật</span>
+  <a class="rail-item" href="#chapter-villa" data-rail-target="chapter-villa" aria-label="02 · Chân trời">
+    <span class="rail-label">Chân trời</span>
     <span class="rail-code">02</span>
     <span class="rail-tick" aria-hidden="true"></span>
   </a>
-  <a class="rail-item" href="#intake" data-rail-target="intake" aria-label="03 · Khởi tạo">
-    <span class="rail-label">Khởi tạo</span>
+  <a class="rail-item" href="#craft" data-rail-target="craft" aria-label="03 · Nghệ thuật">
+    <span class="rail-label">Nghệ thuật</span>
     <span class="rail-code">03</span>
+    <span class="rail-tick" aria-hidden="true"></span>
+  </a>
+  <a class="rail-item" href="#intake" data-rail-target="intake" aria-label="04 · Khởi tạo">
+    <span class="rail-label">Khởi tạo</span>
+    <span class="rail-code">04</span>
     <span class="rail-tick" aria-hidden="true"></span>
   </a>
 </nav>
@@ -135,7 +142,7 @@
       </div>
 
       <div class="hero-aside">
-        <a class="scroll-cue" href="#works" aria-label="Cuộn xuống khám phá sân khấu triển lãm">
+        <a class="scroll-cue" href="#chapter-botanical" aria-label="Cuộn xuống khám phá không gian điện ảnh">
           <span class="scroll-cue-line" aria-hidden="true"></span>
           <span>Khám phá</span>
         </a>
@@ -154,31 +161,31 @@
     </div>
   </section>
 
-  <!-- LAYER 2.5 SEAM BRIDGE 1 -> 2: Matrix Volumetric Mist Corridor + 1-Line Kinetic Manifesto Whisper -->
+  <!-- SEAM BRIDGE 1 -> 2: Alpha-Zero Masked Mist Corridor + 1-Sentence Kinetic Manifesto -->
   <section class="mist-bridge mist-bridge-12" id="manifesto" data-act-tone="dark" aria-labelledby="manifesto-heading">
     <div class="matrix-mist-layer mist-corridor" aria-hidden="true">
       <svg class="mist-svg" viewBox="0 0 1600 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
         <defs>
           <filter id="mist-seam-12" x="-25%" y="-35%" width="150%" height="170%">
             <feTurbulence type="fractalNoise" baseFrequency="0.0075 0.022" numOctaves="4" seed="23" result="turb"/>
-            <feColorMatrix type="matrix" values="0 0 0 0 0.66  0 0 0 0 0.84  0 0 0 0 0.84  0 0 0 0.72 -0.22" in="turb" result="cloud"/>
-            <feGaussianBlur stdDeviation="22" in="cloud"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 0.66  0 0 0 0 0.84  0 0 0 0 0.84  0 0 0 0.68 -0.22" in="turb" result="cloud"/>
+            <feGaussianBlur stdDeviation="24" in="cloud"/>
           </filter>
-          <radialGradient id="seam-12-halo" cx="50%" cy="62%" r="58%">
-            <stop offset="0%" stop-color="#A6CFD1" stop-opacity="0.28"/>
-            <stop offset="52%" stop-color="#31797D" stop-opacity="0.14"/>
-            <stop offset="100%" stop-color="#05141C" stop-opacity="0"/>
+          <radialGradient id="seam-12-halo" cx="50%" cy="56%" r="54%">
+            <stop offset="0%" stop-color="#A6CFD1" stop-opacity="0.22"/>
+            <stop offset="52%" stop-color="#25676B" stop-opacity="0.1"/>
+            <stop offset="100%" stop-color="#030A10" stop-opacity="0"/>
           </radialGradient>
         </defs>
         <rect width="1600" height="420" fill="url(#seam-12-halo)"/>
         <g class="mist-band mist-band-1">
-          <ellipse cx="420" cy="210" rx="680" ry="135" fill="#B8D9DC" opacity="0.28" filter="url(#mist-seam-12)"/>
+          <ellipse cx="420" cy="210" rx="680" ry="130" fill="#B8D9DC" opacity="0.24" filter="url(#mist-seam-12)"/>
         </g>
         <g class="mist-band mist-band-2">
-          <ellipse cx="1160" cy="230" rx="720" ry="145" fill="#8CC5C2" opacity="0.24" filter="url(#mist-seam-12)"/>
+          <ellipse cx="1160" cy="230" rx="720" ry="140" fill="#8CC5C2" opacity="0.2" filter="url(#mist-seam-12)"/>
         </g>
         <g class="mist-band mist-band-3">
-          <ellipse cx="800" cy="255" rx="820" ry="120" fill="#CFE7E8" opacity="0.22" filter="url(#mist-seam-12)"/>
+          <ellipse cx="800" cy="245" rx="820" ry="115" fill="#CFE7E8" opacity="0.18" filter="url(#mist-seam-12)"/>
         </g>
       </svg>
     </div>
@@ -216,13 +223,12 @@
     </div>
   </section>
 
-  <!-- ACT 2: Unified Full-Bleed 100vw Borderless Living Cinema Stage with Mist-Sweep Switcher -->
-  <section class="living-stage" id="works" data-act-tone="dark" data-active-scene="botanical" aria-labelledby="stage-heading">
-    <div class="stage-viewport">
-      <!-- Pre-mounted 1080p Real Video 01: Botanical Sanctuary (Default Active) -->
+  <!-- ACT 2: Full-Bleed 100vw Video 02 — Botanical Sanctuary (Directly Visible in Scroll Flow) -->
+  <section class="cinema-chapter chapter-botanical" id="chapter-botanical" data-act-tone="dark" aria-labelledby="botanical-heading">
+    <div class="chapter-stage">
       <video
-        class="stage-video is-active"
-        id="stage-video-botanical"
+        class="chapter-video"
+        id="chapter-video-botanical"
         autoplay
         muted
         loop
@@ -232,16 +238,70 @@
         width="1920"
         height="1080"
         data-cinema-video="reel01"
-        data-scene-video="botanical"
         aria-label="Botanical Sanctuary — không gian gợn nước bạch kim và hơi sương ngọc bích"
       >
         <source src="/assets/reel-01-botanical.mp4" type="video/mp4">
       </video>
+      <div class="chapter-scrim chapter-scrim-left" aria-hidden="true"></div>
+    </div>
 
-      <!-- Pre-mounted 1080p Real Video 02: Coastal Glass Pavilion (Instant Zero-Flash Crossfade) -->
+    <div class="container chapter-overlay chapter-overlay-left">
+      <article class="chapter-card reveal" data-specular>
+        <p class="chapter-eyebrow">01 · BOTANICAL SANCTUARY</p>
+        <h2 id="botanical-heading">Lặng sóng<br><span>sinh hương.</span></h2>
+        <p class="chapter-desc">Nhịp nước tĩnh và hơi sương ngọc bích dành cho thương hiệu chế tác thủ công, nghỉ dưỡng và nghệ thuật sống.</p>
+        <div class="chapter-actions">
+          <button
+            type="button"
+            class="video-control-pill"
+            data-toggle-video="reel01"
+            aria-pressed="false"
+            aria-label="Tạm dừng hoặc phát phim Botanical Sanctuary"
+          >
+            <span class="control-dot" aria-hidden="true"></span>
+            <span class="control-label">Tạm dừng</span>
+          </button>
+          <button
+            type="button"
+            class="pill pill-jade chapter-fs-btn btn-magnetic"
+            data-open-cinema="reel01"
+            data-src="/assets/reel-01-botanical.mp4"
+            data-poster="/assets/reel-01-botanical.webp"
+            data-title="01 · Botanical Sanctuary"
+            data-subtitle="Nhịp nước tĩnh và hơi sương ngọc bích cho thương hiệu chế tác và nghỉ dưỡng."
+          >
+            Toàn màn hình <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ACT 3: Full-Bleed 100vw Video 03 — Coastal Glass Pavilion (Directly Visible in Scroll Flow) -->
+  <section class="cinema-chapter chapter-villa" id="chapter-villa" data-act-tone="dark" aria-labelledby="villa-heading">
+    <!-- Alpha-Zero Masked Mist Veil Dissolving Botanical Water into Starlit Coastal Pool -->
+    <div class="matrix-mist-layer mist-corridor-23" aria-hidden="true">
+      <svg class="mist-svg" viewBox="0 0 1600 320" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <filter id="mist-seam-23" x="-25%" y="-35%" width="150%" height="170%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.008 0.02" numOctaves="4" seed="37" result="turb23"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 0.48  0 0 0 0 0.78  0 0 0 0 0.84  0 0 0 0.54 -0.22" in="turb23" result="coastalCloud"/>
+            <feGaussianBlur stdDeviation="26" in="coastalCloud"/>
+          </filter>
+        </defs>
+        <g class="mist-band mist-band-1">
+          <ellipse cx="460" cy="160" rx="740" ry="110" fill="#6DA4B8" opacity="0.2" filter="url(#mist-seam-23)"/>
+        </g>
+        <g class="mist-band mist-band-2">
+          <ellipse cx="1160" cy="175" rx="760" ry="120" fill="#88C4C2" opacity="0.18" filter="url(#mist-seam-23)"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="chapter-stage chapter-stage-villa">
       <video
-        class="stage-video"
-        id="stage-video-coastal"
+        class="chapter-video"
+        id="chapter-video-villa"
         autoplay
         muted
         loop
@@ -251,243 +311,102 @@
         width="1920"
         height="1080"
         data-cinema-video="reel02"
-        data-scene-video="coastal"
-        aria-label="Coastal Glass Pavilion — biệt thự kính tối giản bên bờ biển và mặt nước vô cực"
+        aria-label="Coastal Glass Pavilion — biệt thự kính ven biển và mặt hồ vô cực"
       >
         <source src="/assets/reel-02-coastal-villa.mp4" type="video/mp4">
       </video>
-
-      <!-- Volumetric Mist Veil Sweep Triggered on Scene Switch -->
-      <div class="stage-mist-sweep" id="stage-mist-sweep" aria-hidden="true"></div>
-      <div class="stage-edge-scrim" aria-hidden="true"></div>
+      <div class="chapter-scrim chapter-scrim-right" aria-hidden="true"></div>
     </div>
 
-    <!-- Refined Lower-Left Floating Editorial Console -->
-    <div class="container stage-overlay">
-      <div class="stage-console reveal" data-specular>
-        <div class="stage-console-copy">
-          <p class="stage-eyebrow" id="stage-eyebrow">01 · BOTANICAL SANCTUARY</p>
-          <h2 id="stage-heading">Lặng sóng<br><span>sinh hương.</span></h2>
-          <p class="stage-desc" id="stage-desc">Nhịp nước tĩnh và hơi sương ngọc bích dành cho thương hiệu chế tác thủ công, nghỉ dưỡng và nghệ thuật sống.</p>
+    <div class="container chapter-overlay chapter-overlay-right">
+      <article class="chapter-card reveal" data-specular>
+        <p class="chapter-eyebrow">02 · COASTAL GLASS PAVILION</p>
+        <h2 id="villa-heading">Kiến trúc chạm<br><span>chân trời.</span></h2>
+        <p class="chapter-desc">Ánh sáng hoàng hôn xanh và mặt hồ vô cực phản chiếu không gian dành cho studio kiến trúc và bất động sản tầm vóc.</p>
+        <div class="chapter-actions">
+          <button
+            type="button"
+            class="video-control-pill"
+            data-toggle-video="reel02"
+            aria-pressed="false"
+            aria-label="Tạm dừng hoặc phát phim Coastal Glass Pavilion"
+          >
+            <span class="control-dot" aria-hidden="true"></span>
+            <span class="control-label">Tạm dừng</span>
+          </button>
+          <button
+            type="button"
+            class="pill pill-jade chapter-fs-btn btn-magnetic"
+            data-open-cinema="reel02"
+            data-src="/assets/reel-02-coastal-villa.mp4"
+            data-poster="/assets/reel-02-coastal-villa.webp"
+            data-title="02 · Coastal Glass Pavilion"
+            data-subtitle="Biệt thự kính ven biển và mặt hồ vô cực trong sắc xanh đại hải."
+          >
+            Toàn màn hình <span aria-hidden="true">↗</span>
+          </button>
         </div>
-
-        <div class="stage-controls-row">
-          <div class="scene-switcher" role="tablist" aria-label="Chuyển đổi không gian điện ảnh">
-            <button
-              type="button"
-              class="scene-pill is-active"
-              role="tab"
-              aria-selected="true"
-              data-scene-switch="botanical"
-              data-video-key="reel01"
-              data-src="/assets/reel-01-botanical.mp4"
-              data-poster="/assets/reel-01-botanical.webp"
-              data-eyebrow="01 · BOTANICAL SANCTUARY"
-              data-title-line1="Lặng sóng"
-              data-title-line2="sinh hương."
-              data-desc="Nhịp nước tĩnh và hơi sương ngọc bích dành cho thương hiệu chế tác thủ công, nghỉ dưỡng và nghệ thuật sống."
-              data-modal-title="01 · Botanical Sanctuary"
-              data-modal-subtitle="Nhịp nước tĩnh và hơi sương ngọc bích cho thương hiệu chế tác và nghỉ dưỡng."
-            >
-              <span class="scene-num">01</span>
-              <span>Ngọc Bích</span>
-            </button>
-
-            <button
-              type="button"
-              class="scene-pill"
-              role="tab"
-              aria-selected="false"
-              data-scene-switch="coastal"
-              data-video-key="reel02"
-              data-src="/assets/reel-02-coastal-villa.mp4"
-              data-poster="/assets/reel-02-coastal-villa.webp"
-              data-eyebrow="02 · COASTAL GLASS PAVILION"
-              data-title-line1="Kiến trúc chạm"
-              data-title-line2="chân trời."
-              data-desc="Ánh sáng hoàng hôn xanh và mặt hồ vô cực phản chiếu không gian dành cho studio kiến trúc và bất động sản tầm vóc."
-              data-modal-title="02 · Coastal Glass Pavilion"
-              data-modal-subtitle="Biệt thự kính ven biển và mặt hồ vô cực trong sắc xanh đại hải."
-            >
-              <span class="scene-num">02</span>
-              <span>Chân Trời</span>
-            </button>
-          </div>
-
-          <div class="stage-util-actions">
-            <button
-              type="button"
-              class="video-control-pill stage-playback-btn"
-              id="stage-toggle-btn"
-              data-toggle-active-stage
-              aria-pressed="false"
-              aria-label="Tạm dừng hoặc phát phim đang trình chiếu"
-            >
-              <span class="control-dot" aria-hidden="true"></span>
-              <span class="control-label">Tạm dừng</span>
-            </button>
-
-            <button
-              type="button"
-              class="pill pill-jade stage-fs-btn btn-magnetic"
-              id="stage-fullscreen-btn"
-              data-open-cinema="reel01"
-              data-src="/assets/reel-01-botanical.mp4"
-              data-poster="/assets/reel-01-botanical.webp"
-              data-title="01 · Botanical Sanctuary"
-              data-subtitle="Nhịp nước tĩnh và hơi sương ngọc bích cho thương hiệu chế tác và nghỉ dưỡng."
-            >
-              Toàn màn hình <span aria-hidden="true">↗</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      </article>
     </div>
   </section>
 
-  <!-- ACT 3 + SEAMLESS FOOTER: Museum-Grade Coded "Luminous Platinum-Jade Optical Sanctuary" -->
+  <!-- ACT 4 + SEAMLESS FOOTER: Photorealistic Deep-Water Atmospheric Sanctuary (Zero Vector Curves · Alpha-Zero Top Mask) -->
   <div class="sanctuary-world" id="sanctuary-world" data-act-tone="dark">
-    <!-- LAYER 2.5 SEAM BRIDGE 2 -> 3: Volumetric Mist Dissolving Act 2 Water into Coded Sanctuary -->
-    <div class="matrix-mist-layer mist-corridor-23" aria-hidden="true">
+    <!-- SEAM BRIDGE 3 -> 4: Alpha-Zero Masked Mist Dissolving Infinity Pool Reflection into Act 4 -->
+    <div class="matrix-mist-layer mist-corridor-34" aria-hidden="true">
       <svg class="mist-svg" viewBox="0 0 1600 320" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
         <defs>
-          <filter id="mist-seam-23" x="-25%" y="-35%" width="150%" height="170%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.008 0.02" numOctaves="4" seed="47" result="turb23"/>
-            <feColorMatrix type="matrix" values="0 0 0 0 0.42  0 0 0 0 0.84  0 0 0 0 0.74  0 0 0 0.65 -0.22" in="turb23" result="jadeCloud"/>
-            <feGaussianBlur stdDeviation="24" in="jadeCloud"/>
+          <filter id="mist-seam-34" x="-25%" y="-35%" width="150%" height="170%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.0078 0.019" numOctaves="4" seed="53" result="turb34"/>
+            <feColorMatrix type="matrix" values="0 0 0 0 0.36  0 0 0 0 0.72  0 0 0 0 0.68  0 0 0 0.5 -0.22" in="turb34" result="poolMist"/>
+            <feGaussianBlur stdDeviation="28" in="poolMist"/>
           </filter>
         </defs>
         <g class="mist-band mist-band-1">
-          <ellipse cx="480" cy="150" rx="720" ry="110" fill="#63C7AA" opacity="0.22" filter="url(#mist-seam-23)"/>
+          <ellipse cx="480" cy="160" rx="740" ry="105" fill="#4BA898" opacity="0.16" filter="url(#mist-seam-34)"/>
         </g>
         <g class="mist-band mist-band-2">
-          <ellipse cx="1180" cy="175" rx="760" ry="125" fill="#9BD7D2" opacity="0.2" filter="url(#mist-seam-23)"/>
+          <ellipse cx="1140" cy="170" rx="760" ry="115" fill="#7AB8BA" opacity="0.15" filter="url(#mist-seam-34)"/>
         </g>
       </svg>
     </div>
 
-    <!-- MUSEUM-GRADE CODED OPTICAL LIGHT SCULPTURE (Zero Canvas · Pure GPU SVG Optical Filters & CSS3) -->
+    <!-- PHOTOREALISTIC DEEP-WATER VOLUMETRIC ATMOSPHERE (Zero Canvas · Zero Crude Vector Lines · Alpha-Zero Top Mask) -->
     <div class="sanctuary-sculpture" id="sanctuary-sculpture" aria-hidden="true">
-      <!-- Layer A: Living Liquid-Jade & Moonlit Silver Aurora Mesh (4 Coprime Breathing Pools) -->
+      <!-- Layer A: Ultra-Soft Deep-Water Volumetric Aurora Pools (Coprime Cycles 19s / 29s / 43s / 53s) -->
       <div class="sanctuary-aurora-mesh">
-        <span class="aurora-orb orb-teal"></span>
+        <span class="aurora-orb orb-ocean"></span>
         <span class="aurora-orb orb-emerald"></span>
-        <span class="aurora-orb orb-jade"></span>
-        <span class="aurora-orb orb-silver"></span>
+        <span class="aurora-orb orb-deep-jade"></span>
+        <span class="aurora-orb orb-moonlight"></span>
       </div>
 
-      <!-- Layer B: Infinite-Resolution Inline SVG Liquid-Platinum & Emerald Optical Prism Ribbons + Orbital Arcs -->
-      <svg class="prism-ribbons-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-        <defs>
-          <filter id="liquid-refract" x="-12%" y="-12%" width="124%" height="124%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.0028 0.0075" numOctaves="3" seed="19" result="wave"/>
-            <feDisplacementMap in="SourceGraphic" in2="wave" scale="22" xChannelSelector="R" yChannelSelector="G"/>
-          </filter>
+      <!-- Layer B: Organic Billowing Matrix Mist Veils Flowing Down Under Translucent Footer (Pure feTurbulence Fog) -->
+      <div class="matrix-mist-layer sanctuary-mist-veil">
+        <svg class="mist-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs>
+            <filter id="sanctuary-fog-filter" x="-25%" y="-25%" width="150%" height="150%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.006 0.014" numOctaves="4" seed="67" result="fogNoise"/>
+              <feColorMatrix type="matrix" values="0 0 0 0 0.34  0 0 0 0 0.72  0 0 0 0 0.66  0 0 0 0.44 -0.2" in="fogNoise" result="fog"/>
+              <feGaussianBlur stdDeviation="32" in="fog"/>
+            </filter>
+          </defs>
+          <g class="mist-band mist-band-1">
+            <rect x="-220" y="140" width="2040" height="780" filter="url(#sanctuary-fog-filter)"/>
+          </g>
+          <g class="mist-band mist-band-2">
+            <rect x="-260" y="220" width="2120" height="720" filter="url(#sanctuary-fog-filter)"/>
+          </g>
+          <g class="mist-band mist-band-3">
+            <rect x="-180" y="340" width="1960" height="620" filter="url(#sanctuary-fog-filter)"/>
+          </g>
+        </svg>
+      </div>
 
-          <filter id="prism-bloom" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="16" result="soft"/>
-            <feMerge>
-              <feMergeNode in="soft"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-
-          <linearGradient id="platinum-silk-grad" x1="0%" y1="30%" x2="100%" y2="70%">
-            <stop offset="0%" stop-color="#D8F2EE" stop-opacity="0.06"/>
-            <stop offset="22%" stop-color="#E7FAF6" stop-opacity="0.58"/>
-            <stop offset="50%" stop-color="#48D1A8" stop-opacity="0.46"/>
-            <stop offset="78%" stop-color="#D6F0ED" stop-opacity="0.64"/>
-            <stop offset="100%" stop-color="#158464" stop-opacity="0.05"/>
-          </linearGradient>
-
-          <linearGradient id="emerald-ribbon-grad" x1="0%" y1="70%" x2="100%" y2="25%">
-            <stop offset="0%" stop-color="#0B3B45" stop-opacity="0.08"/>
-            <stop offset="28%" stop-color="#1FA87A" stop-opacity="0.52"/>
-            <stop offset="56%" stop-color="#7EECC8" stop-opacity="0.42"/>
-            <stop offset="84%" stop-color="#CFEBE6" stop-opacity="0.48"/>
-            <stop offset="100%" stop-color="#0B3B45" stop-opacity="0.04"/>
-          </linearGradient>
-
-          <linearGradient id="platinum-hairline" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.72"/>
-            <stop offset="45%" stop-color="#7EECC8" stop-opacity="0.34"/>
-            <stop offset="100%" stop-color="#CBEBE6" stop-opacity="0.1"/>
-          </linearGradient>
-
-          <radialGradient id="sanctuary-core-glow" cx="50%" cy="64%" r="48%">
-            <stop offset="0%" stop-color="#48D1A8" stop-opacity="0.32"/>
-            <stop offset="46%" stop-color="#158464" stop-opacity="0.16"/>
-            <stop offset="100%" stop-color="#030D11" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-
-        <!-- Central Luminous Jade Sanctuary Horizon Aura -->
-        <rect width="1600" height="900" fill="url(#sanctuary-core-glow)"/>
-
-        <!-- Nested Brushed-Platinum Geometric Orbital Arcs (Echoing Hero Video 01 Ring) -->
-        <g class="orbital-ring orbital-ring-outer" transform="translate(800 540)">
-          <circle cx="0" cy="0" r="470" fill="none" stroke="url(#platinum-hairline)" stroke-width="1.25" stroke-dasharray="420 110 210 90" opacity="0.58"/>
-        </g>
-        <g class="orbital-ring orbital-ring-mid" transform="translate(800 540)">
-          <circle cx="0" cy="0" r="355" fill="none" stroke="url(#platinum-hairline)" stroke-width="1.5" stroke-dasharray="280 80 180 120" opacity="0.68"/>
-        </g>
-        <g class="orbital-ring orbital-ring-inner" transform="translate(800 540)">
-          <circle cx="0" cy="0" r="235" fill="none" stroke="url(#platinum-hairline)" stroke-width="1.15" stroke-dasharray="160 70 220 60" opacity="0.54"/>
-        </g>
-
-        <!-- Liquid-Refracted Platinum & Emerald Optical Infinity Ribbons -->
-        <g class="prism-ribbon-group ribbon-drift-a" filter="url(#liquid-refract)">
-          <path
-            d="M -120 650 C 180 420, 480 410, 780 565 C 1070 715, 1340 690, 1720 430"
-            fill="none"
-            stroke="url(#platinum-silk-grad)"
-            stroke-width="64"
-            stroke-linecap="round"
-            opacity="0.52"
-            filter="url(#prism-bloom)"
-          />
-          <path
-            d="M -120 650 C 180 420, 480 410, 780 565 C 1070 715, 1340 690, 1720 430"
-            fill="none"
-            stroke="#E9FBF7"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            opacity="0.68"
-          />
-        </g>
-
-        <g class="prism-ribbon-group ribbon-drift-b" filter="url(#liquid-refract)">
-          <path
-            d="M -140 500 C 220 710, 560 725, 860 545 C 1150 370, 1410 415, 1740 640"
-            fill="none"
-            stroke="url(#emerald-ribbon-grad)"
-            stroke-width="54"
-            stroke-linecap="round"
-            opacity="0.56"
-            filter="url(#prism-bloom)"
-          />
-          <path
-            d="M -140 500 C 220 710, 560 725, 860 545 C 1150 370, 1410 415, 1740 640"
-            fill="none"
-            stroke="#9DF4D6"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            opacity="0.62"
-          />
-        </g>
-
-        <!-- Optical Liquid Caustic Ripples Resting Along Footer Horizon -->
-        <g class="sanctuary-ripples" opacity="0.48">
-          <ellipse cx="800" cy="820" rx="540" ry="38" fill="none" stroke="url(#platinum-hairline)" stroke-width="1.2"/>
-          <ellipse cx="800" cy="820" rx="390" ry="26" fill="none" stroke="#6EE7B7" stroke-opacity="0.34" stroke-width="1"/>
-          <ellipse cx="800" cy="820" rx="240" ry="15" fill="none" stroke="#E4F6F1" stroke-opacity="0.42" stroke-width="0.9"/>
-        </g>
-      </svg>
-
-      <!-- Layer C: Interactive Pointer-Refracting Specular Caustic Halo -->
+      <!-- Layer C: Subtle Cursor-Responsive Ambient Caustic Glow -->
       <div class="sanctuary-caustic-halo" id="sanctuary-caustic-halo"></div>
 
-      <!-- Layer D: 12 Suspended Dew-Silver Micro-Motes -->
+      <!-- Layer D: 12 Delicate Out-of-Focus Suspended Dew-Silver Bokeh Motes -->
       <div class="sanctuary-motes">
         <span class="dew-mote mote-01"></span>
         <span class="dew-mote mote-02"></span>
@@ -504,7 +423,7 @@
       </div>
     </div>
 
-    <!-- COMPACT ARCHITECTURAL CRAFT RAIL (~150px Tall Floating Over Sanctuary) -->
+    <!-- COMPACT ARCHITECTURAL CRAFT RAIL (#craft Floating Over Deep-Water Atmosphere) -->
     <section class="craft-rail-section" id="craft" aria-labelledby="craft-heading">
       <div class="container">
         <div class="craft-bar-head reveal">
@@ -549,7 +468,7 @@
       </div>
     </section>
 
-    <!-- MAIN ATELIER GATEWAY (#register + #intake-form + AI Connect Floating Over Sanctuary) -->
+    <!-- MAIN ATELIER GATEWAY (#register + #intake-form + AI Connect) -->
     <section class="gateway" id="intake" aria-labelledby="gateway-heading">
       <span id="register" class="anchor-offset" aria-hidden="true"></span>
       <div class="container gateway-container">
@@ -659,7 +578,7 @@
       </div>
     </section>
 
-    <!-- SEAMLESS TRANSLUCENT FOOTER (Liquid-Platinum & Jade Sanctuary Flows Right Underneath) -->
+    <!-- SEAMLESS TRANSLUCENT FOOTER (Deep-Water Atmosphere & Mist Flow Right Underneath) -->
     <footer class="site-footer">
       <div class="container footer-inner">
         <div class="footer-brand">

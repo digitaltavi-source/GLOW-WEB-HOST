@@ -104,7 +104,20 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
     assert.ok(html.includes(`/assets/${file}`), `index.html missing curated poster /assets/${file}`);
   }
   assert.ok((html.match(/<video\b/g) || []).length >= 4, "must render 3 curated cinema videos + modal video player");
-  assert.ok(html.includes('id="sanctuary-sculpture"'), "index.html missing coded #sanctuary-sculpture optical art");
+  assert.ok(html.includes('id="chapter-botanical"'), "index.html missing #chapter-botanical direct scroll chapter");
+  assert.ok(html.includes('id="chapter-villa"'), "index.html missing #chapter-villa direct scroll chapter");
+  assert.ok(html.includes('id="sanctuary-sculpture"'), "index.html missing #sanctuary-sculpture atmospheric layer");
+  assert.equal(html.includes("prism-ribbons-svg"), false, "crude SVG prism-ribbons-svg curves must be removed");
+  assert.equal(html.includes("orbital-ring"), false, "thin wireframe orbital-ring circles must be removed");
+
+  const css = readText("public/app.css");
+  assert.equal(css.includes("prism-ribbons-svg"), false, "app.css must not contain removed prism-ribbons-svg rules");
+  assert.equal(css.includes("orbital-ring"), false, "app.css must not contain removed orbital-ring rules");
+  assert.match(
+    css,
+    /\.sanctuary-sculpture\s*\{[^}]*mask-image:\s*linear-gradient\(\s*180deg,\s*transparent\s+0%/s,
+    "app.css .sanctuary-sculpture must enforce alpha-zero vertical top fade mask"
+  );
 
   const requiredHtmlTokens = [
     'id="runtime-status"',

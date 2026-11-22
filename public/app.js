@@ -7,7 +7,6 @@ const progress = $("#progress");
 const siteHeader = $("#site-header");
 const heroSection = $("#top");
 const manifestoSection = $("#manifesto");
-const livingStage = $("#works");
 const craftSection = $("#craft");
 const craftThread = $("#craft-thread");
 const chapterRail = $("#chapter-rail");
@@ -174,15 +173,23 @@ async function refreshRuntime() {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 3. GPU-Smooth Scroll Choreography & 4-Stop Micro-Rail Sync                 */
+/* 3. GPU-Smooth Scroll Choreography, 5-Stop Micro-Rail & World Atmosphere    */
 /* -------------------------------------------------------------------------- */
 const kineticWords = $$(".kinetic-manifesto .k-word");
 const railItems = $$(".rail-item");
 let scrollRafId = 0;
 
+const WORLD_SCENE_MAP = {
+  top: "ocean",
+  "chapter-botanical": "botanical",
+  "chapter-villa": "coastal",
+  craft: "sanctuary",
+  intake: "sanctuary",
+};
+
 function updateChapterRail(vh, scrollY, maxScroll) {
   if (!chapterRail || railItems.length === 0) return;
-  const probeY = vh * 0.42;
+  const probeY = vh * 0.44;
 
   let activeTarget = "top";
   if (maxScroll > 0 && scrollY >= maxScroll - 24) {
@@ -202,6 +209,11 @@ function updateChapterRail(vh, scrollY, maxScroll) {
   railItems.forEach((item) => {
     item.classList.toggle("is-active", item.dataset.railTarget === activeTarget);
   });
+
+  const targetScene = WORLD_SCENE_MAP[activeTarget] || "ocean";
+  if (document.body.dataset.worldScene !== targetScene) {
+    document.body.dataset.worldScene = targetScene;
+  }
 }
 
 function updateScrollChoreography() {
@@ -332,10 +344,6 @@ initPointerCraft();
 /* -------------------------------------------------------------------------- */
 const cinemaVideos = $$("video[data-cinema-video]");
 const manualOverrides = new Map();
-let activeStageScene = "botanical";
-let activeStageVideoKey = "reel01";
-
-const stageToggleBtn = $("#stage-toggle-btn");
 
 function setButtonPausedState(btn, paused) {
   if (!btn) return;
@@ -347,9 +355,6 @@ function setButtonPausedState(btn, paused) {
 function syncToggleButton(key, paused) {
   const directBtn = $(`[data-toggle-video="${key}"]`);
   if (directBtn) setButtonPausedState(directBtn, paused);
-  if (key === activeStageVideoKey && stageToggleBtn) {
-    setButtonPausedState(stageToggleBtn, paused);
-  }
 }
 
 function safePlay(video) {
@@ -400,7 +405,7 @@ const videoVisibilityObserver = new IntersectionObserver(
       }
     });
   },
-  { threshold: 0.12 }
+  { threshold: 0.1 }
 );
 
 cinemaVideos.forEach((video) => {
@@ -432,121 +437,13 @@ $$("[data-toggle-video]").forEach((btn) => {
   });
 });
 
-stageToggleBtn?.addEventListener("click", () => {
-  const video = $(`video[data-cinema-video="${activeStageVideoKey}"]`);
-  if (!video) return;
-  if (video.paused) {
-    manualOverrides.set(activeStageVideoKey, "playing");
-    safePlay(video);
-    syncToggleButton(activeStageVideoKey, false);
-  } else {
-    manualOverrides.set(activeStageVideoKey, "paused");
-    video.pause();
-    syncToggleButton(activeStageVideoKey, true);
-  }
-});
-
 reducedMotionQuery.addEventListener?.("change", (e) => {
   isReducedMotion = e.matches;
   applyReducedMotionState();
 });
 
 /* -------------------------------------------------------------------------- */
-/* 6. Act 2 Mist-Sweep Scene Switcher & Dynamic World-Atmosphere Sync         */
-/* -------------------------------------------------------------------------- */
-const sceneTabs = $$("[data-scene-switch]");
-const stageVideos = $$("video[data-scene-video]");
-const stageMistSweep = $("#stage-mist-sweep");
-const stageEyebrow = $("#stage-eyebrow");
-const stageHeading = $("#stage-heading");
-const stageDesc = $("#stage-desc");
-const stageFullscreenBtn = $("#stage-fullscreen-btn");
-let sweepTimer = 0;
-
-function renderStageHeading(line1, line2) {
-  if (!stageHeading) return;
-  const span = document.createElement("span");
-  span.textContent = line2;
-  stageHeading.replaceChildren(
-    document.createTextNode(line1),
-    document.createElement("br"),
-    span
-  );
-}
-
-function switchLivingStageScene(tabBtn) {
-  if (!tabBtn) return;
-  const targetScene = tabBtn.dataset.sceneSwitch || "botanical";
-  const targetVideoKey = tabBtn.dataset.videoKey || "reel01";
-
-  activeStageScene = targetScene;
-  activeStageVideoKey = targetVideoKey;
-
-  document.body.dataset.worldScene = targetScene;
-  if (livingStage) livingStage.dataset.activeScene = targetScene;
-
-  sceneTabs.forEach((btn) => {
-    const active = btn === tabBtn;
-    btn.classList.toggle("is-active", active);
-    btn.setAttribute("aria-selected", String(active));
-  });
-
-  stageVideos.forEach((video) => {
-    const isTarget = video.dataset.sceneVideo === targetScene;
-    video.classList.toggle("is-active", isTarget);
-    if (isTarget) {
-      const override = manualOverrides.get(targetVideoKey);
-      if (!isReducedMotion && override !== "paused") {
-        safePlay(video);
-        syncToggleButton(targetVideoKey, false);
-      } else {
-        syncToggleButton(targetVideoKey, video.paused);
-      }
-    }
-  });
-
-  if (stageEyebrow && tabBtn.dataset.eyebrow) {
-    stageEyebrow.textContent = tabBtn.dataset.eyebrow;
-  }
-  if (tabBtn.dataset.titleLine1 && tabBtn.dataset.titleLine2) {
-    renderStageHeading(tabBtn.dataset.titleLine1, tabBtn.dataset.titleLine2);
-  }
-  if (stageDesc && tabBtn.dataset.desc) {
-    stageDesc.textContent = tabBtn.dataset.desc;
-  }
-  if (stageFullscreenBtn) {
-    stageFullscreenBtn.dataset.openCinema = targetVideoKey;
-    stageFullscreenBtn.dataset.src = tabBtn.dataset.src || "/assets/reel-01-botanical.mp4";
-    stageFullscreenBtn.dataset.poster = tabBtn.dataset.poster || "/assets/reel-01-botanical.webp";
-    stageFullscreenBtn.dataset.title = tabBtn.dataset.modalTitle || "01 · Botanical Sanctuary";
-    stageFullscreenBtn.dataset.subtitle = tabBtn.dataset.modalSubtitle || "";
-  }
-
-  if (stageMistSweep && !isReducedMotion) {
-    window.clearTimeout(sweepTimer);
-    stageMistSweep.classList.remove("is-sweeping");
-    void stageMistSweep.offsetWidth;
-    stageMistSweep.classList.add("is-sweeping");
-    sweepTimer = window.setTimeout(() => {
-      stageMistSweep.classList.remove("is-sweeping");
-    }, 900);
-  }
-}
-
-sceneTabs.forEach((tab, idx) => {
-  tab.addEventListener("click", () => switchLivingStageScene(tab));
-  tab.addEventListener("keydown", (e) => {
-    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
-    e.preventDefault();
-    const dir = e.key === "ArrowRight" ? 1 : -1;
-    const nextIdx = (idx + dir + sceneTabs.length) % sceneTabs.length;
-    sceneTabs[nextIdx].focus();
-    switchLivingStageScene(sceneTabs[nextIdx]);
-  });
-});
-
-/* -------------------------------------------------------------------------- */
-/* 7. Full-Screen Cinema Lightbox Modal (Real 1080p MP4 + ESC Focus Return)   */
+/* 6. Full-Screen Cinema Lightbox Modal (Real 1080p MP4 + ESC Focus Return)   */
 /* -------------------------------------------------------------------------- */
 const cinemaModal = $("#cinema-modal");
 const cinemaVideo = $("#cinema-stage-video");
