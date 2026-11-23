@@ -5,7 +5,7 @@
   "file_count": 113,
   "files": {
     ".env.example": "a10c7b3f97eae284e986ad397d60654fb265f81e",
-    ".github/workflows/validate-public-host.yml": "995221824da1f6f16e66d5f502516e6a0dffbc46",
+    ".github/workflows/validate-public-host.yml": "ea2c633dbbd6a14a996fab02bba27a3c19605641",
     ".gitignore": "c744b43aa122cebbdac36b9d020b42dc58c9cdb9",
     "HOSTINGER_PUBLIC_NODE_DEPLOYMENT_PROFILE_v0.1.0.json": "c39c87f6bd50763abdaf632ca16ac740ff8f0696",
     "OPERATOR_GATEWAY.md": "bda45e878d3bd5866522a897dd75971e3d9003d2",
@@ -90,7 +90,7 @@
     "tests/canonical-app-surface.test.ts": "5434d06cc0fb8a4b1be1b3b8c678008c8a739ba0",
     "tests/compat-lane.test.ts": "b07b0f6a20664f470bb980e29a8e47c48b118c90",
     "tests/connection-diagnostics.test.ts": "1a2c324d26d6d436314c2813e5bc0b90c79a9690",
-    "tests/connector-ownership.test.ts": "05f61301466fd87b0b52ea47560b25878d03adc1",
+    "tests/connector-ownership.test.ts": "957a52b6e6143e4f5b3c608dfe8e066c898238fd",
     "tests/contracts.test.ts": "0ee32da711c270e42619a905ddce7257176c67e0",
     "tests/domain-topology.test.ts": "5c341389e32d8233d4addddca4788eb097697e8a",
     "tests/entry214-sync-and-security.test.ts": "6e9a660478cdbb21af88630a967d0de84f2f8744",

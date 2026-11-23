@@ -46,9 +46,10 @@ test('published public contract describes current routing without invented readi
  assert.doesNotMatch(op,/\bH[123]\b|KIT[_ -]?[ABC]|CAP\.WEB\./u);
 });
 
-test('workflow checks release+engineering branches only',()=>{
+test('workflow restricts CI execution to manual workflow_dispatch without auto push or PR triggers',()=>{
  const wf=source('.github/workflows/validate-public-host.yml');
- assert.match(wf,/branches:\s*\[main, sandbox\]/);
+ assert.match(wf,/on:\s*\n\s*workflow_dispatch:/);
+ assert.doesNotMatch(wf,/^\s*(push|pull_request):/m);
 });
 
 test('verify-host-export-parity rejects symlinked files and symlinked manifests via lstatSync',async()=>{
