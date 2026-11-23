@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#05161F">
 <title>GLOW Web — Ánh Sáng Đại Hải · Kiến Trúc Điện Ảnh Cho Thương Hiệu</title>
 <link rel="preload" as="image" href="/assets/hero-ocean-jade.webp" fetchpriority="high">
-<link rel="stylesheet" href="/app.css">
+<link rel="stylesheet" href="/app.css?v=61">
 </head>
 <body data-world-scene="ocean" data-active-view="home" data-lang="vi">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skip">Chuyển tới nội dung chính</a>
@@ -535,6 +535,54 @@
             </g>
             <g class="mist-band mist-band-3">
               <rect x="-180" y="340" width="1960" height="620" filter="url(#sanctuary-fog-filter)"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="sanctuary-caustic-loop" aria-hidden="true">
+          <svg class="sanctuary-caustic-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <defs>
+              <filter id="caustic-wave-blur" x="-15%" y="-35%" width="130%" height="170%">
+                <feGaussianBlur stdDeviation="7.5"/>
+              </filter>
+              <linearGradient id="caustic-filament-a" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#6EE7B7" stop-opacity="0"/>
+                <stop offset="28%" stop-color="#9AF6DC" stop-opacity="0.34"/>
+                <stop offset="52%" stop-color="#D9FCFA" stop-opacity="0.52"/>
+                <stop offset="76%" stop-color="#6EE7B7" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#6EE7B7" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="caustic-filament-b" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#52E0B2" stop-opacity="0"/>
+                <stop offset="34%" stop-color="#A7F3D0" stop-opacity="0.28"/>
+                <stop offset="58%" stop-color="#E6FFFA" stop-opacity="0.44"/>
+                <stop offset="82%" stop-color="#48D1A8" stop-opacity="0.24"/>
+                <stop offset="100%" stop-color="#52E0B2" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <g class="caustic-wave-a" filter="url(#caustic-wave-blur)" fill="none" stroke="url(#caustic-filament-a)" stroke-linecap="round">
+              <path d="M180 86 C360 62, 520 118, 700 88 C880 58, 1040 116, 1220 84 C1340 64, 1430 96, 1510 82" stroke-width="2.4"/>
+              <path d="M240 142 C410 116, 590 168, 780 136 C960 106, 1120 164, 1310 134" stroke-width="1.9" opacity="0.82"/>
+              <path d="M320 198 C510 174, 680 218, 860 192 C1030 168, 1180 212, 1360 188" stroke-width="1.5" opacity="0.64"/>
+            </g>
+            <g class="caustic-wave-b" filter="url(#caustic-wave-blur)" fill="none" stroke="url(#caustic-filament-b)" stroke-linecap="round">
+              <path d="M140 112 C330 138, 500 78, 690 110 C880 142, 1060 82, 1250 114 C1370 134, 1450 98, 1530 112" stroke-width="2.1"/>
+              <path d="M290 168 C470 194, 640 142, 830 170 C1010 198, 1170 148, 1340 172" stroke-width="1.6" opacity="0.74"/>
+              <path d="M410 226 C580 246, 750 206, 930 228 C1090 248, 1210 214, 1330 226" stroke-width="1.3" opacity="0.52"/>
+            </g>
+            <g class="moss-dew-plane">
+              <circle class="moss-glint mg-a" style="--mg-d:-1.4s" cx="214" cy="284" r="2.1" fill="#6EE7B7"/>
+              <circle class="moss-glint mg-b" style="--mg-d:-4.7s" cx="368" cy="348" r="1.8" fill="#A7F3D0"/>
+              <circle class="moss-glint mg-c" style="--mg-d:-2.9s" cx="526" cy="278" r="2.4" fill="#6EE7B7"/>
+              <circle class="moss-glint mg-a" style="--mg-d:-6.3s" cx="684" cy="412" r="1.9" fill="#A7F3D0"/>
+              <circle class="moss-glint mg-b" style="--mg-d:-0.8s" cx="842" cy="352" r="2.3" fill="#6EE7B7"/>
+              <circle class="moss-glint mg-c" style="--mg-d:-5.5s" cx="1018" cy="288" r="1.8" fill="#A7F3D0"/>
+              <circle class="moss-glint mg-a" style="--mg-d:-3.6s" cx="1186" cy="416" r="2.5" fill="#6EE7B7"/>
+              <circle class="moss-glint mg-b" style="--mg-d:-7.9s" cx="1364" cy="346" r="1.9" fill="#A7F3D0"/>
+              <circle class="moss-glint mg-c" style="--mg-d:-2.1s" cx="292" cy="542" r="2.0" fill="#6EE7B7"/>
+              <circle class="moss-glint mg-a" style="--mg-d:-5.1s" cx="612" cy="608" r="2.2" fill="#A7F3D0"/>
+              <circle class="moss-glint mg-b" style="--mg-d:-3.2s" cx="956" cy="546" r="1.8" fill="#6EE7B7"/>
+              <circle class="moss-glint mg-c" style="--mg-d:-8.4s" cx="1278" cy="614" r="2.3" fill="#A7F3D0"/>
             </g>
           </svg>
         </div>
@@ -1203,6 +1251,6 @@
   </div>
 </div>
 
-<script type="module" src="/app.js"></script>
+<script type="module" src="/app.js?v=61"></script>
 </body>
 </html>
