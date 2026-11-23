@@ -2357,6 +2357,11 @@ body:not([data-active-view="home"]) .chapter-rail {
   }
 }
 
+.site-footer .container.footer-inner {
+  max-width: 1680px;
+  padding-inline: clamp(28px, 4.8vw, 84px);
+}
+
 .footer-inner {
   display: flex;
   flex-wrap: nowrap;
@@ -2381,6 +2386,8 @@ body:not([data-active-view="home"]) .chapter-rail {
   margin: 2px 0 0;
   font-size: 12px;
   color: var(--ink-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .footer-status {
@@ -3850,7 +3857,8 @@ body:not([data-active-view="home"]) .chapter-rail {
 @media (max-width: 780px) {
   .container,
   .container.chapter-overlay,
-  .container.chapter-villa-footer-bar {
+  .container.chapter-villa-footer-bar,
+  .site-footer .container.footer-inner {
     padding-inline: 20px;
   }
 
