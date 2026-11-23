@@ -2336,12 +2336,24 @@ body:not([data-active-view="home"]) .chapter-rail {
 
 @media (min-width: 1024px) and (min-height: 760px) {
   main[data-active-view="home"] .site-footer {
-    margin-top: -74px;
-    height: 74px;
-    padding: 14px 0 16px;
+    margin-top: -80px;
+    min-height: 80px;
+    padding: 11px 0 13px;
+    display: flex;
+    align-items: center;
     z-index: 12;
     background: linear-gradient(180deg, rgba(2, 9, 12, 0.04) 0%, rgba(2, 9, 12, 0.68) 100%);
     border-top: 1px solid rgba(175, 225, 212, 0.14);
+  }
+
+  main[data-active-view="home"] .site-footer .footer-inner {
+    width: 100%;
+  }
+}
+
+@media (min-width: 1200px) {
+  .footer-note {
+    white-space: nowrap;
   }
 }
 

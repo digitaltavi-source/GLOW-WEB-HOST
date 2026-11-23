@@ -244,8 +244,8 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   );
   assert.match(
     css,
-    /main\[data-active-view="home"\]\s+\.site-footer\s*\{[^}]*margin-top:\s*-74px;[^}]*height:\s*74px;/s,
-    "app.css must overlay compact 74px .site-footer onto Home Frame 4 desktop so Frame 4 fits 100svh with zero extra scroll"
+    /main\[data-active-view="home"\]\s+\.site-footer\s*\{[^}]*margin-top:\s*-80px;[^}]*min-height:\s*80px;/s,
+    "app.css must overlay compact 80px .site-footer onto Home Frame 4 desktop so Frame 4 fits 100svh with zero extra scroll or clipping"
   );
   assert.ok(css.includes("--flare-intensity"), "app.css must define --flare-intensity for Video 01 seamless loop flare");
   assert.ok(css.includes(".hero-starfield"), "app.css must style .hero-starfield multi-depth SVG starfield");

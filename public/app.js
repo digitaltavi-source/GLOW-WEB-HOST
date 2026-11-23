@@ -2000,7 +2000,8 @@ function getFrameTops() {
       return Math.min(maxScroll, rawTop + seam);
     }
     if (id === "sanctuary-world") {
-      return Math.min(maxScroll, rawTop + stone);
+      const targetTop = Math.min(maxScroll, rawTop + stone);
+      return Math.abs(maxScroll - targetTop) <= 16 ? maxScroll : targetTop;
     }
     return rawTop;
   });
