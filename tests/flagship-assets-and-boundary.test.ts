@@ -184,8 +184,11 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   assert.ok(html.includes('id="chapter-villa"'), "index.html missing #chapter-villa direct scroll chapter");
   assert.ok(html.includes('class="chapter-editorial'), "index.html missing borderless .chapter-editorial film typography");
   assert.equal(html.includes("chapter-card"), false, "hard bordered .chapter-card boxes over video frames must be removed");
-  assert.ok(html.includes('href="/app.css?v=62"'), "index.html must cache-bust /app.css?v=62");
-  assert.ok(html.includes('src="/app.js?v=62"'), "index.html must cache-bust /app.js?v=62");
+  assert.ok(html.includes('href="/app.css?v=63"'), "index.html must cache-bust /app.css?v=63");
+  assert.ok(html.includes('src="/app.js?v=63"'), "index.html must cache-bust /app.js?v=63");
+  assert.ok(html.includes('class="footer-grid"'), "index.html must include expanded .footer-grid");
+  assert.ok(html.includes('class="footer-bottom"'), "index.html must include .footer-bottom legal and social row");
+  assert.ok(html.includes('class="footer-social"'), "index.html must include .footer-social monochrome icon strip");
   assert.ok(html.includes('class="sanctuary-caustic-svg"'), "index.html must include living loop .sanctuary-caustic-svg inside #sanctuary-sculpture");
   assert.ok(html.includes('id="sanctuary-sculpture"'), "index.html missing #sanctuary-sculpture atmospheric layer");
   assert.equal(html.includes("prism-ribbons-svg"), false, "crude SVG prism-ribbons-svg curves must be removed");
@@ -242,20 +245,23 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   );
   assert.match(
     css,
-    /\.sanctuary-world\s*\{[^}]*z-index:\s*5;[^}]*margin-top:\s*calc\(-1\s*\*\s*var\(--stone-overlap\)\);[^}]*url\("\/assets\/basalt-terrace-deck\.webp\?v=62"\)[^}]*#000\s+var\(--stone-overlap\),\s*#000\s+100%/s,
-    "app.css .sanctuary-world must dissolve over Video 03 pool coping across --stone-overlap with cache-busted basalt-terrace-deck.webp?v=62"
+    /\.sanctuary-world\s*\{[^}]*z-index:\s*5;[^}]*margin-top:\s*calc\(-1\s*\*\s*var\(--stone-overlap\)\);[^}]*url\("\/assets\/basalt-terrace-deck\.webp\?v=63"\)[^}]*#000\s+var\(--stone-overlap\),\s*#000\s+100%/s,
+    "app.css .sanctuary-world must dissolve over Video 03 pool coping across --stone-overlap with cache-busted basalt-terrace-deck.webp?v=63"
   );
   assert.match(
     css,
-    /@media\s*\(min-width:\s*1024px\)\s*and\s*\(min-height:\s*760px\)\s*\{\s*\.sanctuary-world\s*\{[^}]*justify-content:\s*flex-start;/s,
-    "app.css desktop .sanctuary-world must anchor #craft and #intake high beneath the header (justify-content: flex-start)"
+    /@media\s*\(min-width:\s*1024px\)\s*and\s*\(min-height:\s*760px\)\s*\{\s*\.sanctuary-world\s*\{[^}]*justify-content:\s*space-evenly;/s,
+    "app.css desktop .sanctuary-world must distribute #craft and #intake evenly across the viewport (justify-content: space-evenly)"
   );
   assert.ok(css.includes(".sanctuary-caustic-svg"), "app.css must style .sanctuary-caustic-svg living loop caustic layer");
   assert.match(
     css,
-    /main\[data-active-view="home"\]\s+\.site-footer\s*\{[^}]*margin-top:\s*-80px;[^}]*min-height:\s*80px;/s,
-    "app.css must overlay compact 80px .site-footer onto Home Frame 4 desktop so Frame 4 fits 100svh with zero extra scroll or clipping"
+    /main\[data-active-view="home"\]\s+\.site-footer\s*\{[^}]*margin-top:\s*-196px;[^}]*min-height:\s*196px;/s,
+    "app.css must overlay expanded 196px .site-footer onto Home Frame 4 desktop so Frame 4 fits 100svh with zero extra scroll or clipping"
   );
+  assert.ok(css.includes(".footer-grid"), "app.css must style .footer-grid 4-column desktop footer");
+  assert.ok(css.includes(".footer-bottom"), "app.css must style .footer-bottom legal and social row");
+  assert.ok(css.includes(".footer-social"), "app.css must style .footer-social icon strip");
   assert.ok(css.includes("--flare-intensity"), "app.css must define --flare-intensity for Video 01 seamless loop flare");
   assert.ok(css.includes(".hero-starfield"), "app.css must style .hero-starfield multi-depth SVG starfield");
   assert.ok(css.includes(".hero-manifesto-dock"), "app.css must style .hero-manifesto-dock inside Frame 1");

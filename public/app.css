@@ -1470,7 +1470,7 @@ body:not([data-active-view="home"]) .chapter-rail {
       rgba(3, 20, 18, 0.22) 70%,
       #02070A 100%
     ),
-    url("/assets/basalt-terrace-deck.webp?v=62");
+    url("/assets/basalt-terrace-deck.webp?v=63");
   background-size: 100% 100%, cover;
   background-position: center top, center top;
   background-repeat: no-repeat, no-repeat;
@@ -1494,10 +1494,10 @@ body:not([data-active-view="home"]) .chapter-rail {
   .sanctuary-world {
     height: calc(100svh + var(--stone-overlap));
     min-height: calc(100svh + var(--stone-overlap));
-    justify-content: flex-start;
-    padding-top: calc(var(--stone-overlap) + clamp(96px, 11.6vh, 126px));
-    padding-bottom: 84px;
-    gap: clamp(24px, 4.0vh, 46px);
+    justify-content: space-evenly;
+    padding-top: calc(var(--stone-overlap) + clamp(78px, 9.2vh, 102px));
+    padding-bottom: clamp(196px, 22.8vh, 220px);
+    gap: clamp(24px, 3.6vh, 44px);
   }
 
   .sanctuary-world .craft-rail-section {
@@ -1505,7 +1505,7 @@ body:not([data-active-view="home"]) .chapter-rail {
   }
 
   .sanctuary-world .craft-strip {
-    padding: 12px 0 14px;
+    padding: 18px 0 22px;
   }
 
   .sanctuary-world .gateway {
@@ -1517,7 +1517,7 @@ body:not([data-active-view="home"]) .chapter-rail {
   }
 
   .sanctuary-world .gateway-desc {
-    margin: 0 auto 20px;
+    margin: 0 auto 28px;
   }
 }
 
@@ -1799,12 +1799,13 @@ body:not([data-active-view="home"]) .chapter-rail {
 
 .craft-bar-head .eyebrow {
   margin: 0;
+  font-size: 11.5px;
   text-shadow: 0 2px 14px rgba(1, 7, 10, 0.9);
 }
 
 .craft-bar-head h2 {
   margin: 0;
-  font-size: clamp(1.32rem, 2.15vw, 1.76rem);
+  font-size: clamp(1.48rem, 2.3vw, 2.02rem);
   font-weight: 600;
   letter-spacing: -0.025em;
   color: #FFFFFF;
@@ -1873,20 +1874,20 @@ body:not([data-active-view="home"]) .chapter-rail {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   border-radius: 999px;
   background: rgba(72, 209, 168, 0.12);
   border: 1px solid rgba(126, 236, 200, 0.3);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.06em;
   color: var(--jade-luminous);
 }
 
 .craft-step h3 {
-  margin: 0 0 4px;
-  font-size: 14px;
+  margin: 0 0 5px;
+  font-size: 15.5px;
   font-weight: 650;
   letter-spacing: -0.01em;
   color: #FFFFFF;
@@ -1895,8 +1896,8 @@ body:not([data-active-view="home"]) .chapter-rail {
 
 .craft-step p {
   margin: 0;
-  font-size: 12.5px;
-  line-height: 1.5;
+  font-size: 13.8px;
+  line-height: 1.56;
   color: var(--ink-silver);
   text-shadow: 0 2px 14px rgba(1, 7, 10, 0.9), 0 1px 3px rgba(1, 7, 10, 0.84);
 }
@@ -1932,8 +1933,8 @@ body:not([data-active-view="home"]) .chapter-rail {
 }
 
 .gateway-centered h2 {
-  margin: 0 0 14px;
-  font-size: clamp(1.65rem, 3.05vw, 2.75rem);
+  margin: 0 0 16px;
+  font-size: clamp(1.9rem, 3.35vw, 3.1rem);
   font-weight: 620;
   line-height: 1.14;
   letter-spacing: -0.03em;
@@ -1958,9 +1959,9 @@ body:not([data-active-view="home"]) .chapter-rail {
 }
 
 .gateway-desc {
-  margin: 0 auto 26px;
-  max-width: 680px;
-  font-size: 15.5px;
+  margin: 0 auto 28px;
+  max-width: 720px;
+  font-size: clamp(15.5px, 1.15vw, 17.5px);
   line-height: 1.62;
   color: var(--ink-silver);
   text-shadow: 0 2px 16px rgba(1, 7, 10, 0.9), 0 1px 4px rgba(1, 7, 10, 0.84);
@@ -1976,16 +1977,16 @@ body:not([data-active-view="home"]) .chapter-rail {
 
 /* 3 Uniform Pill Capsule Buttons with Vivid Neon Jade-Aqua Hover Glow */
 .pill-neon-capsule {
-  height: 50px;
-  min-height: 50px;
-  min-width: 204px;
-  flex: 0 1 204px;
-  padding: 0 22px;
+  height: 54px;
+  min-height: 54px;
+  min-width: 214px;
+  flex: 0 1 214px;
+  padding: 0 24px;
   border-radius: 999px;
   background: rgba(11, 34, 44, 0.78);
   color: #EFFCF8;
   border: 1px solid rgba(168, 224, 214, 0.34);
-  font-size: 14.5px;
+  font-size: 15px;
   font-weight: 620;
   letter-spacing: -0.005em;
   backdrop-filter: blur(16px);
@@ -2386,36 +2387,32 @@ body:not([data-active-view="home"]) .chapter-rail {
 }
 
 /* ==========================================================================
-   Seamless Translucent Footer (Deep-Water Atmosphere Flows Right Underneath)
+   Seamless Translucent Footer (Glowrivia-Inspired 2-Tier Obsidian Glass)
    ========================================================================== */
 .site-footer {
   position: relative;
   z-index: 6;
-  padding: 24px 0 32px;
-  background: linear-gradient(180deg, transparent 0%, rgba(3, 11, 16, 0.72) 100%);
-  border-top: 1px solid rgba(175, 225, 212, 0.14);
+  padding: 28px 0 22px;
+  background: linear-gradient(180deg, rgba(2, 10, 14, 0.62) 0%, rgba(2, 8, 12, 0.9) 100%);
+  border-top: 1px solid rgba(175, 225, 212, 0.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 @media (min-width: 1024px) and (min-height: 760px) {
   main[data-active-view="home"] .site-footer {
-    margin-top: -80px;
-    min-height: 80px;
-    padding: 11px 0 13px;
+    margin-top: -196px;
+    min-height: 196px;
+    padding: 16px 0 12px;
     display: flex;
     align-items: center;
     z-index: 12;
-    background: linear-gradient(180deg, rgba(2, 9, 12, 0.04) 0%, rgba(2, 9, 12, 0.68) 100%);
-    border-top: 1px solid rgba(175, 225, 212, 0.14);
+    background: linear-gradient(180deg, rgba(2, 9, 13, 0.42) 0%, rgba(2, 8, 12, 0.82) 100%);
+    border-top: 1px solid rgba(175, 225, 212, 0.16);
   }
 
   main[data-active-view="home"] .site-footer .footer-inner {
     width: 100%;
-  }
-}
-
-@media (min-width: 1200px) {
-  .footer-note {
-    white-space: nowrap;
   }
 }
 
@@ -2426,10 +2423,24 @@ body:not([data-active-view="home"]) .chapter-rail {
 
 .footer-inner {
   display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px 20px;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.65fr 1fr 1fr 1fr;
+  gap: 16px 28px;
+  align-items: start;
+}
+
+.footer-col-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  max-width: 420px;
 }
 
 .footer-brand {
@@ -2440,27 +2451,37 @@ body:not([data-active-view="home"]) .chapter-rail {
   max-width: 100%;
 }
 
-.footer-brand > div {
+.footer-tagline {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.48;
+  color: rgba(214, 236, 231, 0.82);
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
 }
 
-.footer-note {
-  margin: 2px 0 0;
-  font-size: 12px;
-  color: var(--ink-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
+.footer-heading {
+  margin: 0 0 7px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--jade-luminous);
 }
 
 .footer-status {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 13px;
+  padding: 5px 12px;
   border-radius: var(--radius-pill);
-  background: rgba(5, 20, 29, 0.56);
-  border: 1px solid rgba(190, 232, 222, 0.18);
-  font-size: 12px;
+  background: rgba(5, 20, 29, 0.62);
+  border: 1px solid rgba(190, 232, 222, 0.2);
+  font-size: 11.5px;
   color: var(--ink-silver);
   white-space: nowrap;
   backdrop-filter: blur(12px);
@@ -2492,22 +2513,114 @@ body:not([data-active-view="home"]) .chapter-rail {
 
 .footer-links {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   flex-shrink: 0;
-  gap: 20px;
+  gap: 3px;
 }
 
 .footer-links a {
   text-decoration: none;
-  font-size: 13px;
+  font-size: 12.5px;
+  line-height: 1.38;
   font-weight: 500;
   white-space: nowrap;
   color: var(--ink-silver);
   transition: color 0.18s ease;
 }
 
-.footer-links a:hover {
+.footer-links a:hover,
+.footer-links a:focus-visible {
   color: var(--jade-luminous);
+}
+
+.footer-link-btn {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: 12.5px;
+  line-height: 1.38;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--ink-silver);
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.18s ease;
+}
+
+.footer-link-btn:hover,
+.footer-link-btn:focus-visible {
+  color: var(--jade-luminous);
+}
+
+.footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 20px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(186, 232, 222, 0.12);
+}
+
+.footer-legal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.footer-note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.footer-sep {
+  opacity: 0.42;
+}
+
+.footer-legal a {
+  text-decoration: none;
+  color: rgba(206, 232, 226, 0.78);
+  transition: color 0.18s ease;
+}
+
+.footer-legal a:hover,
+.footer-legal a:focus-visible {
+  color: var(--jade-luminous);
+}
+
+.footer-social {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  color: rgba(208, 234, 228, 0.72);
+  background: rgba(14, 34, 42, 0.42);
+  border: 1px solid rgba(186, 232, 222, 0.14);
+  transition: color 0.18s ease, border-color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
+}
+
+.social-link:hover,
+.social-link:focus-visible {
+  color: #FFFFFF;
+  border-color: rgba(52, 232, 180, 0.65);
+  background: rgba(16, 62, 54, 0.68);
+  transform: translateY(-1px);
 }
 
 /* ==========================================================================
@@ -3888,8 +4001,9 @@ body:not([data-active-view="home"]) .chapter-rail {
     grid-template-columns: 1fr;
   }
 
-  .footer-inner {
-    flex-wrap: wrap;
+  .footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px 24px;
   }
 
   .footer-note {
@@ -4057,14 +4171,34 @@ body:not([data-active-view="home"]) .chapter-rail {
     padding: 22px 18px;
   }
 
-  .footer-inner {
-    flex-direction: column;
-    align-items: flex-start;
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .footer-col-brand {
+    max-width: 100%;
   }
 
   .footer-links {
+    gap: 8px;
+  }
+
+  .footer-links a,
+  .footer-link-btn {
+    white-space: normal;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding-top: 14px;
+  }
+
+  .footer-social {
     flex-wrap: wrap;
-    gap: 12px 18px;
+    gap: 10px;
   }
 
   .footer-status {
