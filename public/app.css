@@ -1470,7 +1470,7 @@ body:not([data-active-view="home"]) .chapter-rail {
       rgba(3, 20, 18, 0.22) 70%,
       #02070A 100%
     ),
-    url("/assets/basalt-terrace-deck.webp?v=61");
+    url("/assets/basalt-terrace-deck.webp?v=62");
   background-size: 100% 100%, cover;
   background-position: center top, center top;
   background-repeat: no-repeat, no-repeat;

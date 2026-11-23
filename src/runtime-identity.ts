@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, lstatSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveProtectedStateDir } from "./state-dir.js";
@@ -19,6 +19,11 @@ function issuerHost(raw: string | undefined) {
   }
 }
 
+function matchesDomain(host: string, domain: string): boolean {
+  const normalized = host.trim().toLowerCase().replace(/\.+$/, "");
+  return normalized === domain || normalized.endsWith(`.${domain}`);
+}
+
 function mcpPath(raw: string | undefined) {
   try {
     return raw?.trim() ? new URL(raw.trim()).pathname : "UNDECLARED";
@@ -30,6 +35,8 @@ function mcpPath(raw: string | undefined) {
 function loadIdentityFile(candidate: string, source: string): { source: string; value: StaticIdentity } | null {
   if (!existsSync(candidate)) return null;
   try {
+    const st = lstatSync(candidate);
+    if (st.isSymbolicLink() || !st.isFile()) return null;
     const parsed = JSON.parse(readFileSync(candidate, "utf8"));
     if (parsed && typeof parsed === "object" && !Array.isArray(parsed) && parsed.contract === 'GLOW_ASSEMBLY_IDENTITY_V1') {
       const allowed=['contract','assembly_id','assembly_state','carrier_sha','public_host_repository','public_host_sha','private_factory_repository','private_factory_sha','runtime_binding','deployment_target','source_branch'];
@@ -78,11 +85,24 @@ export function loadRuntimeIdentity(env: NodeJS.ProcessEnv = process.env) {
       ? "REMOTE_PROTECTED_SERVICE"
       : "UNDECLARED";
   const stateDir = resolveProtectedStateDir(env);
-  const authProvider = authHost.endsWith("supabase.co")
+  const rawAuthMode = (env.GLOW_AUTH_MODE ?? "").trim();
+  const publicOriginHost = issuerHost(env.GLOW_PUBLIC_ORIGIN);
+  const mcpUrlHost = issuerHost(env.GLOW_PUBLIC_MCP_URL);
+  const isValidAuthHost = authHost !== "UNDECLARED" && authHost !== "INVALID_URL";
+  const isNativeGlowIssuer =
+    rawAuthMode === "GLOW_NATIVE_SINGLE_ISSUER" ||
+    (isValidAuthHost &&
+      (authHost === publicOriginHost ||
+        authHost === mcpUrlHost ||
+        matchesDomain(authHost, "glow.local") ||
+        matchesDomain(authHost, "glowstudio.vn")));
+  const authProvider = matchesDomain(authHost, "supabase.co")
     ? "SUPABASE_OAUTH"
-    : authHost.endsWith("auth0.com")
+    : matchesDomain(authHost, "auth0.com")
       ? "AUTH0_OAUTH"
-      : "EXTERNAL_OR_UNDECLARED";
+      : isNativeGlowIssuer
+        ? "GLOW_NATIVE_OIDC"
+        : "EXTERNAL_OR_UNDECLARED";
 
   return {
     contract: "GLOW_RUNTIME_IDENTITY_V1",

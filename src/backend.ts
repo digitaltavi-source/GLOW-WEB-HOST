@@ -14,6 +14,14 @@ type CombinedRuntime = {
 let combinedRuntimePromise: Promise<CombinedRuntime> | null = null;
 let combinedRuntimeIdentity: string | null = null;
 
+const SAFE_READINESS_CODE_RE = /^[A-Z][A-Z0-9_]{1,96}$/;
+const UPSTREAM_FETCH_TIMEOUT_MS = 15_000;
+
+export function resetCombinedRuntimeCacheForTest(): void {
+  combinedRuntimePromise = null;
+  combinedRuntimeIdentity = null;
+}
+
 function combinedModuleUrl(specifier: string): string {
   if (specifier.startsWith("file:")) return specifier;
   return pathToFileURL(isAbsolute(specifier) ? specifier : resolve(process.cwd(),specifier)).href;
@@ -24,8 +32,8 @@ async function getCombinedRuntime(config: HostConfig): Promise<CombinedRuntime> 
   if(!specifier) throw new BackendError("COMBINED_RUNTIME_NOT_CONFIGURED");
 
   if(!combinedRuntimePromise || combinedRuntimeIdentity!==specifier){
-    combinedRuntimeIdentity=specifier;
-    combinedRuntimePromise=import(combinedModuleUrl(specifier)).then(async mod=>{
+    const nextIdentity=specifier;
+    const nextPromise=import(combinedModuleUrl(specifier)).then(async mod=>{
       const create=mod.createGlowCombinedRuntime;
       if(typeof create!=="function") throw new BackendError("COMBINED_RUNTIME_FACTORY_MISSING");
       const state=resolveProtectedStateDir();
@@ -38,7 +46,15 @@ async function getCombinedRuntime(config: HostConfig): Promise<CombinedRuntime> 
         throw new BackendError("COMBINED_RUNTIME_EXECUTOR_INVALID");
       }
       return runtime as CombinedRuntime;
+    }).catch((err: unknown)=>{
+      if(combinedRuntimePromise===nextPromise){
+        combinedRuntimePromise=null;
+        combinedRuntimeIdentity=null;
+      }
+      throw err;
     });
+    combinedRuntimeIdentity=nextIdentity;
+    combinedRuntimePromise=nextPromise;
   }
   return combinedRuntimePromise;
 }
@@ -66,7 +82,8 @@ export async function callProtectedService(
         "authorization":"Bearer "+config.protectedServiceToken,
         "x-glow-subject":subject
       },
-      body:JSON.stringify(request)
+      body:JSON.stringify(request),
+      signal:AbortSignal.timeout(UPSTREAM_FETCH_TIMEOUT_MS)
     });
     if(!response.ok) throw new BackendError("PROTECTED_SERVICE_HTTP_"+response.status);
     raw=await response.json();
@@ -111,10 +128,12 @@ export async function checkProtectedReadiness(
     }
     return {ok:false,protected_service_authenticated:true,code:"PROTECTED_FACTORY_UNEXPECTED_RESPONSE"};
   }catch(error){
+    const rawCode=error instanceof Error?error.message.trim():"";
+    const safeCode=SAFE_READINESS_CODE_RE.test(rawCode)?rawCode:"PROTECTED_FACTORY_PROBE_FAILED";
     return {
       ok:false,
       protected_service_authenticated:false,
-      code:error instanceof Error?error.message:"PROTECTED_FACTORY_PROBE_FAILED"
+      code:safeCode
     };
   }
 }

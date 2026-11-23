@@ -4,6 +4,7 @@ import {SystemAuditSchema,GetSystemAuditSchema,createSystemAuditExecutor} from '
 import { randomUUID, createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import express from "express";
 import { getOAuthProtectedResourceMetadataUrl, requireBearerAuth } from "@modelcontextprotocol/express";
 import { toNodeHandler } from "@modelcontextprotocol/node";
 import type { McpServerFactory } from "@modelcontextprotocol/server";
@@ -17,12 +18,12 @@ import {EVIDENCE_ADMISSION_SCOPE,ArtifactAdmissionSchema,EvidenceAdmissionSchema
 import {fetchAuthorizedFile} from './file-input.js';
 import { classifyWorkResponse } from "./work-response.js";
 import { buildProtectedResourceMetadata } from "./resource-metadata.js";
-import { createGlowMcpExpressApp } from "./mcp-app.js";
+import { createGlowMcpExpressApp, DEFAULT_MCP_JSON_LIMIT, PUBLIC_HTML_CSP } from "./mcp-app.js";
 import { NextFactoryControlInputSchema } from "./next-factory-schema.js";
 import { resolveHostDomainTopology } from "./domain-topology.js";
 import {PHASE_ACCEPTANCE_SCOPE,PHASE_ACCEPTANCE_MISSION_PATTERN,toolOAuthMetadata,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,phaseAcceptanceAuthorityStatus,validateAcceptanceBytes} from './phase-acceptance.js';
-import { queryTemplates, getTemplateById } from "./template-registry.js";
-import { renderTemplateHtml, buildTemplateSourcePayload } from "./template-renderer.js";
+import { queryTemplates, getTemplateById, isValidTemplateId } from "./template-registry.js";
+import { renderTemplateHtml, buildTemplateSourcePayload, escapeHtml } from "./template-renderer.js";
 
 const HOST_ADAPTER_REVISION = "0.3.10-file-artifact-input-candidate";
 const HOST_CONTRACT_ID = "GWF_NEXT_FACTORY_ACTIVE_DEMO_CANDIDATE_V2";
@@ -505,9 +506,14 @@ const buildServer: McpServerFactory = ctx => {
 };
 
 export const handler = createMcpHandler(buildServer);
+const deferredMcpPaths = [
+  "/mcp-v2",
+  ...(domainTopology.basePath ? [`${domainTopology.basePath}/mcp-v2`] : []),
+];
 export const app = createGlowMcpExpressApp(
   (process.env.GLOW_ALLOWED_HOSTS ?? "localhost,127.0.0.1").split(",").map(v=>v.trim()).filter(Boolean),
-  "12mb"
+  DEFAULT_MCP_JSON_LIMIT,
+  { deferredJsonPaths: deferredMcpPaths }
 );
 
 const mcpServerUrl = configuredMcpServerUrl;
@@ -525,7 +531,16 @@ const auth = requireBearerAuth({
 });
 
 const resourceMetadataV2Url=resourceMetadataUrl;
-const authV2=auth;
+const mcpLargeJsonParser = express.json({ limit: "12mb" });
+const authV2: express.RequestHandler = (req, res, next) => {
+  auth(req, res, (authErr?: unknown) => {
+    if (authErr) {
+      next(authErr);
+      return;
+    }
+    mcpLargeJsonParser(req, res, next);
+  });
+};
 
 const node = toNodeHandler(handler);
 
@@ -590,12 +605,231 @@ function firstQueryString(value: unknown): string | undefined {
   return undefined;
 }
 
+function cleanSingleLineParam(value: string | undefined, maxLen: number): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const cleaned = value.replace(/[\u0000-\u001F\u007F]/g, " ").trim().slice(0, maxLen);
+  return cleaned.length > 0 ? cleaned : undefined;
+}
+
+const ALLOWED_STANDALONE_NEXT_PATHS = new Set([
+  "/",
+  "/app",
+  "/product",
+  "/solutions",
+  "/resources",
+  "/pricing",
+  "/workspace",
+  "/privacy",
+]);
+
+function sanitizeStandaloneNextPath(
+  rawNext: string | undefined,
+  prefix: string,
+  extra: { readonly brand?: string; readonly template?: string; readonly lang?: "vi" | "en" }
+): string {
+  const defaultNext = `${prefix}/workspace`;
+  let targetPath = defaultNext;
+  if (typeof rawNext === "string") {
+    const trimmed = rawNext.trim();
+    if (
+      trimmed.length > 0 &&
+      trimmed.length <= 256 &&
+      trimmed.startsWith("/") &&
+      !trimmed.startsWith("//") &&
+      !/[\u0000-\u001F\u007F\\]/.test(trimmed) &&
+      !trimmed.split(/[/?#]/).includes("..") &&
+      !/%2e|%5c/i.test(trimmed) &&
+      !/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)
+    ) {
+      try {
+        const parsed = new URL(trimmed, "http://glow.internal");
+        const unprefixed =
+          prefix && (parsed.pathname === prefix || parsed.pathname.startsWith(`${prefix}/`))
+            ? parsed.pathname.slice(prefix.length) || "/"
+            : parsed.pathname;
+        if (
+          parsed.origin === "http://glow.internal" &&
+          parsed.pathname.startsWith("/") &&
+          !parsed.pathname.startsWith("//") &&
+          ALLOWED_STANDALONE_NEXT_PATHS.has(unprefixed)
+        ) {
+          if (prefix && parsed.pathname === "/workspace") {
+            parsed.pathname = `${prefix}/workspace`;
+          }
+          targetPath = `${parsed.pathname}${parsed.search}${parsed.hash}`;
+        }
+      } catch {
+        targetPath = defaultNext;
+      }
+    }
+  }
+  try {
+    const enriched = new URL(targetPath, "http://glow.internal");
+    if (enriched.pathname === "/workspace" || (prefix && enriched.pathname === `${prefix}/workspace`)) {
+      if (extra.template && isValidTemplateId(extra.template) && !enriched.searchParams.has("template")) {
+        enriched.searchParams.set("template", extra.template);
+      }
+      if (extra.brand && !enriched.searchParams.has("brand")) {
+        enriched.searchParams.set("brand", extra.brand);
+      }
+      if (extra.lang && !enriched.searchParams.has("lang")) {
+        enriched.searchParams.set("lang", extra.lang);
+      }
+      return `${enriched.pathname}${enriched.search}${enriched.hash}`;
+    }
+  } catch {
+    return defaultNext;
+  }
+  return targetPath;
+}
+
+function renderStandalonePrivacyHtml(prefix: string, isEn: boolean): string {
+  const homeHref = prefix || "/";
+  const workspaceHref = `${prefix}/workspace`;
+  return `<!doctype html>
+<html lang="${isEn ? "en" : "vi"}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${isEn ? "GLOW Web · Privacy & Security Policy" : "GLOW Web · Chính sách Quyền riêng tư & Bảo mật"}</title>
+  <style>
+    :root{color-scheme:light;font-family:"SF Pro Display","Inter","Segoe UI",-apple-system,system-ui,sans-serif}
+    body{margin:0;padding:40px 20px;background:linear-gradient(176deg,#E7F3EF 0%,#F4FAF8 50%,#E6F2EE 100%);color:#071E2B;line-height:1.68}
+    main{max-width:780px;margin:0 auto;background:#FFFFFF;border:1px solid #ACC8BF;border-radius:24px;padding:36px;box-shadow:0 24px 56px -24px rgba(7,30,43,.14)}
+    .eyebrow{font-size:11px;font-weight:700;letter-spacing:.18em;color:#147A5B;text-transform:uppercase}
+    h1{margin:10px 0 14px;font-size:clamp(1.7rem,3vw,2.3rem);line-height:1.18}
+    h2{margin:24px 0 8px;font-size:1.12rem;color:#0E5E46}
+    p,li{color:#2B4C59;font-size:15px}
+    .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+    a.btn{display:inline-flex;align-items:center;padding:11px 20px;border-radius:999px;text-decoration:none;font-weight:650;font-size:14px;border:1px solid #ACC8BF;color:#071E2B}
+    a.btn.primary{background:linear-gradient(135deg,#168664 0%,#116D51 100%);color:#FFFFFF;border-color:#116D51}
+  </style>
+</head>
+<body data-glow-page="standalone-privacy-policy">
+  <main>
+    <div class="eyebrow">GLOW WEB · PRIVACY &amp; DATA STEWARDSHIP</div>
+    <h1>${isEn ? "Privacy &amp; Data Protection Policy" : "Chính sách Quyền riêng tư &amp; Bảo vệ Dữ liệu"}</h1>
+    <p>${isEn ? "GLOW Web processes identity, project briefs, and authorized workspace artifacts strictly to operate your requested digital studio workflows." : "GLOW Web chỉ xử lý thông tin định danh, bản mô tả yêu cầu thiết kế và tài nguyên dự án được ủy quyền nhằm phục vụ trực tiếp không gian chế tác website của bạn."}</p>
+    <h2>${isEn ? "1. Data Minimization &amp; Isolation" : "1. Tối thiểu hóa &amp; Cô lập Dữ liệu"}</h2>
+    <ul>
+      <li>${isEn ? "Public storefront drafts prepared in browser memory stay local until you explicitly sign in or submit through an authenticated channel." : "Bản nháp chuẩn bị trên trình duyệt tại trang công khai không tự động gửi đi khi chưa có thao tác xác thực rõ ràng của bạn."}</li>
+      <li>${isEn ? "Authenticated workspace sessions enforce tenant isolation, CSRF verification, and strict Content-Security-Policy boundaries." : "Phiên làm việc đã xác thực áp dụng cô lập dữ liệu theo không gian làm việc, kiểm tra chống giả mạo yêu cầu (CSRF) và chính sách bảo mật nội dung (CSP) nghiêm ngặt."}</li>
+    </ul>
+    <h2>${isEn ? "2. Zero Third-Party Advertising Sale" : "2. Không bán hoặc chia sẻ dữ liệu quảng cáo"}</h2>
+    <p>${isEn ? "GLOW never sells customer briefs, email addresses, or OAuth profile attributes to third-party ad networks." : "GLOW tuyệt đối không bán bản mô tả dự án, địa chỉ email hoặc thông tin hồ sơ đăng nhập cho bên thứ ba phục vụ quảng cáo."}</p>
+    <div class="actions">
+      <a class="btn primary" href="${escapeHtml(workspaceHref)}">${isEn ? "Open Studio Workspace" : "Mở Không gian dự án"}</a>
+      <a class="btn" href="${escapeHtml(homeHref)}">${isEn ? "← Back to GLOW Web" : "← Về trang chủ GLOW Web"}</a>
+    </div>
+  </main>
+</body>
+</html>`;
+}
+
+function renderStandaloneLoginBridgeHtml(opts: {
+  readonly prefix: string;
+  readonly isEn: boolean;
+  readonly isSignup: boolean;
+  readonly loginHint?: string;
+  readonly brand?: string;
+  readonly safeNext: string;
+}): string {
+  const homeHref = opts.prefix || "/";
+  const privacyHref = `${opts.prefix}/privacy${opts.isEn ? "?lang=en" : ""}`;
+  return `<!doctype html>
+<html lang="${opts.isEn ? "en" : "vi"}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${opts.isEn ? "GLOW Web · Studio Sign-In Gateway" : "GLOW Web · Cổng kết nối Không gian dự án"}</title>
+  <style>
+    :root{color-scheme:light;font-family:"SF Pro Display","Inter","Segoe UI",-apple-system,system-ui,sans-serif}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;padding:28px 16px;background:linear-gradient(176deg,#E7F3EF 0%,#F4FAF8 50%,#E6F2EE 100%);color:#071E2B;line-height:1.62}
+    main{width:min(520px,100%);background:#FFFFFF;border:1px solid #ACC8BF;border-radius:24px;padding:32px;box-shadow:0 24px 56px -24px rgba(7,30,43,.16)}
+    .eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;color:#147A5B;text-transform:uppercase}
+    h1{margin:10px 0 10px;font-size:1.65rem;line-height:1.22}
+    p{margin:0 0 14px;color:#2B4C59;font-size:14.5px}
+    .meta{background:#EEF6F3;border:1px solid #ACC8BF;border-radius:14px;padding:12px 14px;margin:14px 0;font-size:13.5px;color:#071E2B}
+    .meta div+div{margin-top:6px}
+    .actions{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+    a.btn{display:inline-flex;justify-content:center;align-items:center;min-height:46px;padding:11px 20px;border-radius:999px;text-decoration:none;font-weight:650;font-size:14px;border:1px solid #ACC8BF;color:#071E2B}
+    a.btn.primary{background:linear-gradient(135deg,#168664 0%,#116D51 100%);color:#FFFFFF;border-color:#116D51}
+    .foot{margin-top:18px;padding-top:14px;border-top:1px solid #D9EFE6;display:flex;justify-content:space-between;gap:12px;font-size:12.5px;color:#506F7B}
+    .foot a{color:inherit;text-decoration:none}
+  </style>
+</head>
+<body data-glow-page="standalone-auth-bridge" data-glow-auth-state="STANDALONE_PUBLIC_HOST_NO_LOCAL_SESSION">
+  <main>
+    <div class="eyebrow">${opts.isSignup ? (opts.isEn ? "STUDIO ONBOARDING" : "KHỞI TẠO TÀI KHOẢN STUDIO") : (opts.isEn ? "STUDIO ACCESS" : "TRUY CẬP STUDIO")}</div>
+    <h1>${opts.isSignup ? (opts.isEn ? "Continue to GLOW Studio Draft" : "Tiếp tục khởi tạo dự án trên GLOW Studio") : (opts.isEn ? "GLOW Web Standalone Gateway" : "Cổng GLOW Web độc lập")}</h1>
+    <p role="status" aria-live="polite">${opts.isEn ? "This standalone public host serves template previews, draft preparation, and OAuth-protected MCP tools (/mcp-v2). Interactive Google Sign-In &amp; Email OTP sessions run on the unified GLOW Identity Service." : "Máy chủ giao diện công khai độc lập này phục vụ xem trước mẫu website, chuẩn bị bản nháp và cổng kết nối AI (/mcp-v2). Đăng nhập phiên trực tiếp (Google OIDC / Email OTP) hoạt động khi kết nối cùng Dịch vụ Định danh Hợp nhất GLOW."}</p>
+    ${
+      opts.loginHint || opts.brand
+        ? `<div class="meta">
+            ${opts.loginHint ? `<div><strong>Email:</strong> <span data-glow-login-hint="true">${escapeHtml(opts.loginHint)}</span></div>` : ""}
+            ${opts.brand ? `<div><strong>${opts.isEn ? "Brand / Project:" : "Thương hiệu / Dự án:"}</strong> <span data-glow-signup-brand="true">${escapeHtml(opts.brand)}</span></div>` : ""}
+          </div>`
+        : ""
+    }
+    <div class="actions">
+      <a class="btn primary" data-glow-continue-workspace="true" href="${escapeHtml(opts.safeNext)}">${opts.isEn ? "Continue to Studio Draft Workspace →" : "Tiếp tục vào Không gian dự án (Bản nháp) →"}</a>
+      <a class="btn" href="${escapeHtml(homeHref)}">${opts.isEn ? "← Back to Homepage" : "← Quay lại Trang chủ"}</a>
+    </div>
+    <div class="foot">
+      <span>STANDALONE_HOST_BRIDGE</span>
+      <a href="${escapeHtml(privacyHref)}">${opts.isEn ? "Privacy Policy" : "Chính sách Quyền riêng tư"}</a>
+    </div>
+  </main>
+</body>
+</html>`;
+}
+
+function sendPublicHtmlShell(res: express.Response, fileName: string): void {
+  res.setHeader("Content-Security-Policy", PUBLIC_HTML_CSP);
+  res.type("html").sendFile(fileName, { root: publicDir });
+}
+
 function registerPublicTemplateAndPlatformRoutes(prefix: string): void {
   for (const route of PUBLIC_PLATFORM_ROUTES) {
     app.get(`${prefix}${route}`, (_req, res) => {
-      res.type("html").sendFile("index.html", { root: publicDir });
+      sendPublicHtmlShell(res, "index.html");
     });
   }
+
+  app.get(`${prefix}/privacy`, (req, res) => {
+    const langParam = firstQueryString(req.query.lang)?.trim().toLowerCase();
+    const isEn = langParam === "en";
+    res.setHeader("Content-Security-Policy", PUBLIC_HTML_CSP);
+    res.setHeader("Cache-Control", "no-cache");
+    res.status(200).type("html").send(renderStandalonePrivacyHtml(prefix, isEn));
+  });
+
+  app.get(`${prefix}/auth/login`, (req, res) => {
+    const langParam = firstQueryString(req.query.lang)?.trim().toLowerCase();
+    const isEn = langParam === "en";
+    const modeParam = firstQueryString(req.query.mode)?.trim().toLowerCase();
+    const isSignup = modeParam === "signup";
+    const loginHint = cleanSingleLineParam(firstQueryString(req.query.login_hint), 160);
+    const brand = cleanSingleLineParam(firstQueryString(req.query.brand), 80);
+    const templateParam = cleanSingleLineParam(firstQueryString(req.query.template), 64);
+    const safeNext = sanitizeStandaloneNextPath(firstQueryString(req.query.next), prefix, {
+      brand,
+      template: templateParam,
+      lang: langParam === "en" ? "en" : langParam === "vi" ? "vi" : undefined,
+    });
+    res.setHeader("Content-Security-Policy", PUBLIC_HTML_CSP);
+    res.setHeader("Cache-Control", "no-store");
+    res.status(200).type("html").send(
+      renderStandaloneLoginBridgeHtml({
+        prefix,
+        isEn,
+        isSignup,
+        loginHint,
+        brand,
+        safeNext,
+      })
+    );
+  });
 
   app.get(`${prefix}/api/templates`, (req, res) => {
     const featuredParam = firstQueryString(req.query.featured)?.trim().toLowerCase();
@@ -677,15 +911,15 @@ function registerPublicTemplateAndPlatformRoutes(prefix: string): void {
 }
 
 app.get("/",(_req,res) => {
-  res.type("html").sendFile("index.html", { root: publicDir });
+  sendPublicHtmlShell(res, "index.html");
 });
 
 app.get("/app",(_req,res) => {
-  res.type("html").sendFile("index.html", { root: publicDir });
+  sendPublicHtmlShell(res, "index.html");
 });
 registerPublicTemplateAndPlatformRoutes("");
 app.get("/workspace",(_req,res) => {
-  res.type("html").sendFile("workspace.html", { root: publicDir });
+  sendPublicHtmlShell(res, "workspace.html");
 });
 app.get("/workspace.css",(_req,res) => {
   res.type("text/css; charset=utf-8").sendFile("workspace.css", { root: publicDir });
@@ -725,6 +959,7 @@ for (const file of FLAGSHIP_VIDEO_ASSETS) {
   app.get("/assets/" + file, (_req, res) => {
     res.type("video/mp4");
     res.setHeader("Cache-Control", "public, max-age=86400");
+    res.setHeader("X-Content-Type-Options", "nosniff");
     res.sendFile(`assets/${file}`, { root: publicDir });
   });
 }
@@ -771,14 +1006,14 @@ app.all("/mcp-v2",authV2,(req,res)=>void node(req,res,req.body));
 if (domainTopology.basePath) {
   const bp = domainTopology.basePath;
   app.get(bp, (_req, res) => {
-    res.type("html").sendFile("index.html", { root: publicDir });
+    sendPublicHtmlShell(res, "index.html");
   });
   app.get(`${bp}/app`, (_req, res) => {
-    res.type("html").sendFile("index.html", { root: publicDir });
+    sendPublicHtmlShell(res, "index.html");
   });
   registerPublicTemplateAndPlatformRoutes(bp);
   app.get(`${bp}/workspace`, (_req, res) => {
-    res.type("html").sendFile("workspace.html", { root: publicDir });
+    sendPublicHtmlShell(res, "workspace.html");
   });
   app.get(`${bp}/workspace.css`, (_req, res) => {
     res.type("text/css; charset=utf-8").sendFile("workspace.css", { root: publicDir });
@@ -812,6 +1047,7 @@ if (domainTopology.basePath) {
     app.get(`${bp}/assets/${file}`, (_req, res) => {
       res.type("video/mp4");
       res.setHeader("Cache-Control", "public, max-age=86400");
+      res.setHeader("X-Content-Type-Options", "nosniff");
       res.sendFile(`assets/${file}`, { root: publicDir });
     });
   }

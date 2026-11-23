@@ -987,7 +987,9 @@ function renderSolutionsGrid() {
 
     const studioLink = document.createElement("a");
     studioLink.className = "pill pill-neon-capsule";
-    studioLink.href = withBasePath(`/workspace?template=${encodeURIComponent(featuredId)}`);
+    studioLink.href = withBasePath(
+      `/workspace?template=${encodeURIComponent(featuredId)}&lang=${encodeURIComponent(currentLang)}`
+    );
     studioLink.textContent = t("solutions.openStudio");
 
     actions.append(exploreBtn, studioLink);
@@ -1226,7 +1228,9 @@ function renderTemplateGallery() {
 
     const useLink = document.createElement("a");
     useLink.className = "pill pill-neon-capsule";
-    useLink.href = withBasePath(`/workspace?template=${encodeURIComponent(tpl.id)}`);
+    useLink.href = withBasePath(
+      `/workspace?template=${encodeURIComponent(tpl.id)}&lang=${encodeURIComponent(currentLang)}`
+    );
     useLink.textContent = t("resources.useTemplate");
 
     actions.append(previewBtn, useLink);
@@ -1284,7 +1288,9 @@ function populateTemplatePreviewModal(tpl) {
   if (brandEl) brandEl.textContent = loc.sample_brand;
   if (briefEl) briefEl.textContent = loc.sample_brief;
   if (useLink) {
-    useLink.href = withBasePath(`/workspace?template=${encodeURIComponent(tpl.id)}`);
+    useLink.href = withBasePath(
+      `/workspace?template=${encodeURIComponent(tpl.id)}&lang=${encodeURIComponent(currentLang)}`
+    );
     useLink.textContent = t("resources.useTemplate");
   }
   if (licEl) licEl.textContent = `${tpl.source_inspiration} · v${tpl.schema_version}`;
@@ -1541,8 +1547,12 @@ $("#auth-signin-form")?.addEventListener("submit", (e) => {
     $("#auth-signin-email")?.focus();
     return;
   }
-  const params = new URLSearchParams({ next: "/workspace", login_hint: email });
-  window.location.assign(`/auth/login?${params.toString()}`);
+  const params = new URLSearchParams({
+    next: withBasePath("/workspace"),
+    login_hint: email,
+    lang: currentLang,
+  });
+  window.location.assign(`${withBasePath("/auth/login")}?${params.toString()}`);
 });
 
 $("#auth-signup-form")?.addEventListener("submit", (e) => {
@@ -1553,9 +1563,14 @@ $("#auth-signup-form")?.addEventListener("submit", (e) => {
     return;
   }
   const brand = $("#auth-signup-brand")?.value.trim() || "";
-  const params = new URLSearchParams({ next: "/workspace", login_hint: email, mode: "signup" });
+  const params = new URLSearchParams({
+    next: withBasePath("/workspace"),
+    login_hint: email,
+    mode: "signup",
+    lang: currentLang,
+  });
   if (brand) params.set("brand", brand);
-  window.location.assign(`/auth/login?${params.toString()}`);
+  window.location.assign(`${withBasePath("/auth/login")}?${params.toString()}`);
 });
 
 /* -------------------------------------------------------------------------- */
@@ -2377,8 +2392,8 @@ function openCinemaModal(triggerEl) {
   if (!cinemaModal || !triggerEl) return;
   lastCinemaTrigger = triggerEl;
 
-  const src = triggerEl.dataset.src || "/assets/reel-01-botanical.mp4";
-  const poster = triggerEl.dataset.poster || "/assets/reel-01-botanical.webp";
+  const src = withBasePath(triggerEl.dataset.src || "/assets/reel-01-botanical.mp4");
+  const poster = withBasePath(triggerEl.dataset.poster || "/assets/reel-01-botanical.webp");
   const title = triggerEl.dataset.title || "GLOW Showcase";
   const subtitle = triggerEl.dataset.subtitle || "";
 
@@ -2475,6 +2490,42 @@ if (BASE_PATH) {
   $$("img[data-asset-src]").forEach((img) => {
     const assetPath = img.dataset.assetSrc;
     if (assetPath) img.src = withBasePath(assetPath);
+  });
+  $$('link[rel="preload"][href^="/assets/"]').forEach((lnk) => {
+    const href = lnk.getAttribute("href");
+    if (href) lnk.setAttribute("href", withBasePath(href));
+  });
+  $$('video[poster^="/assets/"]').forEach((vid) => {
+    const poster = vid.getAttribute("poster");
+    if (poster) vid.setAttribute("poster", withBasePath(poster));
+  });
+  $$('source[src^="/assets/"]').forEach((srcEl) => {
+    const s = srcEl.getAttribute("src");
+    if (s) {
+      srcEl.setAttribute("src", withBasePath(s));
+      const parentVid = srcEl.parentElement;
+      if (parentVid && typeof parentVid.load === "function") parentVid.load();
+    }
+  });
+  $$("a[href]").forEach((anchor) => {
+    const rawHref = anchor.getAttribute("href") || "";
+    if (
+      rawHref === "/" ||
+      rawHref.startsWith("/workspace") ||
+      rawHref.startsWith("/auth/login") ||
+      rawHref.startsWith("/privacy")
+    ) {
+      if (rawHref.startsWith("/auth/login?next=%2Fworkspace")) {
+        anchor.setAttribute(
+          "href",
+          withBasePath(
+            `/auth/login?next=${encodeURIComponent(withBasePath("/workspace"))}`
+          )
+        );
+      } else {
+        anchor.setAttribute("href", withBasePath(rawHref));
+      }
+    }
   });
 }
 setStep(1);

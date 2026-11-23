@@ -24,15 +24,37 @@ export interface TemplateDesignTokens {
   readonly radius: string;
 }
 
+export interface TemplateBlueprintPayload {
+  readonly id: string;
+  readonly schema_version: "1.0.0";
+  readonly industry_key: TemplateItem["industry_key"];
+  readonly category: TemplateItem["category"];
+  readonly mood: TemplateItem["mood"];
+  readonly status: TemplateItem["status"];
+  readonly featured: boolean;
+  readonly license: TemplateItem["license"];
+  readonly source_inspiration: string;
+  readonly blocks: readonly TemplateBlockSpec[];
+  readonly design_tokens: TemplateDesignTokens;
+}
+
 export interface TemplateSourcePayload {
   readonly ok: true;
   readonly schema_version: "1.0.0";
   readonly id: string;
+  readonly name: string;
+  readonly category: TemplateItem["category"];
+  readonly industry_key: TemplateItem["industry_key"];
+  readonly mood: TemplateItem["mood"];
+  readonly status: TemplateItem["status"];
+  readonly featured: boolean;
   readonly license: TemplateItem["license"];
   readonly source_inspiration: string;
+  readonly patternOrigins: string;
   readonly blocks: readonly TemplateBlockSpec[];
   readonly html: string;
   readonly design_tokens: TemplateDesignTokens;
+  readonly blueprint: TemplateBlueprintPayload;
 }
 
 interface TemplateRenderContext {
@@ -1577,12 +1599,21 @@ export function buildTemplateSourcePayload(
   opts: { readonly brand?: string; readonly brief?: string; readonly basePath?: string } = {}
 ): TemplateSourcePayload {
   const resolvedLang = resolveLang(lang);
+  const tokens = getDesignTokens(template.id);
+  const localized = template[resolvedLang] ?? template.vi;
   return {
     ok: true,
     schema_version: "1.0.0",
     id: template.id,
+    name: localized.title || template.vi.title || template.id,
+    category: template.category,
+    industry_key: template.industry_key,
+    mood: template.mood,
+    status: template.status,
+    featured: Boolean(template.featured),
     license: template.license,
     source_inspiration: template.source_inspiration,
+    patternOrigins: template.source_inspiration,
     blocks: template.blocks,
     html: renderTemplateHtml(template, {
       lang: resolvedLang,
@@ -1590,6 +1621,19 @@ export function buildTemplateSourcePayload(
       brief: opts.brief,
       basePath: opts.basePath,
     }),
-    design_tokens: getDesignTokens(template.id),
+    design_tokens: tokens,
+    blueprint: {
+      id: template.id,
+      schema_version: "1.0.0",
+      industry_key: template.industry_key,
+      category: template.category,
+      mood: template.mood,
+      status: template.status,
+      featured: Boolean(template.featured),
+      license: template.license,
+      source_inspiration: template.source_inspiration,
+      blocks: template.blocks,
+      design_tokens: tokens,
+    },
   };
 }

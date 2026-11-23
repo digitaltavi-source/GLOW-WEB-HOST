@@ -184,8 +184,8 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   assert.ok(html.includes('id="chapter-villa"'), "index.html missing #chapter-villa direct scroll chapter");
   assert.ok(html.includes('class="chapter-editorial'), "index.html missing borderless .chapter-editorial film typography");
   assert.equal(html.includes("chapter-card"), false, "hard bordered .chapter-card boxes over video frames must be removed");
-  assert.ok(html.includes('href="/app.css?v=61"'), "index.html must cache-bust /app.css?v=61");
-  assert.ok(html.includes('src="/app.js?v=61"'), "index.html must cache-bust /app.js?v=61");
+  assert.ok(html.includes('href="/app.css?v=62"'), "index.html must cache-bust /app.css?v=62");
+  assert.ok(html.includes('src="/app.js?v=62"'), "index.html must cache-bust /app.js?v=62");
   assert.ok(html.includes('class="sanctuary-caustic-svg"'), "index.html must include living loop .sanctuary-caustic-svg inside #sanctuary-sculpture");
   assert.ok(html.includes('id="sanctuary-sculpture"'), "index.html missing #sanctuary-sculpture atmospheric layer");
   assert.equal(html.includes("prism-ribbons-svg"), false, "crude SVG prism-ribbons-svg curves must be removed");
@@ -242,8 +242,8 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   );
   assert.match(
     css,
-    /\.sanctuary-world\s*\{[^}]*z-index:\s*5;[^}]*margin-top:\s*calc\(-1\s*\*\s*var\(--stone-overlap\)\);[^}]*url\("\/assets\/basalt-terrace-deck\.webp\?v=61"\)[^}]*#000\s+var\(--stone-overlap\),\s*#000\s+100%/s,
-    "app.css .sanctuary-world must dissolve over Video 03 pool coping across --stone-overlap with cache-busted basalt-terrace-deck.webp?v=61"
+    /\.sanctuary-world\s*\{[^}]*z-index:\s*5;[^}]*margin-top:\s*calc\(-1\s*\*\s*var\(--stone-overlap\)\);[^}]*url\("\/assets\/basalt-terrace-deck\.webp\?v=62"\)[^}]*#000\s+var\(--stone-overlap\),\s*#000\s+100%/s,
+    "app.css .sanctuary-world must dissolve over Video 03 pool coping across --stone-overlap with cache-busted basalt-terrace-deck.webp?v=62"
   );
   assert.match(
     css,
