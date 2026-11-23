@@ -28,12 +28,9 @@ const EXPECTED_TEMPLATE_IDS = [
   "veranda-interior-atelier",
 ] as const;
 
-const ALLOWED_LOCAL_IMAGES = new Set([
-  "/assets/hero-ocean-jade.webp",
-  "/assets/reel-01-botanical.webp",
-  "/assets/reel-02-coastal-villa.webp",
-  "/assets/reel-03-liquid-prism.webp",
-]);
+const ALLOWED_LOCAL_IMAGES = new Set(
+  EXPECTED_TEMPLATE_IDS.map((id) => `/assets/templates/${id}.webp`)
+);
 
 const ALLOWED_LOCAL_VIDEOS = new Set([
   "/assets/hero-ocean-jade.mp4",
@@ -72,6 +69,11 @@ test("NORMAL: cleanroom template registry validates 12 bilingual templates with 
     assert.equal(tpl.license, TEMPLATE_LICENSE);
     assert.equal(tpl.mcp_compatible, true);
     assert.ok(ALLOWED_LOCAL_IMAGES.has(tpl.preview_image), `non-allowlisted image ${tpl.preview_image}`);
+    assert.equal(
+      tpl.preview_image,
+      `/assets/templates/${tpl.id}.webp`,
+      `${tpl.id} must bind dedicated photographic preview_image`
+    );
     assert.ok(ALLOWED_LOCAL_VIDEOS.has(tpl.preview_video), `non-allowlisted video ${tpl.preview_video}`);
     assert.ok(tpl.blocks.length >= 5, `${tpl.id} must have >= 5 structured blocks`);
     assert.ok(tpl.vi.title.length > 0 && tpl.en.title.length > 0);
@@ -266,7 +268,7 @@ test("HTTP Four-Path (NORMAL / FAILURE / ADVERSARIAL / RECOVERY) for /api/templa
 });
 
 const EXPECTED_RENDER_CSP =
-  "default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'self'";
+  "default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'self'";
 
 test("HTTP Four-Path (NORMAL / FAILURE / ADVERSARIAL / RECOVERY) for /api/templates/:id/render and /api/templates/:id/source on root and basePath", async () => {
   const rendererSrc = readFileSync(resolve(process.cwd(), "src/template-renderer.ts"), "utf8");
@@ -302,10 +304,21 @@ test("HTTP Four-Path (NORMAL / FAILURE / ADVERSARIAL / RECOVERY) for /api/templa
             assert.equal(renderRes.status, 200, `${prefix}/api/templates/${id}/render must return 200`);
             assert.match(renderRes.headers.get("content-type") || "", /text\/html/i);
             assert.equal(renderRes.headers.get("x-frame-options"), "SAMEORIGIN");
+            assert.equal(renderRes.headers.get("x-content-type-options"), "nosniff");
             assert.equal(renderRes.headers.get("content-security-policy"), EXPECTED_RENDER_CSP);
             const html = await renderRes.text();
             assert.ok(html.startsWith("<!DOCTYPE html>"), `${id} render must start with DOCTYPE`);
             assert.ok(html.includes(`data-template-id="${id}"`), `${id} render missing data-template-id`);
+            assert.ok(
+              html.includes(`src="${prefix}/assets/templates/${id}.webp"`),
+              `${id} render must embed basePath-aware bespoke hero photograph ${prefix}/assets/templates/${id}.webp`
+            );
+            assert.ok(
+              html.includes('class="hero-photo"') || html.includes('class="resort-hero-img"'),
+              `${id} render must include bespoke hero photograph frame`
+            );
+            assert.ok(html.includes('class="card-photo"'), `${id} render must include .card-photo detail crops`);
+            assert.ok((html.match(/<img\b/g) || []).length >= 4, `${id} render must embed >= 4 real photographic <img> frames`);
             assert.equal(html.includes("/assets/reel-"), false, `${id} render must not reuse video posters`);
             assert.equal(html.includes("/assets/hero-"), false, `${id} render must not reuse hero posters`);
             assert.doesNotMatch(html, /<script\b/i, `${id} render must stay script-free`);
@@ -390,8 +403,13 @@ test("HTTP Four-Path (NORMAL / FAILURE / ADVERSARIAL / RECOVERY) for /api/templa
           assert.equal(xssRenderRes.status, 200);
           const xssHtml = await xssRenderRes.text();
           assert.ok(xssHtml.includes("&lt;script&gt;alert(1)&lt;/script&gt;"), "XSS script payload must be HTML-escaped");
+          assert.ok(
+            xssHtml.includes("&quot;&gt;&lt;img src=x onerror=alert(1)&gt;"),
+            "XSS img onerror payload must be HTML-escaped"
+          );
           assert.equal(xssHtml.includes("<script>"), false, "raw <script> must never appear in rendered output");
-          assert.equal(xssHtml.includes("<img "), false, "raw <img tag must never appear in rendered output");
+          assert.equal(xssHtml.includes("<img src=x"), false, "injected <img src=x must never appear unescaped");
+          assert.doesNotMatch(xssHtml, /<img\b[^>]*\bonerror\s*=/i, "event handler injection inside <img> must never appear unescaped");
 
           // 4. RECOVERY: valid /render and /source succeed cleanly after failure & adversarial probes
           const recRender = await fetchHttpHandler(

@@ -555,6 +555,21 @@ const FLAGSHIP_IMAGE_ASSETS = [
   "basalt-terrace-deck.webp",
 ] as const;
 
+const TEMPLATE_IMAGE_ASSETS = [
+  "coastal-glass-architecture.webp",
+  "botanical-wellness-sanctuary.webp",
+  "ocean-obsidian-ai-platform.webp",
+  "atelier-maison-luxury.webp",
+  "azure-horizon-resort.webp",
+  "jade-botanical-skincare.webp",
+  "silver-prism-creative-studio.webp",
+  "calm-sea-fine-dining.webp",
+  "serene-clinic-medical.webp",
+  "monolith-advisory-legal.webp",
+  "kinetic-academy-edtech.webp",
+  "veranda-interior-atelier.webp",
+] as const;
+
 const FLAGSHIP_VIDEO_ASSETS = [
   "hero-ocean-jade.mp4",
   "reel-01-botanical.mp4",
@@ -626,12 +641,14 @@ function registerPublicTemplateAndPlatformRoutes(prefix: string): void {
       lang,
       brand: firstQueryString(req.query.brand),
       brief: firstQueryString(req.query.brief),
+      basePath: prefix,
     });
     res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("X-Frame-Options", "SAMEORIGIN");
     res.setHeader(
       "Content-Security-Policy",
-      "default-src 'none'; style-src 'unsafe-inline'; img-src data:; frame-ancestors 'self'"
+      "default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'self'"
     );
     res.setHeader("Cache-Control", "public, max-age=300");
     res.status(200).send(html);
@@ -652,6 +669,7 @@ function registerPublicTemplateAndPlatformRoutes(prefix: string): void {
     const payload = buildTemplateSourcePayload(result.template, lang, {
       brand: firstQueryString(req.query.brand),
       brief: firstQueryString(req.query.brief),
+      basePath: prefix,
     });
     res.setHeader("Cache-Control", "public, max-age=300");
     res.json(payload);
@@ -689,7 +707,17 @@ for (const file of FLAGSHIP_IMAGE_ASSETS) {
   app.get("/assets/" + file, (_req, res) => {
     res.type("image/webp");
     res.setHeader("Cache-Control", "public, max-age=86400");
+    res.setHeader("X-Content-Type-Options", "nosniff");
     res.sendFile(`assets/${file}`, { root: publicDir });
+  });
+}
+
+for (const file of TEMPLATE_IMAGE_ASSETS) {
+  app.get("/assets/templates/" + file, (_req, res) => {
+    res.type("image/webp");
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.sendFile(`assets/templates/${file}`, { root: publicDir });
   });
 }
 
@@ -768,7 +796,16 @@ if (domainTopology.basePath) {
     app.get(`${bp}/assets/${file}`, (_req, res) => {
       res.type("image/webp");
       res.setHeader("Cache-Control", "public, max-age=86400");
+      res.setHeader("X-Content-Type-Options", "nosniff");
       res.sendFile(`assets/${file}`, { root: publicDir });
+    });
+  }
+  for (const file of TEMPLATE_IMAGE_ASSETS) {
+    app.get(`${bp}/assets/templates/${file}`, (_req, res) => {
+      res.type("image/webp");
+      res.setHeader("Cache-Control", "public, max-age=86400");
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.sendFile(`assets/templates/${file}`, { root: publicDir });
     });
   }
   for (const file of FLAGSHIP_VIDEO_ASSETS) {

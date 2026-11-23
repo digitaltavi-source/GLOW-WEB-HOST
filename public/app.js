@@ -131,18 +131,22 @@ const I18N = {
     "product.p1.b1": "Điều phối dự án bằng ngôn ngữ tự nhiên tiếng Việt & tiếng Anh",
     "product.p1.b2": "Ranh giới bảo mật OAuth tách biệt, không tự ý xuất bản khi chưa duyệt",
     "product.p1.b3": "Tương thích trọn bộ 12+ mẫu chuẩn trong thư viện tài nguyên",
+    "product.p1.v1": "Điều phối AI · OAuth minh bạch",
+    "product.p1.v2": "Bản dựng trực tiếp từ mẫu chuẩn",
     "product.p1.cta": "Kết nối AI Plugin →",
     "product.p2.badge": "02 · XƯỞNG STUDIO TRỰC QUAN",
     "product.p2.title": "Khối bố cục JSON có rào thẩm mỹ",
     "product.p2.desc": "Mỗi trang được lắp ghép từ các khối chuẩn hóa rõ ràng về nhịp chữ, khoảng thở và tương phản. Tự do tùy biến nội dung mà không bao giờ vỡ bố cục trên di động.",
     "product.p2.b1": "Xem trước tức thì trên khung Desktop & Mobile",
     "product.p2.b2": "Tùy chọn 3 sắc thái thẩm mỹ: Ngọc bích · Ven biển · Điện ảnh",
+    "product.p2.v1": "Rào thẩm mỹ Desktop & Mobile",
     "product.p2.cta": "Mở Xưởng Studio →",
     "product.p3.badge": "03 · XUẤT BẢN SIÊU TỐC",
     "product.p3.title": "Mã nguồn sạch & Đồng bộ GitHub",
     "product.p3.desc": "Xuất bản trực tiếp sang HTML/CSS/JS tối ưu, không phụ thuộc CDN bên ngoài, không rác thẻ lồng ghép và sẵn sàng đồng bộ GitHub hay hạ tầng edge của riêng bạn.",
     "product.p3.b1": "Tốc độ tải siêu nhanh, không khóa nền tảng (zero lock-in)",
     "product.p3.b2": "Chuẩn hóa khả năng tiếp cận bàn phím và giảm chuyển động",
+    "product.p3.v1": "HTML/CSS tĩnh sạch · Đồng bộ GitHub",
     "product.p3.cta": "Xem thư viện mẫu →",
     "product.bandTitle": "Sẵn sàng khởi tạo không gian số mang dấu ấn riêng?",
     "product.bandDesc": "Chọn một mẫu ngành nghề chuẩn mực hoặc kết nối AI của bạn ngay trong Xưởng Studio.",
@@ -330,18 +334,22 @@ const I18N = {
     "product.p1.b1": "Guide projects in natural English or Vietnamese conversation",
     "product.p1.b2": "Strict OAuth authority boundary — never publishes without your sign-off",
     "product.p1.b3": "Compatible with all 12+ structured templates in the resource registry",
+    "product.p1.v1": "AI Orchestration · OAuth Governed",
+    "product.p1.v2": "Live Render from Curated Template",
     "product.p1.cta": "Connect AI Plugin →",
     "product.p2.badge": "02 · VISUAL STUDIO GUARDRAILS",
     "product.p2.title": "JSON Block Architecture",
     "product.p2.desc": "Compose pages from clean, typed section blocks with locked typography scales, contrast ratios, and responsive balance so layouts never break on mobile.",
     "product.p2.b1": "Instant Desktop & Mobile live viewport switching",
     "product.p2.b2": "Three curated moods: Jade Botanical · Coastal Architecture · Editorial",
+    "product.p2.v1": "Desktop & Mobile Layout Guardrails",
     "product.p2.cta": "Open Studio Workspace →",
     "product.p3.badge": "03 · INSTANT CLEAN OUTPUT",
     "product.p3.title": "Clean Static Code & GitHub Sync",
     "product.p3.desc": "Export lean HTML/CSS/JS with zero external CDN dependencies, zero div-soup bloat, and seamless synchronization to your GitHub repositories or edge hosts.",
     "product.p3.b1": "Fast first paint with complete ownership and zero lock-in",
     "product.p3.b2": "Built-in keyboard accessibility and reduced-motion compliance",
+    "product.p3.v1": "Zero-CDN Static HTML/CSS · GitHub Sync",
     "product.p3.cta": "Browse template gallery →",
     "product.bandTitle": "Ready to shape a digital presence unmistakably yours?",
     "product.bandDesc": "Start from a cleanroom industry template or connect your AI directly inside the Studio.",
@@ -813,7 +821,7 @@ const FALLBACK_TEMPLATES = [
     industry_key: "architecture",
     category: "showcase",
     mood: "coastal",
-    preview_image: "/assets/reel-02-coastal-villa.webp",
+    preview_image: "/assets/templates/coastal-glass-architecture.webp",
     preview_video: "/assets/reel-02-coastal-villa.mp4",
     license: "GLOW_CLEANROOM_MIT_INSPIRED",
     source_inspiration: "AstroWind + Webstudio Cleanroom",
@@ -900,10 +908,30 @@ function renderSolutionsGrid() {
     const copy = pillar[currentLang] || pillar.vi;
     const matching = registryTemplates.filter((tpl) => pillar.industryKeys.includes(tpl.industry_key));
     const count = matching.length || pillar.industryKeys.length;
-    const featuredId = matching[0]?.id || pillar.defaultTemplateId;
+    const featuredTpl = matching[0];
+    const secondaryTpl = matching[1];
+    const featuredId = featuredTpl?.id || pillar.defaultTemplateId;
+    const featuredImage = featuredTpl?.preview_image || `/assets/templates/${featuredId}.webp`;
+    const featuredLoc = featuredTpl ? (featuredTpl[currentLang] || featuredTpl.vi) : null;
 
     const card = document.createElement("article");
     card.className = "solution-card";
+
+    const media = document.createElement("div");
+    media.className = "solution-card-media";
+
+    const photo = document.createElement("img");
+    photo.className = "solution-card-photo";
+    photo.src = withBasePath(featuredImage);
+    photo.alt = copy.title;
+    photo.width = 1280;
+    photo.height = 720;
+    photo.loading = "lazy";
+    photo.decoding = "async";
+
+    const scrim = document.createElement("div");
+    scrim.className = "solution-card-scrim";
+    scrim.setAttribute("aria-hidden", "true");
 
     const top = document.createElement("div");
     top.className = "solution-card-top";
@@ -913,7 +941,17 @@ function renderSolutionsGrid() {
       currentLang === "en"
         ? `${count} ${count === 1 ? "template" : "templates"}`
         : `${count} mẫu chuẩn`;
-    top.appendChild(chip);
+
+    const featuredPill = document.createElement("span");
+    featuredPill.className = "solution-featured-pill";
+    const baseTitle = featuredLoc?.title || featuredId;
+    featuredPill.textContent = secondaryTpl ? `${baseTitle} +1` : baseTitle;
+    top.append(chip, featuredPill);
+
+    media.append(photo, scrim, top);
+
+    const body = document.createElement("div");
+    body.className = "solution-card-body";
 
     const h2 = document.createElement("h2");
     h2.textContent = copy.title;
@@ -953,7 +991,8 @@ function renderSolutionsGrid() {
     studioLink.textContent = t("solutions.openStudio");
 
     actions.append(exploreBtn, studioLink);
-    card.append(top, h2, desc, list, actions);
+    body.append(h2, desc, list, actions);
+    card.append(media, body);
     frag.appendChild(card);
   }
   container.replaceChildren(frag);
@@ -1119,13 +1158,16 @@ function renderTemplateGallery() {
 
     const miniViewport = document.createElement("div");
     miniViewport.className = "template-mini-viewport";
+    if (tpl.preview_image) {
+      miniViewport.style.backgroundImage = `linear-gradient(180deg, rgba(6, 16, 23, 0.24), rgba(6, 16, 23, 0.52)), url("${withBasePath(tpl.preview_image)}")`;
+    }
 
     const miniFrame = document.createElement("iframe");
     miniFrame.className = "template-mini-iframe";
     miniFrame.src = withBasePath(
       `/api/templates/${encodeURIComponent(tpl.id)}/render?lang=${encodeURIComponent(currentLang)}`
     );
-    miniFrame.setAttribute("sandbox", "");
+    miniFrame.setAttribute("sandbox", "allow-same-origin");
     miniFrame.setAttribute("loading", "lazy");
     miniFrame.setAttribute("tabindex", "-1");
     miniFrame.setAttribute("aria-hidden", "true");
@@ -1759,21 +1801,54 @@ const WORLD_SCENE_MAP = {
   intake: "sanctuary",
 };
 
+let preferredFinaleRailTarget = "intake";
+
+function getHomeSeamOffsets() {
+  if (window.innerWidth >= 1024) {
+    return { seam: 120, stone: 56 };
+  }
+  return { seam: 0, stone: 0 };
+}
+
 function updateChapterRail(vh, scrollY, maxScroll) {
   if (activeView !== "home" || !chapterRail || railItems.length === 0) return;
-  const probeY = vh * 0.44;
 
   let activeTarget = "top";
-  if (maxScroll > 0 && scrollY >= maxScroll - 24) {
-    activeTarget = "intake";
+  if (window.innerWidth >= 1024) {
+    const tops = getFrameTops();
+    const threshold1 = Math.round((tops[0] + tops[1]) * 0.5);
+    const threshold2 = Math.round((tops[1] + tops[2]) * 0.5);
+    const threshold3 = Math.round((tops[2] + tops[3]) * 0.5);
+
+    if (scrollY >= threshold3) {
+      if (maxScroll > tops[3] + 60 && scrollY >= maxScroll - 28) {
+        activeTarget = "intake";
+      } else {
+        activeTarget = preferredFinaleRailTarget;
+      }
+    } else {
+      preferredFinaleRailTarget = "craft";
+      if (scrollY >= threshold2) {
+        activeTarget = "chapter-villa";
+      } else if (scrollY >= threshold1) {
+        activeTarget = "chapter-botanical";
+      } else {
+        activeTarget = "top";
+      }
+    }
   } else {
-    for (const item of railItems) {
-      const id = item.dataset.railTarget;
-      const sec = id ? document.getElementById(id) : null;
-      if (!sec) continue;
-      const rect = sec.getBoundingClientRect();
-      if (rect.top <= probeY) {
-        activeTarget = id;
+    const probeY = vh * 0.44;
+    if (maxScroll > 0 && scrollY >= maxScroll - 24) {
+      activeTarget = "intake";
+    } else {
+      for (const item of railItems) {
+        const id = item.dataset.railTarget;
+        const sec = id ? document.getElementById(id) : null;
+        if (!sec) continue;
+        const rect = sec.getBoundingClientRect();
+        if (rect.top <= probeY) {
+          activeTarget = id;
+        }
       }
     }
   }
@@ -1800,7 +1875,7 @@ function updateScrollChoreography() {
   }
 
   const heroThreshold =
-    activeView === "home" && heroSection ? Math.max(80, heroSection.offsetHeight - 220) : 24;
+    activeView === "home" && heroSection ? Math.max(80, vh - 160) : 24;
   siteHeader?.classList.toggle("is-scrolled", scrollY > heroThreshold);
 
   if (activeView !== "home") return;
@@ -1816,8 +1891,8 @@ function updateScrollChoreography() {
   }
 
   if (heroSection) {
-    const heroH = Math.max(heroSection.offsetHeight, 1);
-    const heroP = clamp01(scrollY / heroH);
+    const heroSpan = Math.max(vh, 1);
+    const heroP = clamp01(scrollY / heroSpan);
     heroSection.style.setProperty("--hero-p", heroP.toFixed(4));
   }
 
@@ -1915,9 +1990,19 @@ function isHomeFrameSnapActive() {
 
 function getFrameTops() {
   const scrollY = window.scrollY || 0;
+  const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+  const { seam, stone } = getHomeSeamOffsets();
   return HOME_FRAME_IDS.map((id) => {
     const el = document.getElementById(id);
-    return el ? Math.max(0, Math.round(el.getBoundingClientRect().top + scrollY)) : 0;
+    if (!el) return 0;
+    const rawTop = Math.max(0, Math.round(el.getBoundingClientRect().top + scrollY));
+    if (id === "chapter-botanical" || id === "chapter-villa") {
+      return Math.min(maxScroll, rawTop + seam);
+    }
+    if (id === "sanctuary-world") {
+      return Math.min(maxScroll, rawTop + stone);
+    }
+    return rawTop;
   });
 }
 
@@ -2077,16 +2162,23 @@ function initHomeFrameSnap() {
       } else if (targetId === "chapter-villa") {
         destY = tops[2];
       } else if (targetId === "sanctuary-world" || targetId === "craft") {
+        preferredFinaleRailTarget = "craft";
         destY = tops[3];
       } else if (targetId === "intake") {
-        const el = document.getElementById("intake");
-        const elTop = el ? Math.round(el.getBoundingClientRect().top + (window.scrollY || 0)) : tops[3];
-        destY = Math.min(maxScroll, Math.max(tops[3], elTop - 72));
+        preferredFinaleRailTarget = "intake";
+        if (maxScroll <= tops[3] + 24) {
+          destY = tops[3];
+        } else {
+          const el = document.getElementById("intake");
+          const elTop = el ? Math.round(el.getBoundingClientRect().top + (window.scrollY || 0)) : tops[3];
+          destY = Math.min(maxScroll, Math.max(tops[3], elTop - 72));
+        }
       }
 
       if (destY !== null) {
         e.preventDefault();
         animateScrollToY(destY, 540);
+        scheduleScrollChoreography();
       }
     });
   });
@@ -2378,6 +2470,12 @@ window.addEventListener("keydown", (e) => {
 /* -------------------------------------------------------------------------- */
 /* 15. Initial Boot                                                           */
 /* -------------------------------------------------------------------------- */
+if (BASE_PATH) {
+  $$("img[data-asset-src]").forEach((img) => {
+    const assetPath = img.dataset.assetSrc;
+    if (assetPath) img.src = withBasePath(assetPath);
+  });
+}
 setStep(1);
 applyLanguage(currentLang, false);
 setActiveView(activeView, { pushHistory: false, scrollTop: false });
