@@ -717,6 +717,8 @@ function renderStandalonePrivacyHtml(prefix: string, isEn: boolean): string {
     </ul>
     <h2>${isEn ? "2. Zero Third-Party Advertising Sale" : "2. Không bán hoặc chia sẻ dữ liệu quảng cáo"}</h2>
     <p>${isEn ? "GLOW never sells customer briefs, email addresses, or OAuth profile attributes to third-party ad networks." : "GLOW tuyệt đối không bán bản mô tả dự án, địa chỉ email hoặc thông tin hồ sơ đăng nhập cho bên thứ ba phục vụ quảng cáo."}</p>
+    <h2 id="terms">${isEn ? "3. Terms of Use (Bounded Early Access)" : "3. Điều khoản sử dụng (Terms of Use)"}</h2>
+    <p>${isEn ? "GLOW Web is currently offered as a bounded Early Access experience with no automatic online billing. You retain ownership of your brand briefs and exported static HTML/CSS/JS bundles, and no project is published or pushed to external targets without your explicit authorization." : "GLOW Web hiện được cung cấp theo chế độ Trải nghiệm Giới hạn (Early Access) và chưa kích hoạt thu phí trực tuyến tự động. Bạn giữ toàn quyền sở hữu đối với hồ sơ thương hiệu cũng như mã nguồn tĩnh HTML/CSS/JS đã xuất, và không có thao tác xuất bản ra ngoài nào được thực hiện khi chưa có sự phê duyệt rõ ràng của bạn."}</p>
     <div class="actions">
       <a class="btn primary" href="${escapeHtml(workspaceHref)}">${isEn ? "Open Studio Workspace" : "Mở Không gian dự án"}</a>
       <a class="btn" href="${escapeHtml(homeHref)}">${isEn ? "← Back to GLOW Web" : "← Về trang chủ GLOW Web"}</a>

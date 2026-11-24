@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#05161F">
 <title>GLOW Web — Ánh Sáng Đại Hải · Kiến Trúc Điện Ảnh Cho Thương Hiệu</title>
 <link rel="preload" as="image" href="/assets/hero-ocean-jade.webp" fetchpriority="high">
-<link rel="stylesheet" href="/app.css?v=63">
+<link rel="stylesheet" href="/app.css?v=64">
 </head>
 <body data-world-scene="ocean" data-active-view="home" data-lang="vi">
 <a class="skip-link" href="#main-content" data-i18n="a11y.skip">Chuyển tới nội dung chính</a>
@@ -605,7 +605,7 @@
         </div>
       </div>
 
-      <!-- COMPACT ARCHITECTURAL CRAFT RAIL (#craft) -->
+      <!-- ARCHITECTURAL 4-STAGE PROCESS DIAGRAM CARDS (#craft) -->
       <section class="craft-rail-section" id="craft" aria-labelledby="craft-heading">
         <div class="container">
           <div class="craft-bar-head reveal">
@@ -618,42 +618,84 @@
 
           <div class="craft-thread" id="craft-thread" aria-hidden="true">
             <span class="craft-thread-fill"></span>
+            <span class="craft-node craft-node-1"></span>
+            <span class="craft-node craft-node-2"></span>
+            <span class="craft-node craft-node-3"></span>
+            <span class="craft-node craft-node-4"></span>
           </div>
 
           <ol class="craft-strip">
             <li class="craft-step reveal">
-              <span class="step-num">01</span>
-              <div>
+              <div class="craft-step-top">
+                <span class="step-num">01</span>
+                <svg class="craft-diagram-icon" width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                  <circle cx="16" cy="16" r="12.5" stroke="#86F3CE" stroke-opacity="0.45" stroke-width="1.35" stroke-dasharray="2 2.5"/>
+                  <path d="M16 4.5L25.5 16L16 27.5L6.5 16L16 4.5Z" stroke="#DFFCF5" stroke-width="1.35" fill="rgba(72,209,168,0.12)"/>
+                  <circle cx="16" cy="16" r="3" stroke="#86F3CE" stroke-width="1.35" fill="rgba(134,243,206,0.28)"/>
+                  <path d="M16 1.5V4.5M16 27.5V30.5M1.5 16H4.5M27.5 16H30.5" stroke="#86F3CE" stroke-width="1.35" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="craft-step-body">
                 <h3 data-i18n="craft.s1.title">Khởi nguồn cảm hứng</h3>
                 <p data-i18n="craft.s1.desc">Lắng nghe bản sắc và khoảnh khắc thương hiệu cần chạm tới.</p>
               </div>
+              <span class="craft-step-meta" data-i18n="craft.s1.meta">Bản sắc &amp; Định vị</span>
             </li>
             <li class="craft-step reveal">
-              <span class="step-num">02</span>
-              <div>
+              <div class="craft-step-top">
+                <span class="step-num">02</span>
+                <svg class="craft-diagram-icon" width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                  <rect x="3" y="6.5" width="26" height="19" rx="3" stroke="#DFFCF5" stroke-width="1.35" fill="rgba(72,209,168,0.08)"/>
+                  <path d="M19 6.5V25.5M19 18H29" stroke="#86F3CE" stroke-opacity="0.65" stroke-width="1.35"/>
+                  <path d="M5.5 23L26.5 9" stroke="#86F3CE" stroke-width="1.35" stroke-linecap="round" stroke-dasharray="2.5 2.5"/>
+                  <circle cx="12.5" cy="14.5" r="3.4" stroke="#DFFCF5" stroke-width="1.35" fill="rgba(134,243,206,0.22)"/>
+                </svg>
+              </div>
+              <div class="craft-step-body">
                 <h3 data-i18n="craft.s2.title">Định hình điện ảnh</h3>
                 <p data-i18n="craft.s2.desc">Thiết lập ánh sáng, bố cục, kiểu chữ và nhịp chuyển động riêng.</p>
               </div>
+              <span class="craft-step-meta" data-i18n="craft.s2.meta">Ánh sáng &amp; Nhịp điệu</span>
             </li>
             <li class="craft-step reveal">
-              <span class="step-num">03</span>
-              <div>
+              <div class="craft-step-top">
+                <span class="step-num">03</span>
+                <svg class="craft-diagram-icon" width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                  <path d="M16 4L27.5 10.2L16 16.4L4.5 10.2L16 4Z" stroke="#DFFCF5" stroke-width="1.35" stroke-linejoin="round" fill="rgba(72,209,168,0.16)"/>
+                  <path d="M4.5 16L16 22.2L27.5 16" stroke="#86F3CE" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M4.5 21.8L16 28L27.5 21.8" stroke="#86F3CE" stroke-opacity="0.6" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="16" cy="10.2" r="1.6" fill="#DFFCF5"/>
+                </svg>
+              </div>
+              <div class="craft-step-body">
                 <h3 data-i18n="craft.s3.title">Chế tác tinh xảo</h3>
                 <p data-i18n="craft.s3.desc">Hoàn thiện từng điểm ảnh, tương thích đa màn hình và mượt mà.</p>
               </div>
+              <span class="craft-step-meta" data-i18n="craft.s3.meta">Chuẩn xác từng điểm ảnh</span>
             </li>
             <li class="craft-step reveal">
-              <span class="step-num">04</span>
-              <div>
+              <div class="craft-step-top">
+                <span class="step-num">04</span>
+                <svg class="craft-diagram-icon" width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                  <path d="M8 8L16 16M24 8L16 16M8 24L16 16M24 24L16 16" stroke="#86F3CE" stroke-opacity="0.72" stroke-width="1.35" stroke-linecap="round"/>
+                  <circle cx="16" cy="16" r="4.2" stroke="#DFFCF5" stroke-width="1.35" fill="rgba(72,209,168,0.28)"/>
+                  <circle cx="8" cy="8" r="2.3" stroke="#86F3CE" stroke-width="1.35" fill="#061922"/>
+                  <circle cx="24" cy="8" r="2.3" stroke="#86F3CE" stroke-width="1.35" fill="#061922"/>
+                  <circle cx="8" cy="24" r="2.3" stroke="#86F3CE" stroke-width="1.35" fill="#061922"/>
+                  <circle cx="24" cy="24" r="2.3" stroke="#86F3CE" stroke-width="1.35" fill="#061922"/>
+                </svg>
+              </div>
+              <div class="craft-step-body">
                 <h3 data-i18n="craft.s4.title">Bàn giao &amp; Kết nối AI</h3>
                 <p data-i18n="craft.s4.desc">Đồng hành liền mạch cùng ChatGPT &amp; Google Gemini theo quyền duyệt của bạn.</p>
               </div>
+              <span class="craft-step-meta" data-i18n="craft.s4.meta">ChatGPT &amp; Gemini MCP</span>
             </li>
           </ol>
         </div>
       </section>
 
-      <!-- CENTERED 1-LINE EDITORIAL FINALE INVITATION (#register + #intake · 3 Uniform Neon Capsules) -->
+      <!-- FRAMED LUMINOUS EDITORIAL CENTERPIECE (#register + #intake · 3 High-Presence Capsules) -->
       <section class="gateway" id="intake" aria-labelledby="gateway-heading">
         <span id="register" class="anchor-offset" aria-hidden="true"></span>
         <div class="container gateway-container">
@@ -664,7 +706,7 @@
             <p class="gateway-desc" data-i18n="gateway.desc">Kết nối ngay AI của bạn với Glow Website qua Plugin để khởi tạo dự án theo dấu ấn riêng của bạn.</p>
 
             <div class="gateway-cta-row">
-              <a class="pill pill-neon-capsule btn-magnetic" id="cta-connect-plugin" href="/auth/login?next=%2Fworkspace%23ai-connect" data-i18n="gateway.ctaPlugin">Kết nối Plugin</a>
+              <a class="pill pill-neon-capsule pill-neon-primary btn-magnetic" id="cta-connect-plugin" href="/auth/login?next=%2Fworkspace%23ai-connect" data-i18n="gateway.ctaPlugin">Kết nối Plugin</a>
               <a class="pill pill-neon-capsule btn-magnetic" id="cta-design-website" href="/workspace" data-i18n="gateway.ctaDesign">Thiết kế Website</a>
               <button type="button" class="pill pill-neon-capsule btn-magnetic" id="open-intake-drawer" data-i18n="gateway.ctaConsult">Tư vấn nhanh</button>
             </div>
@@ -979,70 +1021,28 @@
     </div>
   </section>
 
-  <!-- SHARED SEAMLESS TRANSLUCENT FOOTER (Glowrivia-Inspired 2-Tier Obsidian Glass) -->
+  <!-- SHARED SEAMLESS SINGLE-ROW FOOTER (Ultra-Clean Glowrivia-Style Bottom Bar) -->
   <footer class="site-footer">
     <div class="container footer-inner">
-      <div class="footer-grid">
-        <div class="footer-col-brand">
-          <div class="footer-brand">
-            <svg class="brand-emblem" viewBox="0 0 36 36" width="24" height="24" fill="none" aria-hidden="true">
-              <circle cx="18" cy="18" r="15" stroke="#CFEBE6" stroke-opacity="0.45" stroke-width="1.3"/>
-              <path d="M18 9L23.2 18L18 27L12.8 18L18 9Z" stroke="#6EE7B7" stroke-width="1.3"/>
+      <div class="footer-bar">
+        <div class="footer-legal-group">
+          <span class="footer-brand-mini">
+            <svg class="brand-emblem" viewBox="0 0 36 36" width="22" height="22" fill="none" aria-hidden="true">
+              <circle cx="18" cy="18" r="15" stroke="#CFEBE6" stroke-opacity="0.5" stroke-width="1.35"/>
+              <path d="M18 9L23.2 18L18 27L12.8 18L18 9Z" stroke="#6EE7B7" stroke-width="1.35" fill="rgba(56,211,162,0.16)"/>
             </svg>
-            <span class="brand-wordmark">GLOW</span>
-          </div>
-          <p class="footer-tagline" data-i18n="footer.tagline">Khai phóng dấu ấn số. Làm chủ công nghệ AI. Kiến tạo website đẳng cấp — theo cách của bạn.</p>
-          <div class="footer-status" role="status" aria-live="polite">
-            <span class="status-pill">
-              <i class="status-dot" aria-hidden="true"></i>
-              <b id="runtime-status">Đang kết nối</b>
-            </span>
-            <span class="status-sep" aria-hidden="true">·</span>
-            <span class="status-ready" id="ready-state">Đang kiểm tra trạng thái…</span>
-          </div>
-        </div>
-
-        <div class="footer-col">
-          <h3 class="footer-heading" data-i18n="footer.colExplore">Khám phá</h3>
-          <nav class="footer-links" aria-label="Khám phá">
-            <a href="/" data-route="home" data-i18n="nav.home">Trang chủ</a>
-            <a href="/product" data-route="product" data-i18n="nav.product">Sản phẩm</a>
-            <a href="/solutions" data-route="solutions" data-i18n="nav.solutions">Giải pháp</a>
-            <a href="/resources" data-route="resources" data-i18n="nav.resources">Tài nguyên</a>
-            <a href="/pricing" data-route="pricing" data-i18n="nav.pricing">Bảng giá</a>
-          </nav>
-        </div>
-
-        <div class="footer-col">
-          <h3 class="footer-heading" data-i18n="footer.colStudio">Xưởng &amp; Trải nghiệm</h3>
-          <nav class="footer-links" aria-label="Xưởng và Trải nghiệm">
-            <a href="/workspace" data-i18n="footer.workspace">Xưởng Studio</a>
-            <a href="/auth/login?next=%2Fworkspace%23ai-connect" data-i18n="footer.aiPlugin">Kết nối AI Plugin</a>
-            <a href="/auth/login?next=%2Fworkspace" data-i18n="footer.google">Đăng nhập Google</a>
-            <button type="button" class="footer-link-btn" data-open-intake data-i18n="footer.quickConsult">Tư vấn nhanh</button>
-          </nav>
-        </div>
-
-        <div class="footer-col">
-          <h3 class="footer-heading" data-i18n="footer.colSupport">Hệ sinh thái &amp; Hỗ trợ</h3>
-          <nav class="footer-links" aria-label="Hệ sinh thái và Hỗ trợ">
-            <a href="https://www.glowrivia.com/index?lang=vi" target="_blank" rel="noopener noreferrer" data-i18n="footer.glowrivia">Hệ sinh thái Glowrivia</a>
-            <a href="/privacy" data-i18n="footer.privacy">Quyền riêng tư</a>
-            <a href="/privacy#terms" data-i18n="footer.terms">Điều khoản sử dụng</a>
-            <button type="button" class="footer-link-btn" data-open-intake data-i18n="footer.contact">Liên hệ &amp; Hợp tác</button>
-          </nav>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <div class="footer-legal">
-          <span>© 2026 GLOW Web Studio</span>
+            <strong>© 2026 GLOW Web Studio</strong>
+          </span>
           <span class="footer-sep" aria-hidden="true">•</span>
           <span class="footer-note" data-i18n="footer.note">Phiên bản Trải nghiệm Giới hạn</span>
           <span class="footer-sep" aria-hidden="true">•</span>
           <a href="/privacy#terms" data-i18n="footer.terms">Điều khoản sử dụng</a>
           <span class="footer-sep" aria-hidden="true">•</span>
           <a href="/privacy" data-i18n="footer.privacyPolicy">Chính sách bảo mật</a>
+        </div>
+
+        <div class="footer-status" role="status" aria-live="polite">
+          <span class="status-pill"><i class="status-dot" aria-hidden="true"></i><b id="runtime-status">Đang kết nối</b></span><span class="status-sep" aria-hidden="true">·</span><span class="status-ready" id="ready-state">Đang kiểm tra…</span>
         </div>
 
         <div class="footer-social" aria-label="Mạng xã hội Glowrivia">
@@ -1321,6 +1321,6 @@
   </div>
 </div>
 
-<script type="module" src="/app.js?v=63"></script>
+<script type="module" src="/app.js?v=64"></script>
 </body>
 </html>

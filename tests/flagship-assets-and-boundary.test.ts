@@ -184,11 +184,16 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   assert.ok(html.includes('id="chapter-villa"'), "index.html missing #chapter-villa direct scroll chapter");
   assert.ok(html.includes('class="chapter-editorial'), "index.html missing borderless .chapter-editorial film typography");
   assert.equal(html.includes("chapter-card"), false, "hard bordered .chapter-card boxes over video frames must be removed");
-  assert.ok(html.includes('href="/app.css?v=63"'), "index.html must cache-bust /app.css?v=63");
-  assert.ok(html.includes('src="/app.js?v=63"'), "index.html must cache-bust /app.js?v=63");
-  assert.ok(html.includes('class="footer-grid"'), "index.html must include expanded .footer-grid");
-  assert.ok(html.includes('class="footer-bottom"'), "index.html must include .footer-bottom legal and social row");
+  assert.ok(html.includes('href="/app.css?v=64"'), "index.html must cache-bust /app.css?v=64");
+  assert.ok(html.includes('src="/app.js?v=64"'), "index.html must cache-bust /app.js?v=64");
+  assert.equal(html.includes("footer-grid"), false, "duplicate 4-column .footer-grid must be removed");
+  assert.ok(html.includes('class="footer-bar"'), "index.html must include single-row .footer-bar");
+  assert.ok(html.includes('class="footer-legal-group"'), "index.html must include .footer-legal-group");
   assert.ok(html.includes('class="footer-social"'), "index.html must include .footer-social monochrome icon strip");
+  assert.equal((html.match(/class="craft-diagram-icon"/g) || []).length, 4, "index.html must include 4 architectural .craft-diagram-icon SVGs");
+  assert.equal((html.match(/class="craft-node craft-node-/g) || []).length, 4, "index.html must include 4 .craft-node timeline anchors");
+  assert.equal((html.match(/class="craft-step-meta"/g) || []).length, 4, "index.html must include 4 .craft-step-meta footer tags");
+  assert.ok(html.includes("pill-neon-primary"), "index.html must highlight primary CTA with .pill-neon-primary");
   assert.ok(html.includes('class="sanctuary-caustic-svg"'), "index.html must include living loop .sanctuary-caustic-svg inside #sanctuary-sculpture");
   assert.ok(html.includes('id="sanctuary-sculpture"'), "index.html missing #sanctuary-sculpture atmospheric layer");
   assert.equal(html.includes("prism-ribbons-svg"), false, "crude SVG prism-ribbons-svg curves must be removed");
@@ -245,22 +250,25 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   );
   assert.match(
     css,
-    /\.sanctuary-world\s*\{[^}]*z-index:\s*5;[^}]*margin-top:\s*calc\(-1\s*\*\s*var\(--stone-overlap\)\);[^}]*url\("\/assets\/basalt-terrace-deck\.webp\?v=63"\)[^}]*#000\s+var\(--stone-overlap\),\s*#000\s+100%/s,
-    "app.css .sanctuary-world must dissolve over Video 03 pool coping across --stone-overlap with cache-busted basalt-terrace-deck.webp?v=63"
+    /\.sanctuary-world\s*\{[^}]*z-index:\s*5;[^}]*margin-top:\s*calc\(-1\s*\*\s*var\(--stone-overlap\)\);[^}]*url\("\/assets\/basalt-terrace-deck\.webp\?v=64"\)[^}]*#000\s+var\(--stone-overlap\),\s*#000\s+100%/s,
+    "app.css .sanctuary-world must dissolve over Video 03 pool coping across --stone-overlap with cache-busted basalt-terrace-deck.webp?v=64"
   );
   assert.match(
     css,
-    /@media\s*\(min-width:\s*1024px\)\s*and\s*\(min-height:\s*760px\)\s*\{\s*\.sanctuary-world\s*\{[^}]*justify-content:\s*space-evenly;/s,
-    "app.css desktop .sanctuary-world must distribute #craft and #intake evenly across the viewport (justify-content: space-evenly)"
+    /@media\s*\(min-width:\s*1041px\)\s*and\s*\(min-height:\s*760px\)\s*\{\s*\.sanctuary-world\s*\{[^}]*justify-content:\s*space-evenly;/s,
+    "app.css desktop .sanctuary-world must distribute #craft and #intake evenly across the viewport at min-width: 1041px (no 1024-1040 collision)"
   );
   assert.ok(css.includes(".sanctuary-caustic-svg"), "app.css must style .sanctuary-caustic-svg living loop caustic layer");
+  assert.ok(css.includes(".craft-diagram-icon"), "app.css must style .craft-diagram-icon architectural SVGs");
+  assert.ok(css.includes(".pill-neon-primary"), "app.css must style .pill-neon-primary luminous emerald CTA");
   assert.match(
     css,
-    /main\[data-active-view="home"\]\s+\.site-footer\s*\{[^}]*margin-top:\s*-196px;[^}]*min-height:\s*196px;/s,
-    "app.css must overlay expanded 196px .site-footer onto Home Frame 4 desktop so Frame 4 fits 100svh with zero extra scroll or clipping"
+    /@media\s*\(min-width:\s*1041px\)\s*and\s*\(min-height:\s*760px\)\s*\{\s*main\[data-active-view="home"\]\s+\.site-footer\s*\{[^}]*margin-top:\s*-84px;[^}]*min-height:\s*84px;/s,
+    "app.css must overlay single-row 84px .site-footer onto Home Frame 4 desktop so Frame 4 fits 100svh with zero extra scroll or clipping"
   );
-  assert.ok(css.includes(".footer-grid"), "app.css must style .footer-grid 4-column desktop footer");
-  assert.ok(css.includes(".footer-bottom"), "app.css must style .footer-bottom legal and social row");
+  assert.equal(css.includes(".footer-grid"), false, "app.css must not contain removed duplicate .footer-grid rules");
+  assert.ok(css.includes(".footer-bar"), "app.css must style single-row .footer-bar");
+  assert.ok(css.includes(".footer-legal-group"), "app.css must style .footer-legal-group");
   assert.ok(css.includes(".footer-social"), "app.css must style .footer-social icon strip");
   assert.ok(css.includes("--flare-intensity"), "app.css must define --flare-intensity for Video 01 seamless loop flare");
   assert.ok(css.includes(".hero-starfield"), "app.css must style .hero-starfield multi-depth SVG starfield");
@@ -268,13 +276,8 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   assert.equal(css.includes(".mist-bridge-12"), false, "app.css must not contain removed opaque .mist-bridge-12 section");
   assert.match(
     css,
-    /\.footer-links\s*\{[^}]*flex-shrink:\s*0;/s,
-    "app.css .footer-links must enforce flex-shrink: 0 for single-line desktop footer"
-  );
-  assert.match(
-    css,
-    /\.footer-links\s+a\s*\{[^}]*white-space:\s*nowrap;/s,
-    "app.css .footer-links a must enforce white-space: nowrap for single-line desktop footer links"
+    /\.footer-legal-group\s+a\s*\{[^}]*white-space:\s*nowrap;/s,
+    "app.css .footer-legal-group a must enforce white-space: nowrap for single-line desktop footer"
   );
   assert.ok(css.includes(".terrace-coping-sheen"), "app.css must define .terrace-coping-sheen basalt continuation");
   assert.ok(css.includes(".terrace-basalt-grid"), "app.css must define .terrace-basalt-grid mineral terrace");
@@ -389,6 +392,11 @@ test("HTTP allowlist serves all 21 assets (5 core WebP + 12 template WebP + 4 MP
             const bad = await fetchHttpHandler(app, `http://127.0.0.1:3100${badPath}`);
             assert.equal(bad.status, 404, `adversarial path ${badPath} must return 404`);
           }
+
+          const privacyRes = await fetchHttpHandler(app, `http://127.0.0.1:3100${prefix}/privacy`);
+          assert.equal(privacyRes.status, 200, `${prefix}/privacy must return 200`);
+          const privacyHtml = await privacyRes.text();
+          assert.ok(privacyHtml.includes('id="terms"'), `${prefix}/privacy must include id="terms" anchor`);
         }
       } finally {
         await handler.close();
