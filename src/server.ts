@@ -19,7 +19,7 @@ import {fetchAuthorizedFile} from './file-input.js';
 import { classifyWorkResponse } from "./work-response.js";
 import { buildProtectedResourceMetadata } from "./resource-metadata.js";
 import { createGlowMcpExpressApp, DEFAULT_MCP_JSON_LIMIT, PUBLIC_HTML_CSP } from "./mcp-app.js";
-import { NextFactoryControlInputSchema } from "./next-factory-schema.js";
+import { NextFactoryControlInputSchema, ExecuteBespokeWebsiteArgsShape } from "./next-factory-schema.js";
 import { resolveHostDomainTopology } from "./domain-topology.js";
 import {PHASE_ACCEPTANCE_SCOPE,PHASE_ACCEPTANCE_MISSION_PATTERN,toolOAuthMetadata,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,phaseAcceptanceAuthorityStatus,validateAcceptanceBytes} from './phase-acceptance.js';
 import { queryTemplates, getTemplateById, isValidTemplateId } from "./template-registry.js";
@@ -501,6 +501,24 @@ const buildServer: McpServerFactory = ctx => {
       const out=await invoke(ctx,'next_factory_control','unspecified','vi-VN',{action:'inspect_artifact_admission',args});
       return {...toolResult(out as unknown as Record<string,unknown>),...(out.status==='failed'?{isError:true}:{})};
     }catch(error){return toolError(error instanceof Error?error.message:'ARTIFACT_LOOKUP_FAILED');}
+  });
+  server.registerTool('glow_execute_bespoke_website',{
+    title:'Execute bespoke animated-SVG website through GLOW Web Factory V2',
+    description:'Allows ChatGPT or Gemini to submit bespoke multi-file HTML/CSS/JS and animated SVG bundles to run the $10k C10 SVG security and craft gate, canonical V2 H1..ASSURANCE -> HUMAN_REVIEW_REQUIRED flow, and real Headless Chrome TQC. Never grants F4_HUMAN_RELEASE or PRODUCTION hard-admission automatically; fails closed on SVG XSS, slop tokens, path traversal, or PRODUCTION requests while specialists remain candidate-pending.',
+    annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false},
+    ...(toolSecuritySchemes?{securitySchemes:toolSecuritySchemes}:{}),
+    inputSchema:z.object({
+      ...ExecuteBespokeWebsiteArgsShape,
+      role:z.enum(["client","operator","unspecified"]).default("unspecified"),
+      locale:z.string().min(2).max(32).default("vi-VN")
+    }).strict()
+  },async ({role,locale,...args})=>{
+    try{
+      const out=await invoke(ctx,'next_factory_control',role,locale,{action:'execute_bespoke_website',args});
+      const classification=classifyWorkResponse(out);
+      if(classification==="SAFE_PUBLIC_FAILURE") return {isError:true,...toolResult(out as unknown as Record<string,unknown>)};
+      return toolResult(out as unknown as Record<string,unknown>);
+    }catch(error){return toolError(error instanceof Error?error.message:'BESPOKE_EXECUTION_FAILED');}
   });
   return server;
 };
