@@ -1470,7 +1470,7 @@ body:not([data-active-view="home"]) .chapter-rail {
       rgba(3, 20, 18, 0.22) 70%,
       #02070A 100%
     ),
-    url("/assets/basalt-terrace-deck.webp?v=64");
+    url("/assets/basalt-terrace-deck.webp?v=65");
   background-size: 100% 100%, cover;
   background-position: center top, center top;
   background-repeat: no-repeat, no-repeat;
@@ -1490,7 +1490,7 @@ body:not([data-active-view="home"]) .chapter-rail {
   );
 }
 
-@media (min-width: 1041px) and (min-height: 760px) {
+@media (min-width: 1041px) and (min-height: 840px) {
   .sanctuary-world {
     height: calc(100svh + var(--stone-overlap));
     min-height: calc(100svh + var(--stone-overlap));
@@ -2080,7 +2080,7 @@ body:not([data-active-view="home"]) .chapter-rail {
 
 .gateway-centered h2 {
   margin: 0 0 16px;
-  font-size: clamp(2.05rem, 3.45vw, 3.1rem);
+  font-size: clamp(2.05rem, 3.45vw, 2.85rem);
   font-weight: 630;
   line-height: 1.14;
   letter-spacing: -0.03em;
@@ -2565,7 +2565,7 @@ body:not([data-active-view="home"]) .chapter-rail {
   -webkit-backdrop-filter: blur(14px);
 }
 
-@media (min-width: 1041px) and (min-height: 760px) {
+@media (min-width: 1041px) and (min-height: 840px) {
   main[data-active-view="home"] .site-footer {
     margin-top: -84px;
     min-height: 84px;
@@ -2712,7 +2712,7 @@ body:not([data-active-view="home"]) .chapter-rail {
   transform: translateY(-1px);
 }
 
-@media (max-width: 1220px) and (min-width: 1041px) {
+@media (max-width: 1380px) and (min-width: 1041px) {
   .footer-bar {
     gap: 10px 12px;
   }
@@ -2723,7 +2723,9 @@ body:not([data-active-view="home"]) .chapter-rail {
   }
 
   .footer-status .status-sep,
-  .footer-status .status-ready {
+  .footer-status .status-ready,
+  .footer-note,
+  .footer-note + .footer-sep {
     display: none;
   }
 }

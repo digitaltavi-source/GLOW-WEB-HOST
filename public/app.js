@@ -2001,7 +2001,7 @@ function isHomeFrameSnapActive() {
     mainContent &&
       mainContent.dataset.activeView === "home" &&
       activeView === "home" &&
-      window.innerWidth >= 1024 &&
+      window.matchMedia("(min-width: 1041px) and (min-height: 840px)").matches &&
       !isReducedMotion &&
       areAllModalsClosed()
   );

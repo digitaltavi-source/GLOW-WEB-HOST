@@ -184,8 +184,8 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   assert.ok(html.includes('id="chapter-villa"'), "index.html missing #chapter-villa direct scroll chapter");
   assert.ok(html.includes('class="chapter-editorial'), "index.html missing borderless .chapter-editorial film typography");
   assert.equal(html.includes("chapter-card"), false, "hard bordered .chapter-card boxes over video frames must be removed");
-  assert.ok(html.includes('href="/app.css?v=64"'), "index.html must cache-bust /app.css?v=64");
-  assert.ok(html.includes('src="/app.js?v=64"'), "index.html must cache-bust /app.js?v=64");
+  assert.ok(html.includes('href="/app.css?v=65"'), "index.html must cache-bust /app.css?v=65");
+  assert.ok(html.includes('src="/app.js?v=65"'), "index.html must cache-bust /app.js?v=65");
   assert.equal(html.includes("footer-grid"), false, "duplicate 4-column .footer-grid must be removed");
   assert.ok(html.includes('class="footer-bar"'), "index.html must include single-row .footer-bar");
   assert.ok(html.includes('class="footer-legal-group"'), "index.html must include .footer-legal-group");
@@ -250,12 +250,12 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   );
   assert.match(
     css,
-    /\.sanctuary-world\s*\{[^}]*z-index:\s*5;[^}]*margin-top:\s*calc\(-1\s*\*\s*var\(--stone-overlap\)\);[^}]*url\("\/assets\/basalt-terrace-deck\.webp\?v=64"\)[^}]*#000\s+var\(--stone-overlap\),\s*#000\s+100%/s,
-    "app.css .sanctuary-world must dissolve over Video 03 pool coping across --stone-overlap with cache-busted basalt-terrace-deck.webp?v=64"
+    /\.sanctuary-world\s*\{[^}]*z-index:\s*5;[^}]*margin-top:\s*calc\(-1\s*\*\s*var\(--stone-overlap\)\);[^}]*url\("\/assets\/basalt-terrace-deck\.webp\?v=65"\)[^}]*#000\s+var\(--stone-overlap\),\s*#000\s+100%/s,
+    "app.css .sanctuary-world must dissolve over Video 03 pool coping across --stone-overlap with cache-busted basalt-terrace-deck.webp?v=65"
   );
   assert.match(
     css,
-    /@media\s*\(min-width:\s*1041px\)\s*and\s*\(min-height:\s*760px\)\s*\{\s*\.sanctuary-world\s*\{[^}]*justify-content:\s*space-evenly;/s,
+    /@media\s*\(min-width:\s*1041px\)\s*and\s*\(min-height:\s*840px\)\s*\{\s*\.sanctuary-world\s*\{[^}]*justify-content:\s*space-evenly;/s,
     "app.css desktop .sanctuary-world must distribute #craft and #intake evenly across the viewport at min-width: 1041px (no 1024-1040 collision)"
   );
   assert.ok(css.includes(".sanctuary-caustic-svg"), "app.css must style .sanctuary-caustic-svg living loop caustic layer");
@@ -263,7 +263,7 @@ test("public flagship files enforce zero internal leaks, zero external CDN, zero
   assert.ok(css.includes(".pill-neon-primary"), "app.css must style .pill-neon-primary luminous emerald CTA");
   assert.match(
     css,
-    /@media\s*\(min-width:\s*1041px\)\s*and\s*\(min-height:\s*760px\)\s*\{\s*main\[data-active-view="home"\]\s+\.site-footer\s*\{[^}]*margin-top:\s*-84px;[^}]*min-height:\s*84px;/s,
+    /@media\s*\(min-width:\s*1041px\)\s*and\s*\(min-height:\s*840px\)\s*\{\s*main\[data-active-view="home"\]\s+\.site-footer\s*\{[^}]*margin-top:\s*-84px;[^}]*min-height:\s*84px;/s,
     "app.css must overlay single-row 84px .site-footer onto Home Frame 4 desktop so Frame 4 fits 100svh with zero extra scroll or clipping"
   );
   assert.equal(css.includes(".footer-grid"), false, "app.css must not contain removed duplicate .footer-grid rules");
