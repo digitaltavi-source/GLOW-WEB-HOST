@@ -6,6 +6,22 @@ import {H1PhaseSchema,H2PhaseSchema,H3PhaseSchema} from './phase-schema.js';
 
 const SAFE_BESPOKE_SLUG_RE = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
 const SAFE_BESPOKE_FILE_RE = /^[A-Za-z0-9][A-Za-z0-9._\/-]{0,127}$/;
+const BESPOKE_ALLOWED_EXTENSIONS = new Set([
+  ".html",
+  ".css",
+  ".js",
+  ".svg",
+  ".json",
+  ".txt",
+  ".webmanifest",
+]);
+const BESPOKE_RESERVED_PATHS = new Set([
+  "manifest.sha256",
+  "factory_lineage_and_receipts.json",
+  "site-manifest.json",
+  "provenance-seal.json",
+]);
+const BESPOKE_MAX_TOTAL_BUNDLE_BYTES = 3_500_000;
 
 export function isSafeBespokeRelPath(relPath: string): boolean {
   if (!SAFE_BESPOKE_FILE_RE.test(relPath)) return false;
@@ -13,17 +29,46 @@ export function isSafeBespokeRelPath(relPath: string): boolean {
     return false;
   }
   const parts = relPath.split("/");
-  return parts.every(part => part.length > 0 && part !== "." && part !== "..");
+  if (!parts.every(part => part.length > 0 && part !== "." && part !== ".." && !part.startsWith("."))) {
+    return false;
+  }
+  const low = relPath.toLowerCase();
+  if (
+    BESPOKE_RESERVED_PATHS.has(low) ||
+    low.endsWith("-deliverable.zip") ||
+    low.endsWith(".zip") ||
+    low === "tqc_screenshots" ||
+    low.startsWith("tqc_screenshots/")
+  ) {
+    return false;
+  }
+  const lastSegment = parts[parts.length - 1] ?? "";
+  const dotIdx = lastSegment.lastIndexOf(".");
+  if (dotIdx <= 0) return false;
+  const ext = lastSegment.slice(dotIdx).toLowerCase();
+  return BESPOKE_ALLOWED_EXTENSIONS.has(ext);
 }
 
 export const ExecuteBespokeWebsiteBriefSchema = z.object({
   brand_name: z.string().min(1).max(160),
-  industry: z.string().min(1).max(128),
-  art_direction_thesis: z.string().min(1).max(1200),
   locale: z.string().min(2).max(32).default("vi-VN"),
+  primary_locale: z.string().min(2).max(32).optional(),
+  secondary_locale: z.string().min(2).max(32).optional(),
+  industry: z.string().min(1).max(128).optional(),
+  archetype: z.string().min(1).max(128).optional(),
+  brief_id: z.string().regex(SAFE_BESPOKE_SLUG_RE).optional(),
+  sku: z.string().min(1).max(128).optional(),
+  product_code: z.string().min(1).max(128).optional(),
+  product_title: z.string().min(1).max(200).optional(),
+  hero_headline: z.string().min(1).max(400).optional(),
+  hero_subheadline: z.string().min(1).max(600).optional(),
+  business_outcome: z.string().min(1).max(600).optional(),
+  art_direction: z.string().min(1).max(1200).optional(),
+  art_direction_thesis: z.string().min(1).max(1200).optional(),
   execution_profile: z.enum(["DEMO_BOUNDED", "PRODUCTION"]).default("DEMO_BOUNDED"),
   tagline: z.string().min(1).max(240).optional(),
   target_audience: z.string().min(1).max(400).optional(),
+  pii_fields: z.array(z.string().min(1).max(64)).max(32).optional(),
 }).strict();
 
 export const ExecuteBespokeWebsiteFilesSchema = z.record(
@@ -37,6 +82,7 @@ export const ExecuteBespokeWebsiteFilesSchema = z.record(
   if (keys.length > 24) {
     ctx.addIssue({ code: "custom", message: "BESPOKE_FILES_MAX_24_EXCEEDED" });
   }
+  let totalBytes = 0;
   for (const key of keys) {
     if (!isSafeBespokeRelPath(key)) {
       ctx.addIssue({
@@ -45,6 +91,16 @@ export const ExecuteBespokeWebsiteFilesSchema = z.record(
         message: `BESPOKE_FILE_PATH_INVALID:${key}`,
       });
     }
+    const content = files[key];
+    if (typeof content === "string") {
+      totalBytes += Buffer.byteLength(content, "utf8");
+    }
+  }
+  if (totalBytes > BESPOKE_MAX_TOTAL_BUNDLE_BYTES) {
+    ctx.addIssue({
+      code: "custom",
+      message: `BESPOKE_FILES_TOTAL_BYTES_EXCEEDED:${totalBytes}>${BESPOKE_MAX_TOTAL_BUNDLE_BYTES}`,
+    });
   }
 });
 

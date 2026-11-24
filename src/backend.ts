@@ -16,6 +16,7 @@ let combinedRuntimeIdentity: string | null = null;
 
 const SAFE_READINESS_CODE_RE = /^[A-Z][A-Z0-9_]{1,96}$/;
 const UPSTREAM_FETCH_TIMEOUT_MS = 15_000;
+const BESPOKE_WEBSITE_FETCH_TIMEOUT_MS = 60_000;
 
 export function resetCombinedRuntimeCacheForTest(): void {
   combinedRuntimePromise = null;
@@ -75,6 +76,14 @@ export async function callProtectedService(
     if(!config.protectedServiceUrl || !config.protectedServiceToken){
       throw new BackendError("PROTECTED_SERVICE_NOT_CONFIGURED");
     }
+    const isBespokeAction =
+      request.operation === "next_factory_control" &&
+      typeof request.input === "object" &&
+      request.input !== null &&
+      (request.input as Record<string, unknown>)["action"] === "execute_bespoke_website";
+    const fetchTimeoutMs = isBespokeAction
+      ? BESPOKE_WEBSITE_FETCH_TIMEOUT_MS
+      : UPSTREAM_FETCH_TIMEOUT_MS;
     const response=await fetchImpl(config.protectedServiceUrl+"/v1/web-missions",{
       method:"POST",
       headers:{
@@ -83,7 +92,7 @@ export async function callProtectedService(
         "x-glow-subject":subject
       },
       body:JSON.stringify(request),
-      signal:AbortSignal.timeout(UPSTREAM_FETCH_TIMEOUT_MS)
+      signal:AbortSignal.timeout(fetchTimeoutMs)
     });
     if(!response.ok) throw new BackendError("PROTECTED_SERVICE_HTTP_"+response.status);
     raw=await response.json();

@@ -110,6 +110,96 @@ test("execute_bespoke_website rejects path traversal, empty, too-few, too-many, 
   );
 });
 
+test("execute_bespoke_website rejects disallowed extensions, dotfiles, reserved engine paths, and oversized total bundle", () => {
+  for (const badPath of [
+    "shell.py",
+    "exploit.sh",
+    "backdoor.php",
+    ".htaccess",
+    ".env",
+    "assets/.hidden.svg",
+    "MANIFEST.sha256",
+    "manifest.sha256",
+    "FACTORY_LINEAGE_AND_RECEIPTS.json",
+    "site-manifest.json",
+    "provenance-seal.json",
+    "tqc_screenshots/01.png",
+    "tqc_screenshots/evil.svg",
+    "son-tra-deliverable.zip",
+    "archive.zip",
+    "module.mjs",
+    "payload.xhtml",
+    "data.xml",
+    "page.htm",
+  ]) {
+    assert.equal(isSafeBespokeRelPath(badPath), false, `Expected disallowed path rejected: ${badPath}`);
+    const res = ExecuteBespokeWebsiteArgsSchema.safeParse({
+      ...VALID_BUNDLE_ARGS,
+      files: {
+        ...VALID_BUNDLE_ARGS.files,
+        [badPath]: "bad",
+      },
+    });
+    assert.equal(res.success, false, `Expected Zod rejection for disallowed path ${badPath}`);
+  }
+
+  // Allowed extensions pass
+  for (const goodPath of [
+    "index.html",
+    "styles.css",
+    "app.js",
+    "assets/logo.svg",
+    "data/specs.json",
+    "robots.txt",
+    "site.webmanifest",
+  ]) {
+    assert.equal(isSafeBespokeRelPath(goodPath), true, `Expected allowed path accepted: ${goodPath}`);
+  }
+
+  // Oversized total bundle (> 3_500_000 UTF-8 bytes) across valid per-file sizes
+  const oversizedFiles: Record<string, string> = {
+    "index.html": VALID_BUNDLE_ARGS.files["index.html"],
+    "styles.css": VALID_BUNDLE_ARGS.files["styles.css"],
+    "app.js": VALID_BUNDLE_ARGS.files["app.js"],
+  };
+  for (let i = 0; i < 11; i++) {
+    oversizedFiles[`chunk_${i}.txt`] = "x".repeat(340_000);
+  }
+  const oversizedRes = ExecuteBespokeWebsiteArgsSchema.safeParse({
+    ...VALID_BUNDLE_ARGS,
+    files: oversizedFiles,
+  });
+  assert.equal(oversizedRes.success, false, "Expected total bundle > 3,500,000 bytes rejected");
+});
+
+test("execute_bespoke_website accepts aligned optional brief fields from Python bridge", () => {
+  const parsed = ExecuteBespokeWebsiteArgsSchema.parse({
+    slug: "aura-neurolabs-medtech-svg",
+    brief: {
+      brand_name: "Aura NeuroLabs",
+      locale: "vi-VN",
+      primary_locale: "vi-VN",
+      secondary_locale: "en-US",
+      industry: "PRECISION_MEDTECH_AI_ROBOTICS",
+      archetype: "BESPOKE-MEDTECH-CLINICAL",
+      brief_id: "BRIEF-AURA-NEUROLABS-2026",
+      sku: "AURA-N7-SURGICAL",
+      product_code: "AURA-N7",
+      product_title: "Aura NeuroLabs N7 Microsurgery Platform",
+      hero_headline: "Sub-millimeter neural tremor suppression",
+      hero_subheadline: "Closed-loop hardware safety lock verified in Chrome TQC.",
+      business_outcome: "Qualified clinical hospital demonstration requests",
+      art_direction: "Crisp clinical precision white/slate/cerulean telemetry",
+      pii_fields: ["lead_name", "lead_email", "institution"],
+    },
+    files: VALID_BUNDLE_ARGS.files,
+  });
+  assert.equal(parsed.brief.sku, "AURA-N7-SURGICAL");
+  assert.equal(parsed.brief.archetype, "BESPOKE-MEDTECH-CLINICAL");
+  assert.equal(parsed.brief.brief_id, "BRIEF-AURA-NEUROLABS-2026");
+  assert.equal(parsed.brief.execution_profile, "DEMO_BOUNDED");
+});
+
 test("glow_execute_bespoke_website tool is registered on /mcp-v2 and forwards to next_factory_control", async () => {
   const serverSource = await readFile(new URL("../src/server.js", import.meta.url), "utf8");
   assert.match(serverSource, /registerTool\(['"]glow_execute_bespoke_website['"]/);
