@@ -15,6 +15,16 @@ const BESPOKE_ALLOWED_EXTENSIONS = new Set([
   ".txt",
   ".webmanifest",
 ]);
+export const BESPOKE_BINARY_ALLOWED_EXTENSIONS = new Set([
+  ".webp",
+  ".avif",
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".mp4",
+  ".webm",
+  ".woff2",
+]);
 const BESPOKE_RESERVED_PATHS = new Set([
   "manifest.sha256",
   "factory_lineage_and_receipts.json",
@@ -22,8 +32,12 @@ const BESPOKE_RESERVED_PATHS = new Set([
   "provenance-seal.json",
 ]);
 const BESPOKE_MAX_TOTAL_BUNDLE_BYTES = 3_500_000;
+const BESPOKE_MAX_BINARY_FILE_COUNT = 48;
+const BESPOKE_MAX_BINARY_SINGLE_BYTES = 4_000_000;
+const BESPOKE_MAX_BINARY_TOTAL_BYTES = 8_000_000;
+const STRICT_BASE64_RE = /^[A-Za-z0-9+/]+={0,2}$/;
 
-export function isSafeBespokeRelPath(relPath: string): boolean {
+function isSafeBespokeRelPathWithExts(relPath: string, allowedExts: Set<string>): boolean {
   if (!SAFE_BESPOKE_FILE_RE.test(relPath)) return false;
   if (relPath.startsWith("/") || relPath.includes("\\") || relPath.includes("//") || relPath.includes("..")) {
     return false;
@@ -46,7 +60,15 @@ export function isSafeBespokeRelPath(relPath: string): boolean {
   const dotIdx = lastSegment.lastIndexOf(".");
   if (dotIdx <= 0) return false;
   const ext = lastSegment.slice(dotIdx).toLowerCase();
-  return BESPOKE_ALLOWED_EXTENSIONS.has(ext);
+  return allowedExts.has(ext);
+}
+
+export function isSafeBespokeRelPath(relPath: string): boolean {
+  return isSafeBespokeRelPathWithExts(relPath, BESPOKE_ALLOWED_EXTENSIONS);
+}
+
+export function isSafeBespokeBinaryRelPath(relPath: string): boolean {
+  return isSafeBespokeRelPathWithExts(relPath, BESPOKE_BINARY_ALLOWED_EXTENSIONS);
 }
 
 export const ExecuteBespokeWebsiteBriefSchema = z.object({
@@ -66,6 +88,7 @@ export const ExecuteBespokeWebsiteBriefSchema = z.object({
   art_direction: z.string().min(1).max(1200).optional(),
   art_direction_thesis: z.string().min(1).max(1200).optional(),
   execution_profile: z.enum(["DEMO_BOUNDED", "PRODUCTION"]).default("DEMO_BOUNDED"),
+  visual_tier: z.enum(["SVG_BESPOKE", "CINEMA_MULTIMEDIA"]).optional(),
   tagline: z.string().min(1).max(240).optional(),
   target_audience: z.string().min(1).max(400).optional(),
   pii_fields: z.array(z.string().min(1).max(64)).max(32).optional(),
@@ -104,10 +127,68 @@ export const ExecuteBespokeWebsiteFilesSchema = z.record(
   }
 });
 
+export const ExecuteBespokeWebsiteBinaryFilesBase64Schema = z.record(
+  z.string(),
+  z.string().min(4)
+).superRefine((binFiles, ctx) => {
+  const keys = Object.keys(binFiles);
+  if (keys.length > BESPOKE_MAX_BINARY_FILE_COUNT) {
+    ctx.addIssue({
+      code: "custom",
+      message: `BESPOKE_BINARY_FILES_MAX_${BESPOKE_MAX_BINARY_FILE_COUNT}_EXCEEDED`,
+    });
+  }
+  let totalDecodedBytes = 0;
+  for (const key of keys) {
+    if (!isSafeBespokeBinaryRelPath(key)) {
+      ctx.addIssue({
+        code: "custom",
+        path: [key],
+        message: `BESPOKE_BINARY_FILE_PATH_INVALID:${key}`,
+      });
+      continue;
+    }
+    const b64 = binFiles[key];
+    if (typeof b64 !== "string" || b64.length < 4 || b64.length % 4 !== 0 || !STRICT_BASE64_RE.test(b64)) {
+      ctx.addIssue({
+        code: "custom",
+        path: [key],
+        message: `BESPOKE_BINARY_BASE64_INVALID:${key}`,
+      });
+      continue;
+    }
+    const decodedBytes = Buffer.from(b64, "base64").byteLength;
+    if (decodedBytes <= 0) {
+      ctx.addIssue({
+        code: "custom",
+        path: [key],
+        message: `BESPOKE_BINARY_BASE64_EMPTY:${key}`,
+      });
+      continue;
+    }
+    if (decodedBytes > BESPOKE_MAX_BINARY_SINGLE_BYTES) {
+      ctx.addIssue({
+        code: "custom",
+        path: [key],
+        message: `BESPOKE_BINARY_FILE_MAX_BYTES_EXCEEDED:${key}:${decodedBytes}>${BESPOKE_MAX_BINARY_SINGLE_BYTES}`,
+      });
+    }
+    totalDecodedBytes += decodedBytes;
+  }
+  if (totalDecodedBytes > BESPOKE_MAX_BINARY_TOTAL_BYTES) {
+    ctx.addIssue({
+      code: "custom",
+      message: `BESPOKE_BINARY_TOTAL_BYTES_EXCEEDED:${totalDecodedBytes}>${BESPOKE_MAX_BINARY_TOTAL_BYTES}`,
+    });
+  }
+});
+
 export const ExecuteBespokeWebsiteArgsShape = {
   slug: z.string().regex(SAFE_BESPOKE_SLUG_RE),
   brief: ExecuteBespokeWebsiteBriefSchema,
   files: ExecuteBespokeWebsiteFilesSchema,
+  binary_files_base64: ExecuteBespokeWebsiteBinaryFilesBase64Schema.optional(),
+  visual_tier: z.enum(["SVG_BESPOKE", "CINEMA_MULTIMEDIA"]).optional(),
   run_browser_tqc: z.boolean().default(true),
 };
 

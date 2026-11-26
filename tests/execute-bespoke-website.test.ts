@@ -2,8 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import {
+  BESPOKE_BINARY_ALLOWED_EXTENSIONS,
   ExecuteBespokeWebsiteArgsSchema,
   NextFactoryControlInputSchema,
+  isSafeBespokeBinaryRelPath,
   isSafeBespokeRelPath,
 } from "../src/next-factory-schema.js";
 import { fetchHttpHandler, hostFixture } from "./http-fixture.js";
@@ -289,6 +291,192 @@ test("glow_execute_bespoke_website tool is registered on /mcp-v2 and forwards to
           const fwdArgs = inp["args"] as Record<string, unknown>;
           assert.equal(fwdArgs["slug"], "son-tra-pavilion-demo");
           assert.equal(fwdArgs["run_browser_tqc"], false);
+        } finally {
+          await handler.close();
+        }
+      }
+    );
+  } finally {
+    globalThis.fetch = origFetch;
+  }
+});
+
+const SAMPLE_VALID_WEBP_B64 =
+  "UklGRi4AAABXRUJQVlA4TCEAAAAvf8JjAAdQkELUpv8BAEX6/58i+p/63//+97///e//ggAA";
+
+test("execute_bespoke_website accepts valid binary_files_base64 + visual_tier CINEMA_MULTIMEDIA and rejects invalid payloads", () => {
+  assert.equal(BESPOKE_BINARY_ALLOWED_EXTENSIONS.has(".webp"), true);
+  assert.equal(BESPOKE_BINARY_ALLOWED_EXTENSIONS.has(".woff2"), true);
+  assert.equal(BESPOKE_BINARY_ALLOWED_EXTENSIONS.has(".html"), false);
+  assert.equal(BESPOKE_BINARY_ALLOWED_EXTENSIONS.has(".svg"), false);
+
+  for (const goodBin of [
+    "assets/hero.webp",
+    "assets/poster.avif",
+    "assets/still.jpg",
+    "assets/still2.jpeg",
+    "assets/icon.png",
+    "media/reel.mp4",
+    "media/reel.webm",
+    "fonts/display.woff2",
+  ]) {
+    assert.equal(isSafeBespokeBinaryRelPath(goodBin), true, `Expected valid binary path: ${goodBin}`);
+  }
+
+  for (const badBin of [
+    "../evil.webp",
+    "assets/../../etc/passwd.webp",
+    "/abs/hero.webp",
+    "assets/.hidden.webp",
+    "assets/shell.exe",
+    "index.html",
+    "assets/emblem.svg",
+    "tqc_screenshots/01.png",
+    "archive.zip",
+  ]) {
+    assert.equal(isSafeBespokeBinaryRelPath(badBin), false, `Expected rejected binary path: ${badBin}`);
+    const parsedBadPath = ExecuteBespokeWebsiteArgsSchema.safeParse({
+      ...VALID_BUNDLE_ARGS,
+      visual_tier: "CINEMA_MULTIMEDIA",
+      binary_files_base64: { [badBin]: SAMPLE_VALID_WEBP_B64 },
+    });
+    assert.equal(parsedBadPath.success, false, `Expected Zod rejection for binary path ${badBin}`);
+  }
+
+  // Valid payload passes
+  const validParsed = ExecuteBespokeWebsiteArgsSchema.parse({
+    ...VALID_BUNDLE_ARGS,
+    visual_tier: "CINEMA_MULTIMEDIA",
+    binary_files_base64: {
+      "assets/hero.webp": SAMPLE_VALID_WEBP_B64,
+      "fonts/brand.woff2": Buffer.from("wOF2\x00\x01\x00\x00").toString("base64"),
+    },
+  });
+  assert.equal(validParsed.visual_tier, "CINEMA_MULTIMEDIA");
+  assert.equal(validParsed.binary_files_base64?.["assets/hero.webp"], SAMPLE_VALID_WEBP_B64);
+
+  // Invalid visual_tier fails closed
+  assert.equal(
+    ExecuteBespokeWebsiteArgsSchema.safeParse({
+      ...VALID_BUNDLE_ARGS,
+      visual_tier: "UNTRUSTED_TIER",
+    }).success,
+    false
+  );
+
+  // Invalid base64 fails closed
+  for (const badB64 of ["not!valid!base64", "abc", "====", "aGVsbG8"]) {
+    assert.equal(
+      ExecuteBespokeWebsiteArgsSchema.safeParse({
+        ...VALID_BUNDLE_ARGS,
+        binary_files_base64: { "assets/hero.webp": badB64 },
+      }).success,
+      false,
+      `Expected invalid base64 rejected: ${badB64}`
+    );
+  }
+
+  // Oversized single binary file (> 4,000,000 decoded bytes) fails closed
+  const singleOversizeB64 = Buffer.alloc(4_000_001, 0x41).toString("base64");
+  assert.equal(
+    ExecuteBespokeWebsiteArgsSchema.safeParse({
+      ...VALID_BUNDLE_ARGS,
+      binary_files_base64: { "assets/huge.webp": singleOversizeB64 },
+    }).success,
+    false
+  );
+
+  // Oversized total binary payload (> 8,000,000 decoded bytes across <= 4MB files) fails closed
+  const threeMbB64 = Buffer.alloc(3_000_000, 0x42).toString("base64");
+  assert.equal(
+    ExecuteBespokeWebsiteArgsSchema.safeParse({
+      ...VALID_BUNDLE_ARGS,
+      binary_files_base64: {
+        "assets/a.webp": threeMbB64,
+        "assets/b.webp": threeMbB64,
+        "assets/c.webp": threeMbB64,
+      },
+    }).success,
+    false
+  );
+});
+
+test("glow_execute_bespoke_website forwards binary_files_base64 and visual_tier over /mcp-v2", async () => {
+  const staticToken = "tok-bespoke-entry218b-mm-1234567890";
+  const capturedRequests: Array<Record<string, unknown>> = [];
+  const origFetch = globalThis.fetch;
+
+  globalThis.fetch = (async (_input: unknown, init?: RequestInit) => {
+    const body = JSON.parse(String(init?.body ?? "{}")) as Record<string, unknown>;
+    capturedRequests.push(body);
+    return new Response(
+      JSON.stringify({
+        request_id: body["request_id"] ?? "req-mm-1",
+        status: "accepted",
+        exposure: "MODEL_SESSION_PRIVATE",
+        result: {
+          action: "execute_bespoke_website",
+          authority: "NEXT_FACTORY_CONTROL",
+          payload: {
+            slug: "son-tra-pavilion-demo",
+            mission_id: "NM-112233445566",
+            mission_state: "HUMAN_REVIEW_REQUIRED",
+            release_authorized: false,
+            execution_profile: "DEMO_BOUNDED",
+            hard_admitted_specialist_count: 0,
+            specialist_count: 12,
+          },
+        },
+        public_evidence: [],
+        errors: [],
+      }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+  }) as typeof fetch;
+
+  try {
+    await hostFixture(
+      {
+        GLOW_AUTH_MODE: "static_bearer",
+        GLOW_PUBLIC_TEST_BEARER_TOKEN: staticToken,
+        GLOW_PUBLIC_TEST_SUBJECT: "usr_bespoke_mm_test",
+      },
+      async ({ app, handler }) => {
+        try {
+          const callRes = await fetchHttpHandler(app, "http://127.0.0.1:3100/mcp-v2", {
+            method: "POST",
+            headers: {
+              authorization: `Bearer ${staticToken}`,
+              "content-type": "application/json",
+              accept: "application/json, text/event-stream",
+            },
+            body: JSON.stringify({
+              jsonrpc: "2.0",
+              id: 218,
+              method: "tools/call",
+              params: {
+                name: "glow_execute_bespoke_website",
+                arguments: {
+                  ...VALID_BUNDLE_ARGS,
+                  visual_tier: "CINEMA_MULTIMEDIA",
+                  binary_files_base64: {
+                    "assets/hero.webp": SAMPLE_VALID_WEBP_B64,
+                  },
+                  run_browser_tqc: false,
+                },
+              },
+            }),
+          });
+          assert.equal(callRes.status, 200);
+          const callText = await callRes.text();
+          assert.match(callText, /HUMAN_REVIEW_REQUIRED/);
+          assert.equal(capturedRequests.length, 1);
+          const inp = capturedRequests[0]!["input"] as Record<string, unknown>;
+          const fwdArgs = inp["args"] as Record<string, unknown>;
+          assert.equal(fwdArgs["visual_tier"], "CINEMA_MULTIMEDIA");
+          assert.deepEqual(fwdArgs["binary_files_base64"], {
+            "assets/hero.webp": SAMPLE_VALID_WEBP_B64,
+          });
         } finally {
           await handler.close();
         }

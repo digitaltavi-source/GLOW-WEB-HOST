@@ -503,8 +503,8 @@ const buildServer: McpServerFactory = ctx => {
     }catch(error){return toolError(error instanceof Error?error.message:'ARTIFACT_LOOKUP_FAILED');}
   });
   server.registerTool('glow_execute_bespoke_website',{
-    title:'Execute bespoke animated-SVG website through GLOW Web Factory V2',
-    description:'Allows ChatGPT or Gemini to submit bespoke multi-file HTML/CSS/JS and animated SVG bundles to run the $10k C10 SVG security and craft gate, canonical V2 H1..ASSURANCE -> HUMAN_REVIEW_REQUIRED flow, and real Headless Chrome TQC. Never grants F4_HUMAN_RELEASE or PRODUCTION hard-admission automatically; fails closed on SVG XSS, slop tokens, path traversal, or PRODUCTION requests while specialists remain candidate-pending.',
+    title:'Execute bespoke multimedia or animated-SVG website through GLOW Web Factory V2',
+    description:'Allows ChatGPT or Gemini to submit bespoke multi-file HTML/CSS/JS, animated SVG, and optional local binary media/font bundles (binary_files_base64: .webp/.avif/.jpg/.png/.mp4/.webm/.woff2 with asset_qc_manifest.json and visual_tier SVG_BESPOKE|CINEMA_MULTIMEDIA) through the C10 security/magic-bytes/craft gate, canonical V2 H1..ASSURANCE -> HUMAN_REVIEW_REQUIRED flow, and 10-gate non-compensatory real Headless Chrome TQC (GLOW_5STAR_CRAFT_GATE_MATRIX_V2). Remains DEMO_BOUNDED while specialists are candidate-pending; never grants F4_HUMAN_RELEASE or PRODUCTION hard-admission automatically.',
     annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false},
     ...(toolSecuritySchemes?{securitySchemes:toolSecuritySchemes}:{}),
     inputSchema:z.object({
