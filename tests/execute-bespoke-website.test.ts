@@ -486,3 +486,119 @@ test("glow_execute_bespoke_website forwards binary_files_base64 and visual_tier 
     globalThis.fetch = origFetch;
   }
 });
+
+test("execute_bespoke_website accepts rich F-218C-06 optional brief fields while rejecting unknown strict keys and out-of-bounds payloads", () => {
+  const richNumeric = ExecuteBespokeWebsiteArgsSchema.parse({
+    slug: "lumiere-horlogerie-bespoke-svg",
+    brief: {
+      brand_name: "LUMIÈRE HORLOGERIE",
+      locale: "vi-VN",
+      primary_locale: "vi-VN",
+      secondary_locale: "en-US",
+      industry: "BESPOKE_LUXURY_HOROLOGY",
+      archetype: "BESPOKE-LUXURY-HOROLOGY",
+      brief_id: "BRIEF-ENTRY218C-LUMIERE-LH09",
+      sku: "LH09-ASTROLABE-BESPOKE-01",
+      product_code: "CALIBER LH-09",
+      product_title: "LUMIÈRE HORLOGERIE — Caliber LH-09",
+      hero_headline: "Nghệ Thuật Chế Tác Đồng Hồ & Ánh Sáng Cơ Học",
+      hero_subheadline: "Ba tác phẩm SVG động nguyên bản và kiểm định Chrome TQC.",
+      business_outcome: "Acquire private salon appointments with explicit S12 PII consent.",
+      visual_tier: "SVG_BESPOKE",
+      cms_material: true,
+      price_usd: 148_000,
+      users: [
+        "Nhà sưu tầm Haute Horlogerie Việt Nam & quốc tế",
+        "Giám tuyển mỹ thuật chế tác cơ khí tinh xảo",
+      ],
+      palette: {
+        bg_primary: "#06090F",
+        bg_elevated: "#0E1420",
+        accent_primary: "#D8B878",
+        accent_secondary: "#38D3A2",
+        text_primary: "#F6F3EC",
+        text_muted: "#B4BCCB",
+      },
+      typography: {
+        heading_font: "Cormorant Garamond, Playfair Display, Georgia, serif",
+        sans_font: "Be Vietnam Pro, Inter, system-ui, sans-serif",
+        mono_font: "JetBrains Mono, monospace",
+        scale_ratio: 1.333,
+        vi_line_height: 1.65,
+      },
+      core_journey: {
+        trigger: "Patron inspects kinetic Tourbillon SVG and 4-layer blueprint",
+        actor: "Haute Horlogerie Collector",
+        true_completion: "Books private salon viewing with S12 consent",
+      },
+      proof_cards: [
+        {
+          code: "LH09-CRAFT-01",
+          metric: "0.29g Titanium",
+          title: "Lồng Tourbillon Hai Cầu",
+          summary: "60 vạch phút khắc tia chuẩn 3Hz.",
+        },
+      ],
+      interactive_module: {
+        module_id: "LUMIERE_CHRONOMETER_RESONANCE_SOLVER",
+        title: "Bộ Mô Phỏng Đẳng Thời Caliber LH-09",
+        inputs: [{ id: "freq-hz", label: "Tần số (Hz)", min: 2.5, max: 5.0, default: 3.0 }],
+      },
+      cta: {
+        section_id: "salon-consultation",
+        submit_label: "Đặt Lịch Thưởng Lãm Tại Private Salon",
+        privacy_notice: "Bảo vệ theo Nghị định 13/2023/NĐ-CP & S12.",
+      },
+      pii_fields: ["lead_name", "lead_email", "lead_salon"],
+    },
+    files: {
+      ...VALID_BUNDLE_ARGS.files,
+      "content-model.json": JSON.stringify({ schema: "GLOW_CMS_CONTENT_MODEL_V1" }),
+    },
+  });
+  assert.equal(richNumeric.brief.cms_material, true);
+  assert.equal(richNumeric.brief.price_usd, 148_000);
+
+  // String/array variants for users, palette, core_journey, interactive_module, cta, and decimal price_usd
+  const richAltVariants = ExecuteBespokeWebsiteArgsSchema.parse({
+    slug: "vernon-luan-flagship-v2",
+    brief: {
+      brand_name: "Vernon Luân",
+      cms_material: true,
+      price_usd: "12000.00",
+      users: "Hospitality Founders & Executive Partners",
+      palette: ["#060B14", "#D4AF6A", "#F4F1EA"],
+      core_journey: ["Explore 4 chapters", "Inspect 17 cinema milestones", "Connect directly"],
+      interactive_module: "Chapter Filter & Cinema Lightbox",
+      cta: "Kết Nối Trực Tiếp Cùng Vernon Luân",
+    },
+    files: VALID_BUNDLE_ARGS.files,
+  });
+  assert.equal(richAltVariants.brief.price_usd, "12000.00");
+
+  // Unknown bogus key MUST still fail .strict()
+  const bogusKeyRes = ExecuteBespokeWebsiteArgsSchema.safeParse({
+    ...VALID_BUNDLE_ARGS,
+    brief: {
+      ...VALID_BUNDLE_ARGS.brief,
+      bogus_unbounded_key: "must_be_rejected_by_strict",
+    },
+  });
+  assert.equal(bogusKeyRes.success, false, "Expected unknown brief key rejected by .strict()");
+
+  // Out-of-bounds price_usd (> 10,000,000) MUST fail
+  assert.equal(
+    ExecuteBespokeWebsiteArgsSchema.safeParse({
+      ...VALID_BUNDLE_ARGS,
+      brief: { ...VALID_BUNDLE_ARGS.brief, price_usd: 10_000_001 },
+    }).success,
+    false
+  );
+  assert.equal(
+    ExecuteBespokeWebsiteArgsSchema.safeParse({
+      ...VALID_BUNDLE_ARGS,
+      brief: { ...VALID_BUNDLE_ARGS.brief, price_usd: "15000000.00" },
+    }).success,
+    false
+  );
+});

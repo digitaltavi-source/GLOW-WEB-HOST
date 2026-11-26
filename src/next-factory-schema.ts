@@ -71,6 +71,31 @@ export function isSafeBespokeBinaryRelPath(relPath: string): boolean {
   return isSafeBespokeRelPathWithExts(relPath, BESPOKE_BINARY_ALLOWED_EXTENSIONS);
 }
 
+const BespokeBoundedPrimitiveSchema = z.union([
+  z.string().max(800),
+  z.number().finite(),
+  z.boolean(),
+  z.null(),
+]);
+
+const BespokeBoundedShallowObjectSchema = z
+  .record(z.string().min(1).max(64), BespokeBoundedPrimitiveSchema)
+  .refine((obj) => Object.keys(obj).length <= 24, {
+    message: "BESPOKE_SHALLOW_OBJECT_MAX_24_KEYS_EXCEEDED",
+  });
+
+const BespokeBoundedValueSchema = z.union([
+  BespokeBoundedPrimitiveSchema,
+  BespokeBoundedShallowObjectSchema,
+  z.array(z.union([BespokeBoundedPrimitiveSchema, BespokeBoundedShallowObjectSchema])).max(24),
+]);
+
+const BespokeBoundedRecordSchema = z
+  .record(z.string().min(1).max(64), BespokeBoundedValueSchema)
+  .refine((obj) => Object.keys(obj).length <= 24, {
+    message: "BESPOKE_RECORD_MAX_24_KEYS_EXCEEDED",
+  });
+
 export const ExecuteBespokeWebsiteBriefSchema = z.object({
   brand_name: z.string().min(1).max(160),
   locale: z.string().min(2).max(32).default("vi-VN"),
@@ -89,6 +114,57 @@ export const ExecuteBespokeWebsiteBriefSchema = z.object({
   art_direction_thesis: z.string().min(1).max(1200).optional(),
   execution_profile: z.enum(["DEMO_BOUNDED", "PRODUCTION"]).default("DEMO_BOUNDED"),
   visual_tier: z.enum(["SVG_BESPOKE", "CINEMA_MULTIMEDIA"]).optional(),
+  cms_material: z.boolean().optional(),
+  price_usd: z
+    .union([
+      z.number().finite().nonnegative().max(10_000_000),
+      z
+        .string()
+        .regex(/^\d{1,8}(\.\d{1,2})?$/)
+        .refine((val) => Number(val) <= 10_000_000, {
+          message: "BESPOKE_PRICE_USD_MAX_10000000_EXCEEDED",
+        }),
+    ])
+    .optional(),
+  users: z
+    .union([
+      z.string().min(1).max(600),
+      z.array(z.string().min(1).max(200)).max(24),
+    ])
+    .optional(),
+  palette: z
+    .union([
+      z
+        .record(z.string().min(1).max(64), z.string().min(1).max(120))
+        .refine((obj) => Object.keys(obj).length <= 24, {
+          message: "BESPOKE_PALETTE_MAX_24_KEYS_EXCEEDED",
+        }),
+      z.array(z.string().min(1).max(120)).max(24),
+    ])
+    .optional(),
+  typography: z
+    .record(
+      z.string().min(1).max(64),
+      z.union([z.string().min(1).max(240), z.number().finite().positive().max(100)])
+    )
+    .refine((obj) => Object.keys(obj).length <= 24, {
+      message: "BESPOKE_TYPOGRAPHY_MAX_24_KEYS_EXCEEDED",
+    })
+    .optional(),
+  core_journey: z
+    .union([
+      z.string().min(1).max(800),
+      z.array(z.string().min(1).max(300)).max(24),
+      z
+        .record(z.string().min(1).max(64), z.string().min(1).max(600))
+        .refine((obj) => Object.keys(obj).length <= 16, {
+          message: "BESPOKE_CORE_JOURNEY_MAX_16_KEYS_EXCEEDED",
+        }),
+    ])
+    .optional(),
+  proof_cards: z.array(BespokeBoundedRecordSchema).max(24).optional(),
+  interactive_module: z.union([z.string().min(1).max(400), BespokeBoundedRecordSchema]).optional(),
+  cta: z.union([z.string().min(1).max(240), BespokeBoundedRecordSchema]).optional(),
   tagline: z.string().min(1).max(240).optional(),
   target_audience: z.string().min(1).max(400).optional(),
   pii_fields: z.array(z.string().min(1).max(64)).max(32).optional(),
