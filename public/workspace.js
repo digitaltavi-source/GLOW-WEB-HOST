@@ -117,8 +117,14 @@ const EN_COPY = {
   brandLabel: 'Personal or brand name',
   langLabel: 'Website language',
   chromeBudgetLabel: 'Interface chrome budget',
+  chromeOptEditorial: 'EDITORIAL_MINIMAL — Editorial minimal standard',
+  chromeOptGallery: 'GALLERY_ZERO_CHROME — Pure cinema gallery showcase',
+  chromeOptApp: 'APP_DASHBOARD — Application / operational console',
   studioLoopLabel: 'Studio workflow mode',
+  loopOptFast: 'FAST_CREATIVE_STUDIO — Rapid creative iteration & visual review',
+  loopOptHardening: 'RELEASE_HARDENING — Strict pre-release verification',
   visualDnaLabel: 'Visual DNA & material notes (optional)',
+  visualDnaPlaceholder: 'Example: Ivory porcelain & celadon glaze, natural daylight, generous breathing room.',
   submitBtn: 'Prepare structured brief',
   altLink: 'Other intake options',
   resultEyebrow: 'STRUCTURED BRIEF READY',
@@ -146,6 +152,9 @@ if (activeLang === 'en') {
       node.textContent = EN_COPY[key];
     }
   });
+  if (visualDnaNotesInput) {
+    visualDnaNotesInput.placeholder = EN_COPY.visualDnaPlaceholder;
+  }
 }
 
 const counter = () => {

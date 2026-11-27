@@ -82,6 +82,51 @@ export function isSafeVisualDnaRef(ref: string): boolean {
   return parts.every((part) => part.length > 0 && part !== "." && part !== ".." && !part.startsWith("."));
 }
 
+const FORBIDDEN_RECORD_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+const CONTROL_CHAR_RE = /[\u0000-\u001F\u007F]/;
+
+const SAFE_RECORD_KEY = z
+  .string()
+  .min(1)
+  .max(64)
+  .refine(
+    (k) => !FORBIDDEN_RECORD_KEYS.has(k) && !CONTROL_CHAR_RE.test(k),
+    { message: "BESPOKE_FORBIDDEN_OR_CONTROL_KEY" }
+  );
+
+function hasUnsafeOwnRecordKey(val: unknown): boolean {
+  if (!val || typeof val !== "object" || Array.isArray(val)) return false;
+  for (const key of Object.keys(val as Record<string, unknown>)) {
+    if (
+      key.length < 1 ||
+      key.length > 64 ||
+      FORBIDDEN_RECORD_KEYS.has(key) ||
+      CONTROL_CHAR_RE.test(key)
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function makeBoundedSafeRecord<V extends z.ZodTypeAny>(
+  valueSchema: V,
+  maxKeys: number,
+  maxMsg: string
+) {
+  return z
+    .unknown()
+    .refine((val) => !hasUnsafeOwnRecordKey(val), {
+      message: "BESPOKE_FORBIDDEN_OR_CONTROL_KEY",
+    })
+    .pipe(
+      z.record(SAFE_RECORD_KEY, valueSchema).refine(
+        (obj) => Object.keys(obj).length <= maxKeys,
+        { message: maxMsg }
+      )
+    );
+}
+
 export const ExecuteBespokeRefinementPinSchema = z.object({
   pin_id: z.string().regex(SAFE_BESPOKE_SLUG_RE),
   viewport: z.enum(["desktop_1440", "laptop_1366", "mobile_390"]),
@@ -94,7 +139,11 @@ export const ExecuteBespokeRefinementPinSchema = z.object({
   ]),
   x_pct: z.number().finite().min(0).max(100),
   y_pct: z.number().finite().min(0).max(100),
-  note: z.string().trim().min(1).max(240),
+  note: z
+    .string()
+    .refine((s) => !CONTROL_CHAR_RE.test(s), { message: "CONTROL_CHARS_FORBIDDEN" })
+    .transform((s) => s.trim())
+    .pipe(z.string().min(1).max(240)),
 }).strict();
 
 const BespokeBoundedPrimitiveSchema = z.union([
@@ -104,11 +153,11 @@ const BespokeBoundedPrimitiveSchema = z.union([
   z.null(),
 ]);
 
-const BespokeBoundedShallowObjectSchema = z
-  .record(z.string().min(1).max(64), BespokeBoundedPrimitiveSchema)
-  .refine((obj) => Object.keys(obj).length <= 24, {
-    message: "BESPOKE_SHALLOW_OBJECT_MAX_24_KEYS_EXCEEDED",
-  });
+const BespokeBoundedShallowObjectSchema = makeBoundedSafeRecord(
+  BespokeBoundedPrimitiveSchema,
+  24,
+  "BESPOKE_SHALLOW_OBJECT_MAX_24_KEYS_EXCEEDED"
+);
 
 const BespokeBoundedValueSchema = z.union([
   BespokeBoundedPrimitiveSchema,
@@ -116,11 +165,11 @@ const BespokeBoundedValueSchema = z.union([
   z.array(z.union([BespokeBoundedPrimitiveSchema, BespokeBoundedShallowObjectSchema])).max(24),
 ]);
 
-const BespokeBoundedRecordSchema = z
-  .record(z.string().min(1).max(64), BespokeBoundedValueSchema)
-  .refine((obj) => Object.keys(obj).length <= 24, {
-    message: "BESPOKE_RECORD_MAX_24_KEYS_EXCEEDED",
-  });
+const BespokeBoundedRecordSchema = makeBoundedSafeRecord(
+  BespokeBoundedValueSchema,
+  24,
+  "BESPOKE_RECORD_MAX_24_KEYS_EXCEEDED"
+);
 
 export const ExecuteBespokeWebsiteBriefSchema = z.object({
   brand_name: z.string().min(1).max(160),
@@ -160,32 +209,20 @@ export const ExecuteBespokeWebsiteBriefSchema = z.object({
     .optional(),
   palette: z
     .union([
-      z
-        .record(z.string().min(1).max(64), z.string().min(1).max(120))
-        .refine((obj) => Object.keys(obj).length <= 24, {
-          message: "BESPOKE_PALETTE_MAX_24_KEYS_EXCEEDED",
-        }),
+      makeBoundedSafeRecord(z.string().min(1).max(120), 24, "BESPOKE_PALETTE_MAX_24_KEYS_EXCEEDED"),
       z.array(z.string().min(1).max(120)).max(24),
     ])
     .optional(),
-  typography: z
-    .record(
-      z.string().min(1).max(64),
-      z.union([z.string().min(1).max(240), z.number().finite().positive().max(100)])
-    )
-    .refine((obj) => Object.keys(obj).length <= 24, {
-      message: "BESPOKE_TYPOGRAPHY_MAX_24_KEYS_EXCEEDED",
-    })
-    .optional(),
+  typography: makeBoundedSafeRecord(
+    z.union([z.string().min(1).max(240), z.number().finite().positive().max(100)]),
+    24,
+    "BESPOKE_TYPOGRAPHY_MAX_24_KEYS_EXCEEDED"
+  ).optional(),
   core_journey: z
     .union([
       z.string().min(1).max(800),
       z.array(z.string().min(1).max(300)).max(24),
-      z
-        .record(z.string().min(1).max(64), z.string().min(1).max(600))
-        .refine((obj) => Object.keys(obj).length <= 16, {
-          message: "BESPOKE_CORE_JOURNEY_MAX_16_KEYS_EXCEEDED",
-        }),
+      makeBoundedSafeRecord(z.string().min(1).max(600), 16, "BESPOKE_CORE_JOURNEY_MAX_16_KEYS_EXCEEDED"),
     ])
     .optional(),
   proof_cards: z.array(BespokeBoundedRecordSchema).max(24).optional(),
@@ -193,7 +230,12 @@ export const ExecuteBespokeWebsiteBriefSchema = z.object({
   cta: z.union([z.string().min(1).max(240), BespokeBoundedRecordSchema]).optional(),
   tagline: z.string().min(1).max(240).optional(),
   target_audience: z.string().min(1).max(400).optional(),
-  primary_audience_action: z.string().min(1).max(280).optional(),
+  primary_audience_action: z
+    .string()
+    .min(1)
+    .max(280)
+    .refine((s) => !CONTROL_CHAR_RE.test(s), { message: "CONTROL_CHARS_FORBIDDEN" })
+    .optional(),
   chrome_budget: z.enum(["GALLERY_ZERO_CHROME", "EDITORIAL_MINIMAL", "APP_DASHBOARD"]).optional(),
   studio_loop_mode: z.enum(["FAST_CREATIVE_STUDIO", "RELEASE_HARDENING"]).optional(),
   visual_dna_refs: z

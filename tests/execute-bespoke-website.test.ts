@@ -725,6 +725,78 @@ test("ENTRY220: ExecuteBespokeWebsiteBriefSchema validates studio loop, chrome b
     }).success,
     false
   );
+
+  // F-220-07: Reject ASCII control chars in refinement_pins[].note and primary_audience_action
+  for (const ctrlStr of ["Refine\u0000hero", "Line1\nLine2", "Carriage\rReturn", "Ansi\u001b[31m", "Del\u007fChar"]) {
+    assert.equal(
+      ExecuteBespokeRefinementPinSchema.safeParse({
+        pin_id: "pin-ctrl",
+        viewport: "desktop_1440",
+        region: "hero_above_fold",
+        x_pct: 40,
+        y_pct: 30,
+        note: ctrlStr,
+      }).success,
+      false,
+      `Expected control chars rejected in pin note: ${JSON.stringify(ctrlStr)}`
+    );
+    assert.equal(
+      ExecuteBespokeWebsiteArgsSchema.safeParse({
+        ...VALID_BUNDLE_ARGS,
+        brief: { ...VALID_BUNDLE_ARGS.brief, primary_audience_action: ctrlStr },
+      }).success,
+      false,
+      `Expected control chars rejected in primary_audience_action: ${JSON.stringify(ctrlStr)}`
+    );
+  }
+
+  // F-220-07: Reject __proto__, constructor, prototype, and control-char keys in bounded records
+  const protoRecord = JSON.parse('{"__proto__":"polluted"}') as Record<string, string>;
+  const badRecords: Array<Record<string, string>> = [
+    protoRecord,
+    { constructor: "polluted" },
+    { prototype: "polluted" },
+    { "bad\u0000key": "x" },
+    { "bad\nkey": "x" },
+  ];
+  for (const badRec of badRecords) {
+    assert.equal(
+      ExecuteBespokeWebsiteArgsSchema.safeParse({
+        ...VALID_BUNDLE_ARGS,
+        brief: { ...VALID_BUNDLE_ARGS.brief, palette: badRec },
+      }).success,
+      false,
+      `Expected forbidden/control key rejected in palette: ${JSON.stringify(Object.keys(badRec))}`
+    );
+    assert.equal(
+      ExecuteBespokeWebsiteArgsSchema.safeParse({
+        ...VALID_BUNDLE_ARGS,
+        brief: { ...VALID_BUNDLE_ARGS.brief, typography: badRec },
+      }).success,
+      false
+    );
+    assert.equal(
+      ExecuteBespokeWebsiteArgsSchema.safeParse({
+        ...VALID_BUNDLE_ARGS,
+        brief: { ...VALID_BUNDLE_ARGS.brief, core_journey: badRec },
+      }).success,
+      false
+    );
+    assert.equal(
+      ExecuteBespokeWebsiteArgsSchema.safeParse({
+        ...VALID_BUNDLE_ARGS,
+        brief: { ...VALID_BUNDLE_ARGS.brief, cta: badRec },
+      }).success,
+      false
+    );
+    assert.equal(
+      ExecuteBespokeWebsiteArgsSchema.safeParse({
+        ...VALID_BUNDLE_ARGS,
+        brief: { ...VALID_BUNDLE_ARGS.brief, proof_cards: [{ nested: badRec }] },
+      }).success,
+      false
+    );
+  }
 });
 
 test("ENTRY220: workspace Click-to-Refine Inspector preserves strict CSP hygiene, iframe sandbox=\"\", zero innerHTML, and studio brief controls", async () => {
@@ -768,8 +840,23 @@ test("ENTRY220: workspace Click-to-Refine Inspector preserves strict CSP hygiene
     "detail_panel",
     "footer",
     "Visual Click-to-Refine",
+    "chromeOptEditorial",
+    "chromeOptGallery",
+    "chromeOptApp",
+    "loopOptFast",
+    "loopOptHardening",
+    "visualDnaPlaceholder",
   ]) {
     assert.ok(js.includes(token), `workspace.js missing required Entry220 symbol/token: ${token}`);
+  }
+  for (const i18nKey of [
+    "chromeOptEditorial",
+    "chromeOptGallery",
+    "chromeOptApp",
+    "loopOptFast",
+    "loopOptHardening",
+  ]) {
+    assert.ok(html.includes(`data-ws-i18n="${i18nKey}"`), `workspace.html missing EN i18n hook ${i18nKey}`);
   }
 
   // Viewport preset classes & pin overlay styling in workspace.css
