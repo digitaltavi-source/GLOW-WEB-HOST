@@ -6,8 +6,8 @@
 <meta name="theme-color" content="#F4F8F7">
 <meta name="description" content="GLOW Web — không gian bắt đầu dự án website, xem trước mẫu giao diện, kiểm tra kết nối và tiếp tục công việc an toàn.">
 <title>Không gian dự án · GLOW Web</title>
-<link rel="stylesheet" href="workspace.css?v=62">
-<script defer src="workspace.js?v=62"></script>
+<link rel="stylesheet" href="workspace.css?v=63">
+<script defer src="workspace.js?v=63"></script>
 </head>
 <body>
 <a class="skip" href="#main" data-ws-i18n="skip">Chuyển tới nội dung chính</a>
@@ -42,12 +42,35 @@
   </div>
 </div>
 <p class="muted" id="stage-meta">Đang tải thư viện mẫu giao diện chuẩn từ GLOW Web…</p>
-<div class="studio-iframe-frame">
+<div class="studio-inspector-bar" role="toolbar" aria-label="Thanh công cụ kiểm tra và ghim sửa trực quan">
+  <div class="viewport-switcher" role="group" aria-label="Chọn khung hiển thị">
+    <button type="button" class="vp-btn is-active" id="vp-desktop-1440" data-viewport="desktop_1440" aria-pressed="true">Desktop 1440</button>
+    <button type="button" class="vp-btn" id="vp-laptop-1366" data-viewport="laptop_1366" aria-pressed="false">Laptop 1366</button>
+    <button type="button" class="vp-btn" id="vp-mobile-390" data-viewport="mobile_390" aria-pressed="false">Mobile 390</button>
+  </div>
+  <div class="inspector-actions">
+    <button type="button" class="inspector-toggle-btn" id="inspector-toggle" aria-pressed="false" data-ws-i18n="inspectorToggle">Chế độ Ghim &amp; Sửa Trực Quan</button>
+    <span class="pin-counter-badge" id="pin-counter-badge" aria-live="polite">0 / 8</span>
+    <button type="button" class="inspector-clear-btn" id="clear-pins-btn" disabled data-ws-i18n="clearPinsBtn">Xóa tất cả ghim</button>
+  </div>
+</div>
+<p class="inspector-hint" id="inspector-hint" data-ws-i18n="inspectorHint">Bật chế độ Ghim &amp; Sửa Trực Quan rồi nhấp lên khung xem trước để đánh dấu tối đa 8 điểm cần tinh chỉnh (không can thiệp vào hộp cát iframe).</p>
+<div class="studio-iframe-frame viewport-desktop-1440" id="studio-iframe-frame" data-viewport="desktop_1440">
   <div class="studio-browser-bar" aria-hidden="true">
     <span class="studio-dots"><i></i><i></i><i></i></span>
     <span id="studio-preview-url" class="studio-url">glow.web/coastal-glass-architecture</span>
   </div>
-  <iframe id="studio-template-iframe" class="studio-iframe" sandbox="" title="Xem trước mẫu giao diện trực tiếp" loading="lazy"></iframe>
+  <div class="studio-viewport-wrap" id="studio-viewport-wrap">
+    <iframe id="studio-template-iframe" class="studio-iframe" sandbox="" title="Xem trước mẫu giao diện trực tiếp" loading="lazy"></iframe>
+    <div id="studio-pin-overlay" class="studio-pin-overlay" role="application" aria-label="Lớp phủ ghim chỉnh sửa trực quan" aria-hidden="true" tabindex="-1"></div>
+  </div>
+</div>
+<div class="pin-list-panel" id="pin-list-panel" hidden>
+  <div class="pin-list-header">
+    <h3 class="pin-list-title" data-ws-i18n="pinListTitle">Điểm ghim tinh chỉnh trực quan</h3>
+    <span class="pin-list-sub" data-ws-i18n="pinListSub">Tự động đính kèm vào yêu cầu JSON trên trình duyệt</span>
+  </div>
+  <ul class="pin-list" id="pin-list" aria-label="Danh sách điểm ghim tinh chỉnh"></ul>
 </div>
 </section>
 
@@ -64,6 +87,27 @@
 </div></fieldset>
 <div class="field"><label for="goal"><span data-ws-i18n="goalLabel">Điều quan trọng nhất website cần đạt được</span> <span aria-hidden="true">*</span></label><textarea id="goal" name="goal" required minlength="15" maxlength="700" placeholder="Ví dụ: Giúp khách hàng hiểu rõ dịch vụ và gửi yêu cầu tư vấn thuận tiện."></textarea><div class="smallline"><span data-ws-i18n="goalHint">Viết bằng ngôn ngữ của bạn</span><output id="remaining" for="goal">0 / 700</output></div></div>
 <div class="fields"><div class="field"><label for="brand" data-ws-i18n="brandLabel">Tên cá nhân / thương hiệu</label><input id="brand" name="brand" autocomplete="organization" maxlength="120" placeholder="Có thể bổ sung sau"></div><div class="field"><label for="language" data-ws-i18n="langLabel">Ngôn ngữ website</label><select id="language" name="language"><option value="Tiếng Việt">Tiếng Việt</option><option value="Song ngữ Việt–Anh">Song ngữ Việt–Anh</option><option value="English">English</option></select></div></div>
+<div class="fields">
+  <div class="field">
+    <label for="chrome-budget" data-ws-i18n="chromeBudgetLabel">Mức độ tối giản khung giao diện (Chrome Budget)</label>
+    <select id="chrome-budget" name="chrome_budget">
+      <option value="EDITORIAL_MINIMAL" selected>EDITORIAL_MINIMAL — Tối giản biên tập chuẩn mực</option>
+      <option value="GALLERY_ZERO_CHROME">GALLERY_ZERO_CHROME — Khung trưng bày thuần điện ảnh</option>
+      <option value="APP_DASHBOARD">APP_DASHBOARD — Giao diện ứng dụng / điều khiển</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="studio-loop-mode" data-ws-i18n="studioLoopLabel">Nhịp độ làm việc Studio</label>
+    <select id="studio-loop-mode" name="studio_loop_mode">
+      <option value="FAST_CREATIVE_STUDIO" selected>FAST_CREATIVE_STUDIO — Sáng tạo nhanh &amp; duyệt trực quan</option>
+      <option value="RELEASE_HARDENING">RELEASE_HARDENING — Kiểm định nghiêm ngặt trước phát hành</option>
+    </select>
+  </div>
+</div>
+<div class="field">
+  <label for="visual-dna-notes" data-ws-i18n="visualDnaLabel">Ghi chú thẩm mỹ &amp; chất liệu hình ảnh (tùy chọn)</label>
+  <input id="visual-dna-notes" name="visual_dna_notes" maxlength="240" placeholder="Ví dụ: Tông gốm sứ ngà &amp; men ngọc, ánh sáng tự nhiên, khoảng thở rộng.">
+</div>
 <div class="actions"><button class="primary" type="submit" id="prepare-btn"><span data-ws-i18n="submitBtn">Chuẩn bị yêu cầu</span> <span aria-hidden="true">↗</span></button><a class="secondary" id="ws-register-link" href="/#register" data-ws-i18n="altLink">Xem hình thức khác</a></div>
 </form>
 <div id="result" class="result" hidden tabindex="-1"><p class="eyebrow" data-ws-i18n="resultEyebrow">BẢN NHÁP ĐÃ CHUẨN BỊ</p><h3 data-ws-i18n="resultTitle">Yêu cầu của bạn đã được tổng hợp</h3><p data-ws-i18n="resultDesc">Chưa có dự án nào được tạo trên hệ thống. Hãy sao chép nội dung để tiếp tục trong ChatGPT hoặc Google Gemini đã kết nối GLOW WEBSITE.</p><pre id="capsule"></pre><div class="actions"><button type="button" id="copy" class="primary" data-ws-i18n="copyBtn">Sao chép yêu cầu</button><a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer" class="secondary">Mở ChatGPT <span aria-hidden="true">↗</span></a></div></div>

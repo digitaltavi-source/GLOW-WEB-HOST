@@ -3,10 +3,12 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import {
   BESPOKE_BINARY_ALLOWED_EXTENSIONS,
+  ExecuteBespokeRefinementPinSchema,
   ExecuteBespokeWebsiteArgsSchema,
   NextFactoryControlInputSchema,
   isSafeBespokeBinaryRelPath,
   isSafeBespokeRelPath,
+  isSafeVisualDnaRef,
 } from "../src/next-factory-schema.js";
 import { fetchHttpHandler, hostFixture } from "./http-fixture.js";
 
@@ -601,4 +603,183 @@ test("execute_bespoke_website accepts rich F-218C-06 optional brief fields while
     }).success,
     false
   );
+});
+
+test("ENTRY220: ExecuteBespokeWebsiteBriefSchema validates studio loop, chrome budget, visual_dna_refs, cinema_media_material, and refinement_pins strictly", () => {
+  const validStudioBrief = ExecuteBespokeWebsiteArgsSchema.parse({
+    slug: "saigon-atelier-ceramic-2026",
+    brief: {
+      brand_name: "Saigon Atelier Ceramic",
+      locale: "vi-VN",
+      primary_audience_action: "Book a private architectural tea tasting & ceramic viewing",
+      chrome_budget: "GALLERY_ZERO_CHROME",
+      studio_loop_mode: "FAST_CREATIVE_STUDIO",
+      visual_dna_refs: ["refs/celadon-glaze.webp", "refs/kiln-light-study.png"],
+      cinema_media_material: false,
+      refinement_pins: [
+        {
+          pin_id: "pin-01",
+          viewport: "desktop_1440",
+          region: "hero_above_fold",
+          x_pct: 48.5,
+          y_pct: 28.0,
+          note: "Increase breathing room above headline and soften celadon tint",
+        },
+        {
+          pin_id: "pin-02",
+          viewport: "mobile_390",
+          region: "detail_panel",
+          x_pct: 52.0,
+          y_pct: 78.4,
+          note: "Align dossier cards cleanly with 16px horizontal rhythm",
+        },
+      ],
+    },
+    files: VALID_BUNDLE_ARGS.files,
+  });
+  assert.equal(validStudioBrief.brief.chrome_budget, "GALLERY_ZERO_CHROME");
+  assert.equal(validStudioBrief.brief.studio_loop_mode, "FAST_CREATIVE_STUDIO");
+  assert.equal(validStudioBrief.brief.cinema_media_material, false);
+  assert.equal(validStudioBrief.brief.refinement_pins?.length, 2);
+
+  // Reject invalid visual_dna_refs (path traversal, absolute path, URL, dotfiles)
+  for (const badRef of [
+    "../secret.png",
+    "/etc/passwd",
+    "https://evil.example/a.png",
+    "refs/.hidden.webp",
+    "refs//double.png",
+    "refs\\win.png",
+  ]) {
+    assert.equal(isSafeVisualDnaRef(badRef), false, `Expected unsafe visual_dna_ref rejected: ${badRef}`);
+    assert.equal(
+      ExecuteBespokeWebsiteArgsSchema.safeParse({
+        ...VALID_BUNDLE_ARGS,
+        brief: { ...VALID_BUNDLE_ARGS.brief, visual_dna_refs: [badRef] },
+      }).success,
+      false
+    );
+  }
+
+  // Reject >8 visual_dna_refs
+  assert.equal(
+    ExecuteBespokeWebsiteArgsSchema.safeParse({
+      ...VALID_BUNDLE_ARGS,
+      brief: {
+        ...VALID_BUNDLE_ARGS.brief,
+        visual_dna_refs: Array.from({ length: 9 }, (_, i) => `refs/ref-${i}.webp`),
+      },
+    }).success,
+    false
+  );
+
+  // Reject malformed / out-of-range / unknown-key refinement_pins
+  for (const badPin of [
+    { pin_id: "pin-01", viewport: "desktop_1440", region: "hero_above_fold", x_pct: -1, y_pct: 20, note: "neg x" },
+    { pin_id: "pin-01", viewport: "desktop_1440", region: "hero_above_fold", x_pct: 50, y_pct: 100.1, note: "gt 100 y" },
+    { pin_id: "pin-01", viewport: "tablet_768", region: "hero_above_fold", x_pct: 50, y_pct: 50, note: "bad vp" },
+    { pin_id: "pin-01", viewport: "desktop_1440", region: "unknown_zone", x_pct: 50, y_pct: 50, note: "bad region" },
+    { pin_id: "../evil", viewport: "desktop_1440", region: "footer", x_pct: 10, y_pct: 92, note: "bad id" },
+    { pin_id: "pin-01", viewport: "desktop_1440", region: "footer", x_pct: 10, y_pct: 92, note: "   " },
+    { pin_id: "pin-01", viewport: "desktop_1440", region: "footer", x_pct: 10, y_pct: 92, note: "x".repeat(241) },
+    { pin_id: "pin-01", viewport: "desktop_1440", region: "footer", x_pct: 10, y_pct: 92, note: "ok", extra_key: true },
+  ]) {
+    assert.equal(
+      ExecuteBespokeRefinementPinSchema.safeParse(badPin).success,
+      false,
+      `Expected malformed pin rejected: ${JSON.stringify(badPin)}`
+    );
+  }
+
+  // Reject >8 refinement_pins
+  assert.equal(
+    ExecuteBespokeWebsiteArgsSchema.safeParse({
+      ...VALID_BUNDLE_ARGS,
+      brief: {
+        ...VALID_BUNDLE_ARGS.brief,
+        refinement_pins: Array.from({ length: 9 }, (_, i) => ({
+          pin_id: `pin-${i + 1}`,
+          viewport: "desktop_1440",
+          region: "hero_above_fold",
+          x_pct: 20 + i,
+          y_pct: 30,
+          note: "Too many pins",
+        })),
+      },
+    }).success,
+    false
+  );
+
+  // Reject invalid enum values for chrome_budget and studio_loop_mode
+  assert.equal(
+    ExecuteBespokeWebsiteArgsSchema.safeParse({
+      ...VALID_BUNDLE_ARGS,
+      brief: { ...VALID_BUNDLE_ARGS.brief, chrome_budget: "UNRESTRICTED_CHROME" },
+    }).success,
+    false
+  );
+  assert.equal(
+    ExecuteBespokeWebsiteArgsSchema.safeParse({
+      ...VALID_BUNDLE_ARGS,
+      brief: { ...VALID_BUNDLE_ARGS.brief, studio_loop_mode: "YOLO_UNVERIFIED" },
+    }).success,
+    false
+  );
+});
+
+test("ENTRY220: workspace Click-to-Refine Inspector preserves strict CSP hygiene, iframe sandbox=\"\", zero innerHTML, and studio brief controls", async () => {
+  const html = await readFile(new URL("../public/workspace.html", import.meta.url), "utf8");
+  const css = await readFile(new URL("../public/workspace.css", import.meta.url), "utf8");
+  const js = await readFile(new URL("../public/workspace.js", import.meta.url), "utf8");
+
+  // Strict CSP hygiene in workspace.html
+  assert.doesNotMatch(html, /\sstyle\s*=/i, "workspace.html must not contain inline style attributes");
+  assert.doesNotMatch(html, /<script(?![^>]*\bsrc=)/i, "workspace.html must not contain inline <script> blocks");
+  assert.doesNotMatch(html, /\son[a-z]+\s*=/i, "workspace.html must not contain inline on* event handlers");
+  assert.match(html, /id="studio-template-iframe"[^>]*sandbox=""/, "workspace.html must keep sandbox=\"\" on #studio-template-iframe");
+
+  // Inspector & studio brief controls present
+  for (const id of [
+    "vp-desktop-1440",
+    "vp-laptop-1366",
+    "vp-mobile-390",
+    "inspector-toggle",
+    "studio-pin-overlay",
+    "clear-pins-btn",
+    "pin-list-panel",
+    "chrome-budget",
+    "studio-loop-mode",
+    "visual-dna-notes",
+  ]) {
+    assert.ok(html.includes(`id="${id}"`), `workspace.html missing required control #${id}`);
+  }
+
+  // Zero innerHTML and preserves GLOW_WEB_PUBLIC_INTAKE_V1 capsule fields
+  assert.doesNotMatch(js, /\binnerHTML\b/, "workspace.js must never use innerHTML");
+  for (const token of [
+    "GLOW_WEB_PUBLIC_INTAKE_V1",
+    "chrome_budget",
+    "studio_loop_mode",
+    "visual_dna_notes",
+    "refinement_pins",
+    "header_nav",
+    "hero_above_fold",
+    "primary_media_stage",
+    "detail_panel",
+    "footer",
+    "Visual Click-to-Refine",
+  ]) {
+    assert.ok(js.includes(token), `workspace.js missing required Entry220 symbol/token: ${token}`);
+  }
+
+  // Viewport preset classes & pin overlay styling in workspace.css
+  for (const cls of [
+    ".viewport-desktop-1440",
+    ".viewport-laptop-1366",
+    ".viewport-mobile-390",
+    ".studio-pin-overlay",
+    ".studio-pin-marker",
+  ]) {
+    assert.ok(css.includes(cls), `workspace.css missing required selector ${cls}`);
+  }
 });

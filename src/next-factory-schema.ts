@@ -71,6 +71,32 @@ export function isSafeBespokeBinaryRelPath(relPath: string): boolean {
   return isSafeBespokeRelPathWithExts(relPath, BESPOKE_BINARY_ALLOWED_EXTENSIONS);
 }
 
+const SAFE_VISUAL_DNA_REF_RE = /^[A-Za-z0-9][A-Za-z0-9._\/-]{0,199}$/;
+
+export function isSafeVisualDnaRef(ref: string): boolean {
+  if (!SAFE_VISUAL_DNA_REF_RE.test(ref)) return false;
+  if (ref.startsWith("/") || ref.includes("\\") || ref.includes("//") || ref.includes("..") || ref.includes("://")) {
+    return false;
+  }
+  const parts = ref.split("/");
+  return parts.every((part) => part.length > 0 && part !== "." && part !== ".." && !part.startsWith("."));
+}
+
+export const ExecuteBespokeRefinementPinSchema = z.object({
+  pin_id: z.string().regex(SAFE_BESPOKE_SLUG_RE),
+  viewport: z.enum(["desktop_1440", "laptop_1366", "mobile_390"]),
+  region: z.enum([
+    "header_nav",
+    "hero_above_fold",
+    "primary_media_stage",
+    "detail_panel",
+    "footer",
+  ]),
+  x_pct: z.number().finite().min(0).max(100),
+  y_pct: z.number().finite().min(0).max(100),
+  note: z.string().trim().min(1).max(240),
+}).strict();
+
 const BespokeBoundedPrimitiveSchema = z.union([
   z.string().max(800),
   z.number().finite(),
@@ -167,6 +193,19 @@ export const ExecuteBespokeWebsiteBriefSchema = z.object({
   cta: z.union([z.string().min(1).max(240), BespokeBoundedRecordSchema]).optional(),
   tagline: z.string().min(1).max(240).optional(),
   target_audience: z.string().min(1).max(400).optional(),
+  primary_audience_action: z.string().min(1).max(280).optional(),
+  chrome_budget: z.enum(["GALLERY_ZERO_CHROME", "EDITORIAL_MINIMAL", "APP_DASHBOARD"]).optional(),
+  studio_loop_mode: z.enum(["FAST_CREATIVE_STUDIO", "RELEASE_HARDENING"]).optional(),
+  visual_dna_refs: z
+    .array(
+      z.string().refine((val) => isSafeVisualDnaRef(val), {
+        message: "BESPOKE_VISUAL_DNA_REF_INVALID",
+      })
+    )
+    .max(8)
+    .optional(),
+  cinema_media_material: z.boolean().optional(),
+  refinement_pins: z.array(ExecuteBespokeRefinementPinSchema).max(8).optional(),
   pii_fields: z.array(z.string().min(1).max(64)).max(32).optional(),
 }).strict();
 
