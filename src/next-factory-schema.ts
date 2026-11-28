@@ -127,8 +127,24 @@ function makeBoundedSafeRecord<V extends z.ZodTypeAny>(
     );
 }
 
+const SAFE_TEMPLATE_ID_RE = /^[a-z0-9][a-z0-9-]{1,63}$/;
+
+function hasUnsafeNestedRecordKey(val: unknown, depth = 0): boolean {
+  if (depth > 6 || val === null || typeof val !== "object") return false;
+  if (Array.isArray(val)) {
+    return val.some((item) => hasUnsafeNestedRecordKey(item, depth + 1));
+  }
+  if (hasUnsafeOwnRecordKey(val)) return true;
+  for (const child of Object.values(val as Record<string, unknown>)) {
+    if (hasUnsafeNestedRecordKey(child, depth + 1)) return true;
+  }
+  return false;
+}
+
 export const ExecuteBespokeRefinementPinSchema = z.object({
   pin_id: z.string().regex(SAFE_BESPOKE_SLUG_RE),
+  template_id: z.string().regex(SAFE_TEMPLATE_ID_RE).optional(),
+  locale: z.enum(["vi", "en"]).optional(),
   viewport: z.enum(["desktop_1440", "laptop_1366", "mobile_390"]),
   region: z.enum([
     "header_nav",
@@ -247,6 +263,7 @@ export const ExecuteBespokeWebsiteBriefSchema = z.object({
     .max(8)
     .optional(),
   cinema_media_material: z.boolean().optional(),
+  pin_workflow_scope: z.literal("DRAFT_FEEDBACK_ANNOTATION_ONLY").optional(),
   refinement_pins: z.array(ExecuteBespokeRefinementPinSchema).max(8).optional(),
   pii_fields: z.array(z.string().min(1).max(64)).max(32).optional(),
 }).strict();
@@ -350,6 +367,73 @@ export const ExecuteBespokeWebsiteArgsShape = {
 };
 
 export const ExecuteBespokeWebsiteArgsSchema = z.object(ExecuteBespokeWebsiteArgsShape).strict();
+
+const AestheticMetricsPayloadSchema = z
+  .unknown()
+  .refine(
+    (val) =>
+      val !== null &&
+      typeof val === "object" &&
+      !Array.isArray(val) &&
+      Object.keys(val as Record<string, unknown>).length >= 1 &&
+      Object.keys(val as Record<string, unknown>).length <= 48 &&
+      !hasUnsafeNestedRecordKey(val),
+    { message: "AESTHETIC_METRICS_PAYLOAD_INVALID_OR_UNSAFE_KEY" }
+  )
+  .pipe(z.record(SAFE_RECORD_KEY, z.unknown()));
+
+export const EvaluateAestheticTqcArgsShape = {
+  metrics_payload: AestheticMetricsPayloadSchema,
+  chrome_budget: z
+    .enum(["GALLERY_ZERO_CHROME", "EDITORIAL_MINIMAL", "APP_DASHBOARD"])
+    .default("EDITORIAL_MINIMAL"),
+  primary_subject_required: z.boolean().optional(),
+  allow_single_viewport: z.boolean().optional(),
+  collision_not_applicable_reason: z
+    .string()
+    .min(28)
+    .max(280)
+    .refine((s) => !CONTROL_CHAR_RE.test(s), { message: "CONTROL_CHARS_FORBIDDEN" })
+    .optional(),
+};
+
+export const EvaluateAestheticTqcArgsSchema = z.object(EvaluateAestheticTqcArgsShape).strict();
+
+const MediaProviderAvailabilityEntrySchema = z.union([
+  z.boolean(),
+  z
+    .object({
+      available: z.boolean().optional(),
+      has_api_key: z.boolean().nullable().optional(),
+      cli_ready: z.boolean().nullable().optional(),
+    })
+    .strict(),
+]);
+
+export const PlanMediaProviderRouteArgsShape = {
+  request_spec: z
+    .object({
+      modality: z.enum([
+        "cinema_video_loop",
+        "3d_animation_shot",
+        "keyframe_image",
+        "postprocess_compose",
+      ]),
+      clip_count: z.number().int().min(1).max(24).default(1),
+      preferred_provider: z
+        .enum(["gemini_veo_api", "magnific_mcp", "glow_3d_studio", "local_ffmpeg"])
+        .optional(),
+      human_cost_approved: z.boolean().default(false),
+    })
+    .strict(),
+  available_providers: makeBoundedSafeRecord(
+    MediaProviderAvailabilityEntrySchema,
+    16,
+    "MEDIA_PROVIDERS_MAX_16_KEYS_EXCEEDED"
+  ),
+};
+
+export const PlanMediaProviderRouteArgsSchema = z.object(PlanMediaProviderRouteArgsShape).strict();
 
 export const NextFactoryControlInputSchema = z.discriminatedUnion("action",[
  z.object({action:z.literal("inspect_artifact_admission"),args:ArtifactLookupSchema,role:z.enum(["client","operator","unspecified"]).default("unspecified"),locale:z.string().default("vi-VN")}).strict(),
@@ -636,6 +720,18 @@ export const NextFactoryControlInputSchema = z.discriminatedUnion("action",[
         z.object({
           action:z.literal("execute_bespoke_website"),
           args:ExecuteBespokeWebsiteArgsSchema,
+          role:z.enum(["client","operator","unspecified"]).default("unspecified"),
+          locale:z.string().min(2).max(32).default("vi-VN")
+        }).strict(),
+        z.object({
+          action:z.literal("evaluate_aesthetic_usability_tqc"),
+          args:EvaluateAestheticTqcArgsSchema,
+          role:z.enum(["client","operator","unspecified"]).default("unspecified"),
+          locale:z.string().min(2).max(32).default("vi-VN")
+        }).strict(),
+        z.object({
+          action:z.literal("plan_media_provider_route"),
+          args:PlanMediaProviderRouteArgsSchema,
           role:z.enum(["client","operator","unspecified"]).default("unspecified"),
           locale:z.string().min(2).max(32).default("vi-VN")
         }).strict()

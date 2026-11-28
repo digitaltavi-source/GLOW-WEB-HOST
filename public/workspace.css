@@ -782,6 +782,63 @@ footer p {
   transform: translate(-50%, -50%) scale(1.1);
 }
 
+.studio-pin-reticle {
+  position: absolute;
+  left: var(--reticle-x, 50%);
+  top: var(--reticle-y, 50%);
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px dashed #0E5E46;
+  background: rgba(31, 168, 122, 0.16);
+  pointer-events: none;
+  display: none;
+}
+
+.studio-pin-overlay.is-active:focus .studio-pin-reticle,
+.studio-pin-overlay.is-active.kb-reticle-visible .studio-pin-reticle {
+  display: block;
+}
+
+.pin-item.is-stale {
+  background: rgba(250, 245, 236, 0.94);
+  border-color: rgba(184, 107, 67, 0.45);
+}
+
+.pin-stale-badge {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: rgba(184, 107, 67, 0.14);
+  color: #8A4520;
+  width: fit-content;
+}
+
+.pin-item-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pin-jump-btn {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--jade-core);
+  background: var(--jade-soft);
+  color: var(--jade-deep);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pin-jump-btn:hover {
+  background: rgba(31, 168, 122, 0.22);
+}
+
 .pin-list-panel {
   margin-top: 16px;
   padding: 16px 18px;

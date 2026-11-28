@@ -49,12 +49,13 @@
     <button type="button" class="vp-btn" id="vp-mobile-390" data-viewport="mobile_390" aria-pressed="false">Mobile 390</button>
   </div>
   <div class="inspector-actions">
-    <button type="button" class="inspector-toggle-btn" id="inspector-toggle" aria-pressed="false" data-ws-i18n="inspectorToggle">Chế độ Ghim &amp; Sửa Trực Quan</button>
+    <button type="button" class="inspector-toggle-btn" id="inspector-toggle" aria-pressed="false" data-ws-i18n="inspectorToggle">Chế độ Ghim Góp Ý Trực Quan</button>
     <span class="pin-counter-badge" id="pin-counter-badge" aria-live="polite">0 / 8</span>
+    <button type="button" class="inspector-clear-btn" id="clear-stale-pins-btn" disabled data-ws-i18n="clearStalePinsBtn">Xóa ghim khác khung</button>
     <button type="button" class="inspector-clear-btn" id="clear-pins-btn" disabled data-ws-i18n="clearPinsBtn">Xóa tất cả ghim</button>
   </div>
 </div>
-<p class="inspector-hint" id="inspector-hint" data-ws-i18n="inspectorHint">Bật chế độ Ghim &amp; Sửa Trực Quan rồi nhấp lên khung xem trước để đánh dấu tối đa 8 điểm cần tinh chỉnh (không can thiệp vào hộp cát iframe).</p>
+<p class="inspector-hint" id="inspector-hint" data-ws-i18n="inspectorHint">Bật chế độ Ghim Góp Ý Trực Quan rồi nhấp (hoặc dùng phím mũi tên + Enter/Space) để đánh dấu tối đa 8 điểm góp ý cho bản nháp JSON theo đúng mẫu &amp; khung hiển thị hiện tại (không tự sửa DOM sống, giữ nguyên hộp cát iframe).</p>
 <div class="studio-iframe-frame viewport-desktop-1440" id="studio-iframe-frame" data-viewport="desktop_1440">
   <div class="studio-browser-bar" aria-hidden="true">
     <span class="studio-dots"><i></i><i></i><i></i></span>
@@ -62,15 +63,15 @@
   </div>
   <div class="studio-viewport-wrap" id="studio-viewport-wrap">
     <iframe id="studio-template-iframe" class="studio-iframe" sandbox="" title="Xem trước mẫu giao diện trực tiếp" loading="lazy"></iframe>
-    <div id="studio-pin-overlay" class="studio-pin-overlay" role="application" aria-label="Lớp phủ ghim chỉnh sửa trực quan" aria-hidden="true" tabindex="-1"></div>
+    <div id="studio-pin-overlay" class="studio-pin-overlay" role="application" aria-label="Lớp phủ ghim góp ý trực quan theo khung xem hiện tại" aria-hidden="true" tabindex="-1"></div>
   </div>
 </div>
 <div class="pin-list-panel" id="pin-list-panel" hidden>
   <div class="pin-list-header">
-    <h3 class="pin-list-title" data-ws-i18n="pinListTitle">Điểm ghim tinh chỉnh trực quan</h3>
-    <span class="pin-list-sub" data-ws-i18n="pinListSub">Tự động đính kèm vào yêu cầu JSON trên trình duyệt</span>
+    <h3 class="pin-list-title" data-ws-i18n="pinListTitle">Điểm ghim góp ý cho bản nháp</h3>
+    <span class="pin-list-sub" data-ws-i18n="pinListSub">Chỉ đính kèm góp ý vào bản nháp JSON trên trình duyệt — không tự sửa mã nguồn hay DOM sống</span>
   </div>
-  <ul class="pin-list" id="pin-list" aria-label="Danh sách điểm ghim tinh chỉnh"></ul>
+  <ul class="pin-list" id="pin-list" aria-label="Danh sách điểm ghim góp ý"></ul>
 </div>
 </section>
 

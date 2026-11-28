@@ -19,7 +19,12 @@ import {fetchAuthorizedFile} from './file-input.js';
 import { classifyWorkResponse } from "./work-response.js";
 import { buildProtectedResourceMetadata } from "./resource-metadata.js";
 import { createGlowMcpExpressApp, DEFAULT_MCP_JSON_LIMIT, PUBLIC_HTML_CSP } from "./mcp-app.js";
-import { NextFactoryControlInputSchema, ExecuteBespokeWebsiteArgsShape } from "./next-factory-schema.js";
+import {
+  NextFactoryControlInputSchema,
+  ExecuteBespokeWebsiteArgsShape,
+  EvaluateAestheticTqcArgsShape,
+  PlanMediaProviderRouteArgsShape,
+} from "./next-factory-schema.js";
 import { resolveHostDomainTopology } from "./domain-topology.js";
 import {PHASE_ACCEPTANCE_SCOPE,PHASE_ACCEPTANCE_MISSION_PATTERN,toolOAuthMetadata,phaseAcceptanceActor,phaseAcceptanceAuthChallenge,phaseAcceptanceAuthorityStatus,validateAcceptanceBytes} from './phase-acceptance.js';
 import { queryTemplates, getTemplateById, isValidTemplateId } from "./template-registry.js";
@@ -519,6 +524,42 @@ const buildServer: McpServerFactory = ctx => {
       if(classification==="SAFE_PUBLIC_FAILURE") return {isError:true,...toolResult(out as unknown as Record<string,unknown>)};
       return toolResult(out as unknown as Record<string,unknown>);
     }catch(error){return toolError(error instanceof Error?error.message:'BESPOKE_EXECUTION_FAILED');}
+  });
+  server.registerTool('glow_evaluate_aesthetic_tqc',{
+    title:'Evaluate Aesthetic & Usability TQC metrics (fail-closed)',
+    description:'Evaluates browser-measured viewport geometry, section bleed, top/bottom collision gaps (fail-closed NOT_MEASURED when omitted on desktop), chrome budget compliance, axe-core accessibility count, runtime errors, and horizontal overflow through GLOW Web Factory python_bridge -> aesthetic_usability_tqc. Read-only evaluation; never grants F4_HUMAN_RELEASE or commercial qualification.',
+    annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false},
+    ...(toolSecuritySchemes?{securitySchemes:toolSecuritySchemes}:{}),
+    inputSchema:z.object({
+      ...EvaluateAestheticTqcArgsShape,
+      role:z.enum(["client","operator","unspecified"]).default("unspecified"),
+      locale:z.string().min(2).max(32).default("vi-VN")
+    }).strict()
+  },async ({role,locale,...args})=>{
+    try{
+      const out=await invoke(ctx,'next_factory_control',role,locale,{action:'evaluate_aesthetic_usability_tqc',args});
+      const classification=classifyWorkResponse(out);
+      if(classification==="SAFE_PUBLIC_FAILURE") return {isError:true,...toolResult(out as unknown as Record<string,unknown>)};
+      return toolResult(out as unknown as Record<string,unknown>);
+    }catch(error){return toolError(error instanceof Error?error.message:'AESTHETIC_TQC_EVALUATION_FAILED');}
+  });
+  server.registerTool('glow_plan_media_provider_route',{
+    title:'Plan cinema media provider route (advisory pre-flight only)',
+    description:'Advisory deterministic media provider router returning explicit estimated_credits, unlimited_applies_via_mcp=false, advisory_only=true, and cost_approval_enforced_at_execution=false via python_bridge -> cinema_media_pipeline_gate. Rejects unsupported cross-modality providers fail-closed. Does NOT invoke paid media providers or enforce runtime billing.',
+    annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false},
+    ...(toolSecuritySchemes?{securitySchemes:toolSecuritySchemes}:{}),
+    inputSchema:z.object({
+      ...PlanMediaProviderRouteArgsShape,
+      role:z.enum(["client","operator","unspecified"]).default("unspecified"),
+      locale:z.string().min(2).max(32).default("vi-VN")
+    }).strict()
+  },async ({role,locale,...args})=>{
+    try{
+      const out=await invoke(ctx,'next_factory_control',role,locale,{action:'plan_media_provider_route',args});
+      const classification=classifyWorkResponse(out);
+      if(classification==="SAFE_PUBLIC_FAILURE") return {isError:true,...toolResult(out as unknown as Record<string,unknown>)};
+      return toolResult(out as unknown as Record<string,unknown>);
+    }catch(error){return toolError(error instanceof Error?error.message:'MEDIA_PROVIDER_ROUTE_FAILED');}
   });
   return server;
 };

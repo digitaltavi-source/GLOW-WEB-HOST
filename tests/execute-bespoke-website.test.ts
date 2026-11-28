@@ -3,9 +3,11 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import {
   BESPOKE_BINARY_ALLOWED_EXTENSIONS,
+  EvaluateAestheticTqcArgsSchema,
   ExecuteBespokeRefinementPinSchema,
   ExecuteBespokeWebsiteArgsSchema,
   NextFactoryControlInputSchema,
+  PlanMediaProviderRouteArgsSchema,
   isSafeBespokeBinaryRelPath,
   isSafeBespokeRelPath,
   isSafeVisualDnaRef,
@@ -817,6 +819,7 @@ test("ENTRY220: workspace Click-to-Refine Inspector preserves strict CSP hygiene
     "vp-mobile-390",
     "inspector-toggle",
     "studio-pin-overlay",
+    "clear-stale-pins-btn",
     "clear-pins-btn",
     "pin-list-panel",
     "chrome-budget",
@@ -833,13 +836,19 @@ test("ENTRY220: workspace Click-to-Refine Inspector preserves strict CSP hygiene
     "chrome_budget",
     "studio_loop_mode",
     "visual_dna_notes",
+    "pin_workflow_scope",
+    "DRAFT_FEEDBACK_ANNOTATION_ONLY",
     "refinement_pins",
+    "isPinMatchingActiveView",
+    "studio-pin-reticle",
+    "ArrowLeft",
     "header_nav",
     "hero_above_fold",
     "primary_media_stage",
     "detail_panel",
     "footer",
-    "Visual Click-to-Refine",
+    "Visual Feedback Pins (Draft)",
+    "clearStalePinsBtn",
     "chromeOptEditorial",
     "chromeOptGallery",
     "chromeOptApp",
@@ -850,6 +859,7 @@ test("ENTRY220: workspace Click-to-Refine Inspector preserves strict CSP hygiene
     assert.ok(js.includes(token), `workspace.js missing required Entry220 symbol/token: ${token}`);
   }
   for (const i18nKey of [
+    "clearStalePinsBtn",
     "chromeOptEditorial",
     "chromeOptGallery",
     "chromeOptApp",
@@ -866,7 +876,187 @@ test("ENTRY220: workspace Click-to-Refine Inspector preserves strict CSP hygiene
     ".viewport-mobile-390",
     ".studio-pin-overlay",
     ".studio-pin-marker",
+    ".studio-pin-reticle",
+    ".pin-item.is-stale",
+    ".pin-jump-btn",
   ]) {
     assert.ok(css.includes(cls), `workspace.css missing required selector ${cls}`);
+  }
+});
+
+test("ENTRY220 A220-03 & A220-04: scoped pin schema, TQC/router Zod schemas, and /mcp-v2 operator tool forwarding", async () => {
+  // 1) Scoped pin accepts template_id + locale and rejects invalid template_id/locale
+  const okPin = ExecuteBespokeRefinementPinSchema.parse({
+    pin_id: "pin-01",
+    template_id: "coastal-glass-architecture",
+    locale: "en",
+    viewport: "desktop_1440",
+    region: "hero_above_fold",
+    x_pct: 50,
+    y_pct: 25,
+    note: "Increase hero contrast slightly",
+  });
+  assert.equal(okPin.template_id, "coastal-glass-architecture");
+  assert.equal(okPin.locale, "en");
+  assert.equal(
+    ExecuteBespokeRefinementPinSchema.safeParse({ ...okPin, template_id: "../bad" }).success,
+    false
+  );
+  assert.equal(
+    ExecuteBespokeRefinementPinSchema.safeParse({ ...okPin, locale: "fr" }).success,
+    false
+  );
+
+  // 2) EvaluateAestheticTqcArgsSchema & PlanMediaProviderRouteArgsSchema fail closed on unsafe keys & unknown props
+  assert.equal(
+    EvaluateAestheticTqcArgsSchema.safeParse({
+      metrics_payload: { viewports: { "1440x900": { zero_section_bleed: true, overflow_x: 0, top_gap_px: 20, bottom_gap_px: 24 } } },
+      chrome_budget: "EDITORIAL_MINIMAL",
+    }).success,
+    true
+  );
+  const protoNested = JSON.parse('{"viewports":{"__proto__":{"overflow_x":0}}}');
+  assert.equal(
+    EvaluateAestheticTqcArgsSchema.safeParse({ metrics_payload: protoNested }).success,
+    false
+  );
+  assert.equal(
+    EvaluateAestheticTqcArgsSchema.safeParse({
+      metrics_payload: { ok: true },
+      extra_field: true,
+    }).success,
+    false
+  );
+  assert.equal(
+    PlanMediaProviderRouteArgsSchema.safeParse({
+      request_spec: { modality: "cinema_video_loop", clip_count: 2 },
+      available_providers: { gemini_veo_api: { available: true, has_api_key: true } },
+    }).success,
+    true
+  );
+  assert.equal(
+    PlanMediaProviderRouteArgsSchema.safeParse({
+      request_spec: { modality: "invalid_modality", clip_count: 1 },
+      available_providers: {},
+    }).success,
+    false
+  );
+
+  // 3) Live /mcp-v2 tools/list & tools/call for glow_evaluate_aesthetic_tqc and glow_plan_media_provider_route
+  const staticToken = "tok-entry220-mcp-tqc-router-1234567890";
+  const captured: Array<Record<string, unknown>> = [];
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = (async (_input: unknown, init?: RequestInit) => {
+    const body = JSON.parse(String(init?.body ?? "{}")) as Record<string, unknown>;
+    captured.push(body);
+    const inp = (body["input"] as Record<string, unknown>) ?? {};
+    const act = String(inp["action"] ?? "");
+    return new Response(
+      JSON.stringify({
+        request_id: body["request_id"] ?? "req-e220",
+        status: "accepted",
+        exposure: "MODEL_SESSION_PRIVATE",
+        result: {
+          action: act,
+          authority: "NEXT_FACTORY_CONTROL",
+          payload:
+            act === "evaluate_aesthetic_usability_tqc"
+              ? { ok: true, status: "PASS", collision_status: "MEASURED_PASS" }
+              : { ok: true, advisory_only: true, cost_approval_enforced_at_execution: false, selected_provider: "gemini_veo_api" },
+        },
+        public_evidence: [],
+        errors: [],
+      }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+  }) as typeof fetch;
+
+  try {
+    await hostFixture(
+      {
+        GLOW_AUTH_MODE: "static_bearer",
+        GLOW_PUBLIC_TEST_BEARER_TOKEN: staticToken,
+        GLOW_PUBLIC_TEST_SUBJECT: "usr_entry220_test",
+      },
+      async ({ app, handler }) => {
+        try {
+          // Unauthorized rejected with 401
+          const unauthRes = await fetchHttpHandler(app, "http://127.0.0.1:3100/mcp-v2", {
+            method: "POST",
+            headers: { "content-type": "application/json", accept: "application/json, text/event-stream" },
+            body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list", params: {} }),
+          });
+          assert.equal(unauthRes.status, 401);
+
+          // tools/list advertises both new tools
+          const listRes = await fetchHttpHandler(app, "http://127.0.0.1:3100/mcp-v2", {
+            method: "POST",
+            headers: {
+              authorization: `Bearer ${staticToken}`,
+              "content-type": "application/json",
+              accept: "application/json, text/event-stream",
+            },
+            body: JSON.stringify({ jsonrpc: "2.0", id: 2, method: "tools/list", params: {} }),
+          });
+          assert.equal(listRes.status, 200);
+          const listBody = await listRes.text();
+          assert.match(listBody, /glow_evaluate_aesthetic_tqc/);
+          assert.match(listBody, /glow_plan_media_provider_route/);
+
+          // Call glow_evaluate_aesthetic_tqc
+          const tqcRes = await fetchHttpHandler(app, "http://127.0.0.1:3100/mcp-v2", {
+            method: "POST",
+            headers: {
+              authorization: `Bearer ${staticToken}`,
+              "content-type": "application/json",
+              accept: "application/json, text/event-stream",
+            },
+            body: JSON.stringify({
+              jsonrpc: "2.0",
+              id: 3,
+              method: "tools/call",
+              params: {
+                name: "glow_evaluate_aesthetic_tqc",
+                arguments: {
+                  metrics_payload: { viewports: { "1440x900": { zero_section_bleed: true, overflow_x: 0, top_gap_px: 20, bottom_gap_px: 24 } } },
+                  chrome_budget: "EDITORIAL_MINIMAL",
+                },
+              },
+            }),
+          });
+          assert.equal(tqcRes.status, 200);
+          assert.match(await tqcRes.text(), /MEASURED_PASS/);
+
+          // Call glow_plan_media_provider_route
+          const routeRes = await fetchHttpHandler(app, "http://127.0.0.1:3100/mcp-v2", {
+            method: "POST",
+            headers: {
+              authorization: `Bearer ${staticToken}`,
+              "content-type": "application/json",
+              accept: "application/json, text/event-stream",
+            },
+            body: JSON.stringify({
+              jsonrpc: "2.0",
+              id: 4,
+              method: "tools/call",
+              params: {
+                name: "glow_plan_media_provider_route",
+                arguments: {
+                  request_spec: { modality: "cinema_video_loop", clip_count: 1 },
+                  available_providers: { gemini_veo_api: true },
+                },
+              },
+            }),
+          });
+          assert.equal(routeRes.status, 200);
+          assert.match(await routeRes.text(), /advisory_only/);
+          assert.equal(captured.length, 2);
+        } finally {
+          await handler.close();
+        }
+      }
+    );
+  } finally {
+    globalThis.fetch = origFetch;
   }
 });

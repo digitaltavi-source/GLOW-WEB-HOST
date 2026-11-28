@@ -40,6 +40,7 @@ const studioIframeFrame = byId('studio-iframe-frame');
 const pinOverlay = byId('studio-pin-overlay');
 const inspectorToggleBtn = byId('inspector-toggle');
 const pinCounterBadge = byId('pin-counter-badge');
+const clearStalePinsBtn = byId('clear-stale-pins-btn');
 const clearPinsBtn = byId('clear-pins-btn');
 const pinListPanel = byId('pin-list-panel');
 const pinListEl = byId('pin-list');
@@ -56,6 +57,8 @@ let activeViewport = 'desktop_1440';
 let inspectorActive = false;
 let refinementPins = [];
 let pinSeq = 1;
+let keyboardReticleX = 50;
+let keyboardReticleY = 50;
 
 let templatesCatalog = [];
 let activeTemplateId = 'coastal-glass-architecture';
@@ -102,11 +105,12 @@ const EN_COPY = {
   stageEyebrow: '00 · LIVE EDITORIAL TEMPLATE STAGE',
   stageTitle: 'Preview & customize 12 cleanroom website templates',
   stageSelectLabel: 'Choose website template',
-  inspectorToggle: 'Visual Click-to-Refine',
+  inspectorToggle: 'Visual Feedback Pins (Draft)',
+  clearStalePinsBtn: 'Clear other-view pins',
   clearPinsBtn: 'Clear all pins',
-  inspectorHint: 'Enable Visual Click-to-Refine and click on the preview canvas to drop up to 8 numbered refinement pins (iframe sandbox stays untouched).',
-  pinListTitle: 'Visual refinement pins',
-  pinListSub: 'Attached automatically to your browser-local brief JSON',
+  inspectorHint: 'Enable Visual Feedback Pins and click (or press Arrow keys + Enter/Space) to drop up to 8 scoped draft feedback pins bound to the current template, locale, and viewport (draft annotation only — does not hot-patch live DOM; iframe sandbox stays untouched).',
+  pinListTitle: 'Draft feedback annotation pins',
+  pinListSub: 'Attached only to your browser-local brief JSON draft — does not hot-patch live DOM or source',
   formEyebrow: '01 · YOUR PROJECT BRIEF',
   draftBadge: 'Browser-local draft',
   formTitle: 'Tell GLOW about the website you want to build',
@@ -183,6 +187,44 @@ function defaultPinNote(region) {
   return `Tinh chỉnh bố cục và khoảng thở tại vùng ${region.replace(/_/g, ' ')}`;
 }
 
+function isPinMatchingActiveView(pin) {
+  return (
+    pin.template_id === activeTemplateId &&
+    pin.locale === activeLang &&
+    pin.viewport === activeViewport
+  );
+}
+
+function addRefinementPinAt(xPct, yPct) {
+  if (refinementPins.length >= MAX_REFINEMENT_PINS) {
+    show(
+      activeLang === 'en'
+        ? `Maximum ${MAX_REFINEMENT_PINS} draft feedback pins reached.`
+        : `Đã đạt giới hạn tối đa ${MAX_REFINEMENT_PINS} điểm ghim góp ý.`
+    );
+    return null;
+  }
+  const clampedX = Math.round(Math.min(100, Math.max(0, xPct)) * 10) / 10;
+  const clampedY = Math.round(Math.min(100, Math.max(0, yPct)) * 10) / 10;
+  const region = inferSemanticRegion(clampedY);
+  const pinId = `pin-${String(pinSeq++).padStart(2, '0')}`;
+  const pin = {
+    pin_id: pinId,
+    template_id: activeTemplateId,
+    locale: activeLang,
+    viewport: activeViewport,
+    region,
+    x_pct: clampedX,
+    y_pct: clampedY,
+    note: defaultPinNote(region),
+  };
+  refinementPins.push(pin);
+  renderRefinementPins();
+  const noteField = byId(`pin-note-${pinId}`);
+  if (noteField) noteField.focus();
+  return pin;
+}
+
 function setViewportPreset(viewportKey) {
   if (!ALLOWED_VIEWPORTS.has(viewportKey)) return;
   activeViewport = viewportKey;
@@ -200,29 +242,51 @@ function setViewportPreset(viewportKey) {
     btn.classList.toggle('is-active', isMatch);
     btn.setAttribute('aria-pressed', isMatch ? 'true' : 'false');
   });
+  renderRefinementPins();
 }
 
 function renderRefinementPins() {
+  const activePins = refinementPins.filter(isPinMatchingActiveView);
+  const staleCount = refinementPins.length - activePins.length;
+
   if (pinCounterBadge) {
-    pinCounterBadge.textContent = `${refinementPins.length} / ${MAX_REFINEMENT_PINS}`;
+    pinCounterBadge.textContent =
+      staleCount > 0
+        ? `${activePins.length} (${refinementPins.length}/${MAX_REFINEMENT_PINS})`
+        : `${refinementPins.length} / ${MAX_REFINEMENT_PINS}`;
   }
   if (clearPinsBtn) {
     clearPinsBtn.disabled = refinementPins.length === 0;
   }
+  if (clearStalePinsBtn) {
+    clearStalePinsBtn.disabled = staleCount === 0;
+  }
   if (pinOverlay) {
     const overlayFrag = document.createDocumentFragment();
+    const reticle = document.createElement('span');
+    reticle.id = 'studio-pin-reticle';
+    reticle.className = 'studio-pin-reticle';
+    reticle.setAttribute('aria-hidden', 'true');
+    reticle.style.setProperty('--reticle-x', `${keyboardReticleX}%`);
+    reticle.style.setProperty('--reticle-y', `${keyboardReticleY}%`);
+    overlayFrag.appendChild(reticle);
+
     refinementPins.forEach((pin, idx) => {
+      if (!isPinMatchingActiveView(pin)) return;
       const marker = document.createElement('button');
       marker.type = 'button';
       marker.className = 'studio-pin-marker';
+      marker.setAttribute('data-pin-id', pin.pin_id);
+      marker.setAttribute('data-template-id', pin.template_id);
+      marker.setAttribute('data-viewport', pin.viewport);
       marker.textContent = String(idx + 1);
       marker.style.setProperty('--pin-x', `${pin.x_pct}%`);
       marker.style.setProperty('--pin-y', `${pin.y_pct}%`);
       marker.setAttribute(
         'aria-label',
         activeLang === 'en'
-          ? `Pin ${idx + 1} at ${pin.region} (${pin.x_pct}%, ${pin.y_pct}%)`
-          : `Ghim số ${idx + 1} tại ${pin.region} (${pin.x_pct}%, ${pin.y_pct}%)`
+          ? `Pin ${idx + 1} on ${pin.template_id} ${pin.viewport} at ${pin.region} (${pin.x_pct}%, ${pin.y_pct}%)`
+          : `Ghim số ${idx + 1} trên ${pin.template_id} ${pin.viewport} tại ${pin.region} (${pin.x_pct}%, ${pin.y_pct}%)`
       );
       marker.addEventListener('click', (evt) => {
         evt.stopPropagation();
@@ -237,8 +301,10 @@ function renderRefinementPins() {
     pinListPanel.hidden = refinementPins.length === 0;
     const listFrag = document.createDocumentFragment();
     refinementPins.forEach((pin, idx) => {
+      const isActiveView = isPinMatchingActiveView(pin);
       const li = document.createElement('li');
-      li.className = 'pin-item';
+      li.className = isActiveView ? 'pin-item' : 'pin-item is-stale';
+      li.setAttribute('data-pin-state', isActiveView ? 'active' : 'stale');
 
       const meta = document.createElement('div');
       meta.className = 'pin-item-meta';
@@ -249,10 +315,17 @@ function renderRefinementPins() {
 
       const coords = document.createElement('span');
       coords.className = 'pin-item-coords';
-      coords.textContent = `${pin.viewport} · (${pin.x_pct}%, ${pin.y_pct}%)`;
+      coords.textContent = `${pin.template_id} · ${pin.locale} · ${pin.viewport} · (${pin.x_pct}%, ${pin.y_pct}%)`;
 
       meta.appendChild(badge);
       meta.appendChild(coords);
+
+      if (!isActiveView) {
+        const staleTag = document.createElement('span');
+        staleTag.className = 'pin-stale-badge';
+        staleTag.textContent = activeLang === 'en' ? 'Other view' : 'Khác khung xem';
+        meta.appendChild(staleTag);
+      }
 
       const input = document.createElement('input');
       input.type = 'text';
@@ -262,15 +335,34 @@ function renderRefinementPins() {
       input.value = pin.note;
       input.placeholder =
         activeLang === 'en'
-          ? 'Concise refinement note (max 240 chars)'
-          : 'Ghi chú chỉnh sửa ngắn gọn (tối đa 240 ký tự)';
+          ? 'Concise draft feedback note (max 240 chars)'
+          : 'Ghi chú góp ý ngắn gọn (tối đa 240 ký tự)';
       input.setAttribute(
         'aria-label',
-        activeLang === 'en' ? `Refinement note for pin ${idx + 1}` : `Ghi chú chỉnh sửa cho ghim ${idx + 1}`
+        activeLang === 'en' ? `Feedback note for pin ${idx + 1}` : `Ghi chú góp ý cho ghim ${idx + 1}`
       );
       input.addEventListener('input', () => {
         pin.note = input.value.replace(/[\u0000-\u001F\u007F]/g, ' ').slice(0, 240);
       });
+
+      const actions = document.createElement('div');
+      actions.className = 'pin-item-actions';
+
+      if (!isActiveView && pin.locale === activeLang) {
+        const jumpBtn = document.createElement('button');
+        jumpBtn.type = 'button';
+        jumpBtn.className = 'pin-jump-btn';
+        jumpBtn.textContent = activeLang === 'en' ? 'Jump to view' : 'Xem khung này';
+        jumpBtn.addEventListener('click', () => {
+          if (VALID_TEMPLATE_ID_RE.test(pin.template_id) && pin.template_id !== activeTemplateId) {
+            activeTemplateId = pin.template_id;
+            if (templateSelect) templateSelect.value = activeTemplateId;
+            renderLiveTemplateStage();
+          }
+          setViewportPreset(pin.viewport);
+        });
+        actions.appendChild(jumpBtn);
+      }
 
       const removeBtn = document.createElement('button');
       removeBtn.type = 'button';
@@ -280,10 +372,11 @@ function renderRefinementPins() {
         refinementPins = refinementPins.filter((item) => item.pin_id !== pin.pin_id);
         renderRefinementPins();
       });
+      actions.appendChild(removeBtn);
 
       li.appendChild(meta);
       li.appendChild(input);
-      li.appendChild(removeBtn);
+      li.appendChild(actions);
       listFrag.appendChild(li);
     });
     pinListEl.replaceChildren(listFrag);
@@ -300,6 +393,9 @@ function setInspectorActive(nextActive) {
     pinOverlay.classList.toggle('is-active', inspectorActive);
     pinOverlay.setAttribute('aria-hidden', inspectorActive ? 'false' : 'true');
     pinOverlay.tabIndex = inspectorActive ? 0 : -1;
+    if (!inspectorActive) {
+      pinOverlay.classList.remove('kb-reticle-visible');
+    }
   }
 }
 
@@ -316,11 +412,23 @@ if (inspectorToggleBtn) {
     show(
       inspectorActive
         ? activeLang === 'en'
-          ? 'Visual Click-to-Refine enabled. Click on the preview canvas to drop a pin.'
-          : 'Đã bật chế độ Ghim & Sửa Trực Quan. Hãy nhấp vào khung xem trước để thả ghim.'
+          ? 'Visual Feedback Pins enabled (draft annotation only). Click or press Arrow keys + Enter/Space on the preview.'
+          : 'Đã bật chế độ Ghim Góp Ý Trực Quan (chỉ lưu bản nháp). Nhấp chuột hoặc dùng phím mũi tên + Enter/Space.'
         : activeLang === 'en'
-          ? 'Visual Click-to-Refine paused.'
-          : 'Đã tạm tắt chế độ Ghim & Sửa Trực Quan.'
+          ? 'Visual Feedback Pins paused.'
+          : 'Đã tạm tắt chế độ Ghim Góp Ý Trực Quan.'
+    );
+  });
+}
+
+if (clearStalePinsBtn) {
+  clearStalePinsBtn.addEventListener('click', () => {
+    refinementPins = refinementPins.filter(isPinMatchingActiveView);
+    renderRefinementPins();
+    show(
+      activeLang === 'en'
+        ? 'Cleared feedback pins belonging to other templates or viewports.'
+        : 'Đã xóa các điểm ghim thuộc mẫu hoặc khung hiển thị khác.'
     );
   });
 }
@@ -329,40 +437,46 @@ if (clearPinsBtn) {
   clearPinsBtn.addEventListener('click', () => {
     refinementPins = [];
     renderRefinementPins();
-    show(activeLang === 'en' ? 'Cleared all refinement pins.' : 'Đã xóa toàn bộ điểm ghim tinh chỉnh.');
+    show(activeLang === 'en' ? 'Cleared all draft feedback pins.' : 'Đã xóa toàn bộ điểm ghim góp ý.');
   });
 }
 
 if (pinOverlay) {
   pinOverlay.addEventListener('click', (event) => {
     if (!inspectorActive) return;
-    if (refinementPins.length >= MAX_REFINEMENT_PINS) {
-      show(
-        activeLang === 'en'
-          ? `Maximum ${MAX_REFINEMENT_PINS} refinement pins reached.`
-          : `Đã đạt giới hạn tối đa ${MAX_REFINEMENT_PINS} điểm ghim tinh chỉnh.`
-      );
-      return;
-    }
     const rect = pinOverlay.getBoundingClientRect();
     if (!rect || rect.width <= 0 || rect.height <= 0) return;
     const rawX = ((event.clientX - rect.left) / rect.width) * 100;
     const rawY = ((event.clientY - rect.top) / rect.height) * 100;
-    const xPct = Math.round(Math.min(100, Math.max(0, rawX)) * 10) / 10;
-    const yPct = Math.round(Math.min(100, Math.max(0, rawY)) * 10) / 10;
-    const region = inferSemanticRegion(yPct);
-    const pinId = `pin-${String(pinSeq++).padStart(2, '0')}`;
-    refinementPins.push({
-      pin_id: pinId,
-      viewport: activeViewport,
-      region,
-      x_pct: xPct,
-      y_pct: yPct,
-      note: defaultPinNote(region),
-    });
-    renderRefinementPins();
-    const noteField = byId(`pin-note-${pinId}`);
-    if (noteField) noteField.focus();
+    addRefinementPinAt(rawX, rawY);
+  });
+
+  pinOverlay.addEventListener('keydown', (event) => {
+    if (!inspectorActive) return;
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight' || event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      event.preventDefault();
+      if (event.key === 'ArrowLeft') keyboardReticleX = Math.max(0, keyboardReticleX - 5);
+      if (event.key === 'ArrowRight') keyboardReticleX = Math.min(100, keyboardReticleX + 5);
+      if (event.key === 'ArrowUp') keyboardReticleY = Math.max(0, keyboardReticleY - 5);
+      if (event.key === 'ArrowDown') keyboardReticleY = Math.min(100, keyboardReticleY + 5);
+      pinOverlay.classList.add('kb-reticle-visible');
+      const reticle = byId('studio-pin-reticle');
+      if (reticle) {
+        reticle.style.setProperty('--reticle-x', `${keyboardReticleX}%`);
+        reticle.style.setProperty('--reticle-y', `${keyboardReticleY}%`);
+      }
+      show(
+        activeLang === 'en'
+          ? `Pin reticle at (${keyboardReticleX}%, ${keyboardReticleY}%) — press Enter or Space to drop pin.`
+          : `Tâm ghim bàn phím tại (${keyboardReticleX}%, ${keyboardReticleY}%) — nhấn Enter hoặc Space để thả ghim.`
+      );
+      return;
+    }
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      pinOverlay.classList.add('kb-reticle-visible');
+      addRefinementPinAt(keyboardReticleX, keyboardReticleY);
+    }
   });
 }
 
@@ -427,6 +541,7 @@ async function loadTemplatesCatalog() {
       templateSelect.replaceChildren(frag);
     }
     renderLiveTemplateStage();
+    renderRefinementPins();
   } catch {
     if (stageMeta) {
       stageMeta.textContent =
@@ -435,6 +550,7 @@ async function loadTemplatesCatalog() {
           : 'Đang hiển thị khung xem trước mẫu giao diện trực tiếp.';
     }
     renderLiveTemplateStage();
+    renderRefinementPins();
   }
 }
 
@@ -448,6 +564,7 @@ if (templateSelect) {
       nextUrl.searchParams.set('lang', activeLang);
       window.history.replaceState(null, '', `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
       renderLiveTemplateStage();
+      renderRefinementPins();
     }
   });
 }
@@ -483,6 +600,8 @@ form.addEventListener('submit', (event) => {
     : '';
   const compiledPins = refinementPins.slice(0, MAX_REFINEMENT_PINS).map((pin) => ({
     pin_id: pin.pin_id,
+    template_id: VALID_TEMPLATE_ID_RE.test(pin.template_id || '') ? pin.template_id : activeTemplateId,
+    locale: pin.locale === 'en' ? 'en' : 'vi',
     viewport: ALLOWED_VIEWPORTS.has(pin.viewport) ? pin.viewport : 'desktop_1440',
     region: pin.region,
     x_pct: pin.x_pct,
@@ -502,6 +621,7 @@ form.addEventListener('submit', (event) => {
     chrome_budget: selectedChromeBudget,
     studio_loop_mode: selectedStudioLoop,
     visual_dna_notes: visualDnaNotes || null,
+    pin_workflow_scope: 'DRAFT_FEEDBACK_ANNOTATION_ONLY',
     refinement_pins: compiledPins,
     privacy: 'PUBLIC_INTAKE_ONLY_NO_PRIVATE_FACTORY_STATE',
     execution_profile: 'DEMO_BOUNDED',
