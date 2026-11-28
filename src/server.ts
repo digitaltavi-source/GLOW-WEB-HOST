@@ -14,7 +14,7 @@ import { loadConfig } from "./config.js";
 import { loadOAuthConfig, loadStaticBearerConfig, createJwtVerifier, createStaticBearerVerifier, createHybridVerifier } from "./oauth.js";
 import { callProtectedService, callProtectedOperator, checkProtectedReadiness } from "./backend.js";
 import { WebRequest } from "./contracts.js";
-import {EVIDENCE_ADMISSION_SCOPE,ArtifactAdmissionSchema,EvidenceAdmissionSchema,evidenceAdmissionStatus,evidenceAdmissionChallenge,createEvidenceAdmissionExecutor,createArtifactAdmissionPreflight} from './evidence-admission.js';
+import {EVIDENCE_ADMISSION_SCOPE,ArtifactAdmissionSchema,EvidenceAdmissionSchema,evidenceAdmissionActor,evidenceAdmissionStatus,evidenceAdmissionChallenge,createEvidenceAdmissionExecutor,createArtifactAdmissionPreflight} from './evidence-admission.js';
 import {fetchAuthorizedFile} from './file-input.js';
 import { classifyWorkResponse } from "./work-response.js";
 import { buildProtectedResourceMetadata } from "./resource-metadata.js";
@@ -126,6 +126,24 @@ const admitEvidence=createEvidenceAdmissionExecutor(
 );
 const preflightArtifactFile=createArtifactAdmissionPreflight((subject,request)=>callProtectedService(config,subject,request));
 const reportSystemAudit=createSystemAuditExecutor((subject,request,actor)=>callProtectedOperator(config,subject,request,actor));
+async function invokeEvidenceOperatorControl(
+  ctx: { authInfo?: Parameters<typeof evidenceAdmissionActor>[0] & { scopes: string[]; extra?: Record<string, unknown> } },
+  action: "evaluate_aesthetic_usability_tqc" | "plan_media_provider_route",
+  locale: string,
+  args: Record<string, unknown>
+) {
+  if (authMode !== "oauth") throw Error("EVIDENCE_OAUTH_ONLY_REQUIRED");
+  const subject = subjectFrom(ctx);
+  const actor = evidenceAdmissionActor(ctx.authInfo);
+  const request = WebRequest.parse({
+    request_id: randomUUID(),
+    operation: "next_factory_control",
+    role: "unspecified",
+    locale,
+    input: { action, args },
+  });
+  return callProtectedOperator(config, subject, request, actor);
+}
 const buildServer: McpServerFactory = ctx => {
   const server = new McpServer(
     { name: "glow-web", version: HOST_ADAPTER_REVISION },
@@ -306,6 +324,18 @@ const buildServer: McpServerFactory = ctx => {
             return {...toolResult(out as unknown as Record<string,unknown>),...(out.status==='failed'?{isError:true}:{})};
           }catch(error){
             const code=error instanceof Error?error.message:'EVIDENCE_ADMISSION_FAILED';
+            const challenge=evidenceAdmissionChallenge(code,resourceMetadataV2Url);
+            return {...toolError(code),...(challenge?{_meta:challenge}:{})};
+          }
+        }
+        if(action==='evaluate_aesthetic_usability_tqc'||action==='plan_media_provider_route'){
+          try{
+            const out=await invokeEvidenceOperatorControl(ctx,action,locale,args);
+            const classification=classifyWorkResponse(out);
+            if(classification==="SAFE_PUBLIC_FAILURE") return {isError:true,...toolResult(out as unknown as Record<string,unknown>)};
+            return toolResult(out as unknown as Record<string,unknown>);
+          }catch(error){
+            const code=error instanceof Error?error.message:'EVIDENCE_OPERATOR_CONTROL_FAILED';
             const challenge=evidenceAdmissionChallenge(code,resourceMetadataV2Url);
             return {...toolError(code),...(challenge?{_meta:challenge}:{})};
           }
@@ -527,39 +557,49 @@ const buildServer: McpServerFactory = ctx => {
   });
   server.registerTool('glow_evaluate_aesthetic_tqc',{
     title:'Evaluate Aesthetic & Usability TQC metrics (fail-closed)',
-    description:'Evaluates browser-measured viewport geometry, section bleed, top/bottom collision gaps (fail-closed NOT_MEASURED when omitted on desktop), chrome budget compliance, axe-core accessibility count, runtime errors, and horizontal overflow through GLOW Web Factory python_bridge -> aesthetic_usability_tqc. Read-only evaluation; never grants F4_HUMAN_RELEASE or commercial qualification.',
+    description:'Requires verified OAuth web.evidence.admit scope and RBAC. Evaluates browser-measured viewport geometry, section bleed, top/bottom collision gaps (fail-closed NOT_MEASURED when omitted on desktop), chrome budget compliance, axe-core accessibility count, runtime errors, and horizontal overflow through GLOW Web Factory python_bridge -> aesthetic_usability_tqc. Read-only evaluation; never grants F4_HUMAN_RELEASE or commercial qualification.',
     annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false},
-    ...(toolSecuritySchemes?{securitySchemes:toolSecuritySchemes}:{}),
+    ...(authMode==='oauth'?toolOAuthMetadata([...requiredScopes,EVIDENCE_ADMISSION_SCOPE]):{}),
     inputSchema:z.object({
       ...EvaluateAestheticTqcArgsShape,
       role:z.enum(["client","operator","unspecified"]).default("unspecified"),
       locale:z.string().min(2).max(32).default("vi-VN")
     }).strict()
-  },async ({role,locale,...args})=>{
+  },async ({locale,...args})=>{
     try{
-      const out=await invoke(ctx,'next_factory_control',role,locale,{action:'evaluate_aesthetic_usability_tqc',args});
+      const {role:_ignoredRole,...evalArgs}=args;
+      const out=await invokeEvidenceOperatorControl(ctx,'evaluate_aesthetic_usability_tqc',locale,evalArgs);
       const classification=classifyWorkResponse(out);
       if(classification==="SAFE_PUBLIC_FAILURE") return {isError:true,...toolResult(out as unknown as Record<string,unknown>)};
       return toolResult(out as unknown as Record<string,unknown>);
-    }catch(error){return toolError(error instanceof Error?error.message:'AESTHETIC_TQC_EVALUATION_FAILED');}
+    }catch(error){
+      const code=error instanceof Error?error.message:'AESTHETIC_TQC_EVALUATION_FAILED';
+      const challenge=evidenceAdmissionChallenge(code,resourceMetadataV2Url);
+      return {...toolError(code),...(challenge?{_meta:challenge}:{})};
+    }
   });
   server.registerTool('glow_plan_media_provider_route',{
     title:'Plan cinema media provider route (advisory pre-flight only)',
-    description:'Advisory deterministic media provider router returning explicit estimated_credits, unlimited_applies_via_mcp=false, advisory_only=true, and cost_approval_enforced_at_execution=false via python_bridge -> cinema_media_pipeline_gate. Rejects unsupported cross-modality providers fail-closed. Does NOT invoke paid media providers or enforce runtime billing.',
+    description:'Requires verified OAuth web.evidence.admit scope and RBAC. Advisory deterministic media provider router returning explicit estimated_credits, unlimited_applies_via_mcp=false, advisory_only=true, and cost_approval_enforced_at_execution=false via python_bridge -> cinema_media_pipeline_gate. Rejects unsupported cross-modality providers fail-closed. Does NOT invoke paid media providers or enforce runtime billing.',
     annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false},
-    ...(toolSecuritySchemes?{securitySchemes:toolSecuritySchemes}:{}),
+    ...(authMode==='oauth'?toolOAuthMetadata([...requiredScopes,EVIDENCE_ADMISSION_SCOPE]):{}),
     inputSchema:z.object({
       ...PlanMediaProviderRouteArgsShape,
       role:z.enum(["client","operator","unspecified"]).default("unspecified"),
       locale:z.string().min(2).max(32).default("vi-VN")
     }).strict()
-  },async ({role,locale,...args})=>{
+  },async ({locale,...args})=>{
     try{
-      const out=await invoke(ctx,'next_factory_control',role,locale,{action:'plan_media_provider_route',args});
+      const {role:_ignoredRole,...routeArgs}=args;
+      const out=await invokeEvidenceOperatorControl(ctx,'plan_media_provider_route',locale,routeArgs);
       const classification=classifyWorkResponse(out);
       if(classification==="SAFE_PUBLIC_FAILURE") return {isError:true,...toolResult(out as unknown as Record<string,unknown>)};
       return toolResult(out as unknown as Record<string,unknown>);
-    }catch(error){return toolError(error instanceof Error?error.message:'MEDIA_PROVIDER_ROUTE_FAILED');}
+    }catch(error){
+      const code=error instanceof Error?error.message:'MEDIA_PROVIDER_ROUTE_FAILED';
+      const challenge=evidenceAdmissionChallenge(code,resourceMetadataV2Url);
+      return {...toolError(code),...(challenge?{_meta:challenge}:{})};
+    }
   });
   return server;
 };
