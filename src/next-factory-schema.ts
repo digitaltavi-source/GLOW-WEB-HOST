@@ -382,6 +382,64 @@ const AestheticMetricsPayloadSchema = z
   )
   .pipe(z.record(SAFE_RECORD_KEY, z.unknown()));
 
+const HEX_SHA256_RE = /^[0-9a-fA-F]{64}$/;
+
+const WaiverReasonStringSchema = z
+  .string()
+  .min(28)
+  .max(280)
+  .refine((s) => !CONTROL_CHAR_RE.test(s), { message: "CONTROL_CHARS_FORBIDDEN" })
+  .refine((s) => s.trim().startsWith("NOT_APPLICABLE_FOR_BRIEF:"), {
+    message: "WAIVER_REASON_PREFIX_REQUIRED",
+  });
+
+const WaiverScopeEnumSchema = z.enum([
+  "collision_not_applicable",
+  "overlap_not_applicable",
+  "aesthetic_tqc_not_applicable",
+]);
+
+export const AestheticWaiverApprovalReceiptSchema = z
+  .object({
+    schema: z.literal("GLOW_AESTHETIC_WAIVER_APPROVAL_RECEIPT_V1"),
+    receipt_id: z.string().regex(SAFE_BESPOKE_SLUG_RE),
+    approved_by_actor_id: z
+      .string()
+      .min(2)
+      .max(256)
+      .refine((s) => !CONTROL_CHAR_RE.test(s), { message: "CONTROL_CHARS_FORBIDDEN" }),
+    approved_by_role: z.enum(["FOUNDER", "OPERATOR"]),
+    authority_source: z
+      .string()
+      .min(2)
+      .max(256)
+      .refine((s) => !CONTROL_CHAR_RE.test(s), { message: "CONTROL_CHARS_FORBIDDEN" }),
+    brief_sha256: z.string().regex(HEX_SHA256_RE),
+    candidate_bundle_sha256: z.string().regex(HEX_SHA256_RE),
+    slug: z.string().regex(SAFE_BESPOKE_SLUG_RE),
+    mission_id: z.string().regex(SAFE_BESPOKE_SLUG_RE).nullable().optional(),
+    waived_scopes: z.array(WaiverScopeEnumSchema).min(1).max(3),
+    waiver_reasons: makeBoundedSafeRecord(
+      WaiverReasonStringSchema,
+      4,
+      "WAIVER_REASONS_MAX_4_KEYS_EXCEEDED"
+    ),
+    invalidation_conditions: z
+      .array(
+        z
+          .string()
+          .min(3)
+          .max(128)
+          .refine((s) => !CONTROL_CHAR_RE.test(s), { message: "CONTROL_CHARS_FORBIDDEN" })
+      )
+      .min(1)
+      .max(12),
+    issued_at: z.number().int().min(1),
+    expires_at: z.number().int().min(2),
+    signature_hmac_sha256: z.string().regex(HEX_SHA256_RE),
+  })
+  .strict();
+
 export const EvaluateAestheticTqcArgsShape = {
   metrics_payload: AestheticMetricsPayloadSchema,
   chrome_budget: z
@@ -395,6 +453,24 @@ export const EvaluateAestheticTqcArgsShape = {
     .max(280)
     .refine((s) => !CONTROL_CHAR_RE.test(s), { message: "CONTROL_CHARS_FORBIDDEN" })
     .optional(),
+  overlap_not_applicable_reason: z
+    .string()
+    .min(28)
+    .max(280)
+    .refine((s) => !CONTROL_CHAR_RE.test(s), { message: "CONTROL_CHARS_FORBIDDEN" })
+    .optional(),
+  expected_bundle_sha256: z.string().regex(HEX_SHA256_RE).optional(),
+  expected_slug: z.string().regex(SAFE_BESPOKE_SLUG_RE).optional(),
+  expected_brief_sha256: z.string().regex(HEX_SHA256_RE).optional(),
+  expected_mission_id: z.string().regex(SAFE_BESPOKE_SLUG_RE).optional(),
+  require_complete_binding: z.boolean().optional(),
+  expected_axe_scope: z
+    .string()
+    .min(3)
+    .max(128)
+    .refine((s) => !CONTROL_CHAR_RE.test(s), { message: "CONTROL_CHARS_FORBIDDEN" })
+    .optional(),
+  waiver_approval_receipt: AestheticWaiverApprovalReceiptSchema.optional(),
 };
 
 export const EvaluateAestheticTqcArgsSchema = z.object(EvaluateAestheticTqcArgsShape).strict();

@@ -931,6 +931,74 @@ test("ENTRY220 A220-03 & A220-04: scoped pin schema, TQC/router Zod schemas, and
     }).success,
     false
   );
+  // 2B) Entry220-Fix3: Complete build binding + expected_axe_scope + HMAC waiver approval receipt schema validation
+  assert.equal(
+    EvaluateAestheticTqcArgsSchema.safeParse({
+      metrics_payload: {
+        candidate_bundle_sha256: "a".repeat(64),
+        slug: "saigon-ceramic-2026",
+        brief_sha256: "b".repeat(64),
+        viewports: { "1440x900": { zero_section_bleed: true, overflow_x: 0, top_gap_px: 20, bottom_gap_px: 24, element_overlap_count: 0 } },
+      },
+      chrome_budget: "EDITORIAL_MINIMAL",
+      expected_bundle_sha256: "a".repeat(64),
+      expected_slug: "saigon-ceramic-2026",
+      expected_brief_sha256: "b".repeat(64),
+      expected_mission_id: "NM-e220fix3",
+      require_complete_binding: true,
+      expected_axe_scope: "wcag2a,wcag2aa,wcag21a,wcag21aa",
+      overlap_not_applicable_reason: "NOT_APPLICABLE_FOR_BRIEF: Single full-bleed editorial card layout.",
+      waiver_approval_receipt: {
+        schema: "GLOW_AESTHETIC_WAIVER_APPROVAL_RECEIPT_V1",
+        receipt_id: "WR-E220-001",
+        approved_by_actor_id: "https://issuer.test/#founder",
+        approved_by_role: "FOUNDER",
+        authority_source: "https://issuer.test/",
+        brief_sha256: "b".repeat(64),
+        candidate_bundle_sha256: "a".repeat(64),
+        slug: "saigon-ceramic-2026",
+        mission_id: "NM-e220fix3",
+        waived_scopes: ["overlap_not_applicable"],
+        waiver_reasons: {
+          overlap_not_applicable: "NOT_APPLICABLE_FOR_BRIEF: Single full-bleed editorial card layout.",
+        },
+        invalidation_conditions: ["brief_sha256_change", "candidate_bundle_sha256_change"],
+        issued_at: 1700000000,
+        expires_at: 1700003600,
+        signature_hmac_sha256: "c".repeat(64),
+      },
+    }).success,
+    true
+  );
+  assert.equal(
+    EvaluateAestheticTqcArgsSchema.safeParse({
+      metrics_payload: { ok: true },
+      expected_bundle_sha256: "not-a-sha256",
+    }).success,
+    false
+  );
+  assert.equal(
+    EvaluateAestheticTqcArgsSchema.safeParse({
+      metrics_payload: { ok: true },
+      waiver_approval_receipt: {
+        schema: "GLOW_AESTHETIC_WAIVER_APPROVAL_RECEIPT_V1",
+        receipt_id: "../bad-id",
+        approved_by_actor_id: "actor",
+        approved_by_role: "UNKNOWN_ROLE",
+        authority_source: "src",
+        brief_sha256: "b".repeat(64),
+        candidate_bundle_sha256: "a".repeat(64),
+        slug: "s",
+        waived_scopes: ["overlap_not_applicable"],
+        waiver_reasons: {},
+        invalidation_conditions: [],
+        issued_at: 1,
+        expires_at: 2,
+        signature_hmac_sha256: "c".repeat(64),
+      },
+    }).success,
+    false
+  );
   assert.equal(
     PlanMediaProviderRouteArgsSchema.safeParse({
       request_spec: { modality: "cinema_video_loop", clip_count: 2 },

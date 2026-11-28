@@ -557,7 +557,7 @@ const buildServer: McpServerFactory = ctx => {
   });
   server.registerTool('glow_evaluate_aesthetic_tqc',{
     title:'Evaluate Aesthetic & Usability TQC metrics (fail-closed)',
-    description:'Requires verified OAuth web.evidence.admit scope and RBAC. Evaluates browser-measured viewport geometry, section bleed, top/bottom collision gaps (fail-closed NOT_MEASURED when omitted on desktop), chrome budget compliance, axe-core accessibility count, runtime errors, and horizontal overflow through GLOW Web Factory python_bridge -> aesthetic_usability_tqc. Read-only evaluation; never grants F4_HUMAN_RELEASE or commercial qualification.',
+    description:'Requires verified OAuth web.evidence.admit scope and RBAC. Evaluates browser-measured viewport geometry, section bleed, top/bottom collision gaps and direct overlap counts, chrome budget compliance, axe-core accessibility scope, 4-state build binding (COMPLETE/PARTIAL/NOT_CHECKED/MISMATCH with advisory_only vs gate_evidence_eligible), HMAC-SHA256 waiver approval receipts, runtime errors, and horizontal overflow through GLOW Web Factory python_bridge -> aesthetic_usability_tqc. Read-only evaluation; never grants F4_HUMAN_RELEASE or commercial qualification.',
     annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false},
     ...(authMode==='oauth'?toolOAuthMetadata([...requiredScopes,EVIDENCE_ADMISSION_SCOPE]):{}),
     inputSchema:z.object({
